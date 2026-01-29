@@ -4,21 +4,27 @@
 
 /* ... (Bovenste deel met * { ... } blijft hetzelfde) */
 
+/* --- css/style.css --- */
+
+/* ... (De * selector bovenaan mag blijven) ... */
+
 body {
     font-family: 'Nunito', sans-serif;
-    
-    /* NIEUW: Een vrolijke, kleurrijke achtergrond (Snoepjes stijl) */
     background: linear-gradient(135deg, #FFEFBA 0%, #FFFFFF 50%, #B2EBF2 100%);
-    /* Of als je het feller wilt: */
-    /* background: linear-gradient(120deg, #f6d365 0%, #fda085 100%); */
-    
     color: #333;
-    height: 100vh; /* Volledige hoogte */
+    
+    /* DE OPLOSSING VOOR TABLETS: */
+    width: 100vw;
+    height: 100vh; /* Fallback voor oude apparaten */
+    height: 100dvh; /* Dynamic Viewport Height: houdt rekening met browserbalken! */
+    
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden; /* Belangrijk: voorkomt scrollen van de hele pagina */
+    overflow: hidden; /* Voorkomt dat de hele pagina stuitert */
 }
+
+/* ... (De rest blijft hetzelfde) ... */
 
 /* ... (De rest van style.css blijft hetzelfde) ... */
 
