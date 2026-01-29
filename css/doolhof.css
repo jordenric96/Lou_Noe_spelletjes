@@ -58,23 +58,26 @@
 }
 
 /* --- DE SPELER (MARIO) --- */
+/* --- DE SPELER (MARIO) --- */
 #player {
     position: absolute;
     top: 0; left: 0;
     width: 30px; height: 30px;
     z-index: 10;
-    transition: top 0.1s linear, left 0.1s linear; /* Iets sneller */
+    transition: top 0.1s linear, left 0.1s linear;
     
-    /* FALLBACK: Rood blokje als plaatje mist */
-    background-color: red; 
-    border-radius: 4px;
+    /* DEZE TWEE REGELS ZIJN VERWIJDERD: */
+    /* background-color: red; */
+    /* border-radius: 4px; */
 
-    /* Het plaatje */
+    /* Het plaatje instellingen */
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-}
 
+    /* NIEUW: Een mooi schaduwtje onder Mario zodat hij 'los' komt van de vloer */
+    filter: drop-shadow(0 3px 2px rgba(0,0,0,0.4));
+}
 /* Spiegelen als hij naar links loopt */
 #player.facing-left {
     transform: scaleX(-1);
