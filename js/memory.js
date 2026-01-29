@@ -209,13 +209,19 @@ function disableCards() {
 
 function unflipCards() {
     memoryState.lockBoard = true;
+    
+    // AANGEPAST: De tijd staat nu op 800 (was 1500)
     setTimeout(() => {
-        memoryState.flippedCards[0].classList.remove('flipped');
-        memoryState.flippedCards[1].classList.remove('flipped');
+        // Checken of de kaarten nog bestaan (voorkomt foutmeldingen als je te snel herstart)
+        if(memoryState.flippedCards[0] && memoryState.flippedCards[1]) {
+            memoryState.flippedCards[0].classList.remove('flipped');
+            memoryState.flippedCards[1].classList.remove('flipped');
+        }
+        
         memoryState.flippedCards = [];
         memoryState.lockBoard = false;
         switchPlayer();
-    }, 1500); 
+    }, 800); 
 }
 
 function switchPlayer() {
