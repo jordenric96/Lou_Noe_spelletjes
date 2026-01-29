@@ -1,6 +1,4 @@
-/* --- css/memory.css --- */
-
-/* SETUP DASHBOARD CONTAINER */
+/* --- SETUP DASHBOARD --- */
 .memory-setup {
     display: flex;
     flex-direction: column;
@@ -10,77 +8,85 @@
     background: #FAFAFA;
 }
 
-/* De kolommen naast elkaar */
 .setup-columns {
     display: flex;
     flex-direction: row;
     gap: 15px;
-    flex: 1; /* Vul alle ruimte */
+    flex: 1;
     min-height: 0;
 }
 
-/* Eén blokje (Wie/Wat/Waar) */
 .setup-group {
     background: #FFF;
     border-radius: 20px;
-    padding: 10px;
+    padding: 15px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.05);
     border: 3px solid #E0F7FA;
-    
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    overflow-y: auto; /* Scrollen binnen het blokje indien nodig */
+    overflow-y: auto;
 }
 
-/* Kleuraccenten per groep */
+/* Accentkleuren */
 .group-players { border-color: #B3E5FC; }
 .group-theme { border-color: #C8E6C9; }
 .group-size { border-color: #FFF9C4; }
 
 .setup-group h3 {
     color: #0277BD;
-    margin: 5px 0 10px 0;
+    margin: 0 0 15px 0;
     font-size: 1.2rem;
     font-family: 'Fredoka One', cursive;
     text-transform: uppercase;
+    text-align: center;
+    width: 100%;
 }
 
-/* --- KLEUREN KIEZER --- */
-.color-picker {
+/* --- DE VERFPOTJES (KLEUREN) --- */
+.color-picker-title {
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 5px;
+    font-family: 'Nunito', sans-serif;
+}
+
+.color-row {
     display: flex;
-    gap: 8px;
-    margin-bottom: 15px;
-    padding: 5px;
-    background: #F0F0F0;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #F1F1F1;
     border-radius: 50px;
+    width: 100%;
 }
 
 .color-dot {
-    width: 30px;
-    height: 30px;
+    width: 35px; /* Lekker groot */
+    height: 35px;
     border-radius: 50%;
     border: 3px solid white;
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    transition: transform 0.2s;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
+/* Actieve kleur springt eruit */
 .color-dot.active {
     transform: scale(1.3);
-    border-color: #333; /* Huidige selectie */
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    z-index: 2;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+    border-color: #333;
+    z-index: 5;
 }
 
-
-/* --- KNOPPEN GRID --- */
+/* --- KNOPPEN --- */
 .option-grid {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 10px;
+    gap: 12px;
     width: 100%;
 }
 
@@ -88,17 +94,17 @@
     background: #E1F5FE;
     color: #0288D1;
     border: none;
-    padding: 8px 12px;
+    padding: 10px;
     border-radius: 15px;
     font-size: 1.8rem;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 75px;
+    min-width: 85px;
     box-shadow: 0 4px 0 #B3E5FC;
     transition: all 0.2s;
-    position: relative; /* Voor slotjes */
+    position: relative;
 }
 
 .option-btn .btn-label {
@@ -106,65 +112,37 @@
     margin-top: 5px;
     font-family: 'Fredoka One', cursive;
     color: #555;
-    white-space: nowrap; /* Naam op 1 regel */
 }
 
-/* GESELECTEERD */
+/* Geselecteerde knoppen */
 .option-btn.selected {
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
     color: white;
-    /* Achtergrondkleur wordt vaak via JS gezet (bij spelers) of CSS (thema) */
+    /* Background wordt door JS gezet voor spelers */
 }
-
 .option-btn.selected .btn-label { color: white; }
 
-/* Specifieke selectie kleuren */
+/* Thema en Size selectie kleuren */
 .group-theme .option-btn.selected { background: #4CAF50; box-shadow: 0 4px 0 #2E7D32; }
 .group-size .option-btn.selected { background: #FFC107; box-shadow: 0 4px 0 #FFA000; }
 
-/* SPELER KNOPPEN SPECIFIEK */
+/* Speler knop specifiek (witte achtergrond, kleur via border hint) */
 .player-btn {
-    border-bottom: 5px solid transparent; /* Plek voor kleurrandje */
+    background: white;
+    border: 3px solid #EEE;
+    box-shadow: 0 4px 0 #EEE;
 }
-.player-btn.selected {
-    border-bottom: none; /* Geen randje meer als hij selected is, want hele knop is gekleurd */
-}
-
-/* SLOTJES OP THEMA'S */
-.option-btn.locked {
-    filter: grayscale(100%);
-    opacity: 0.5;
-    cursor: not-allowed;
-    background: #EEE;
-    box-shadow: none;
-    border: 2px dashed #CCC;
-}
-.lock-overlay {
-    position: absolute;
-    top: -8px; right: -8px;
-    font-size: 1rem;
-    background: #FF5252;
-    color: white;
-    border-radius: 50%;
-    width: 24px; height: 24px;
-    display: flex; justify-content: center; align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-/* STERREN */
-.star { color: #FFD700; text-shadow: 1px 1px 0 #FFA000; }
-.star.dim { color: #CFD8DC; text-shadow: none; opacity: 0.5; }
+.player-btn .btn-label { color: #888; }
 
 
-/* INPUT VELD NAAM */
+/* Input veld */
 .player-input-container {
     display: flex;
     gap: 5px;
-    margin-top: auto; /* Duw naar beneden */
-    padding-top: 10px;
+    margin-top: auto;
+    padding-top: 15px;
     width: 100%;
-    border-top: 2px dashed #E0E0E0;
+    border-top: 2px dashed #EEE;
 }
 
 #custom-player-name {
@@ -181,15 +159,11 @@
     border: none;
     border-radius: 12px;
     width: 45px;
-    font-size: 1.5rem;
     color: white;
-    cursor: pointer;
-    box-shadow: 0 3px 0 #FFA000;
+    font-size: 1.5rem;
 }
-.add-btn:active { transform: translateY(3px); box-shadow: none; }
 
-
-/* START KNOP */
+/* Start knop */
 .start-btn {
     background: linear-gradient(to bottom, #66BB6A, #43A047);
     color: white;
@@ -204,121 +178,34 @@
     font-family: 'Fredoka One', cursive;
     flex-shrink: 0;
 }
-.start-btn:disabled {
-    background: #CFD8DC;
-    color: #90A4AE;
-    box-shadow: none;
-    cursor: not-allowed;
-}
+.start-btn:disabled { background: #CFD8DC; color: #90A4AE; box-shadow: none; cursor: not-allowed; }
 
+/* Slotjes */
+.option-btn.locked { filter: grayscale(100%); opacity: 0.5; cursor: not-allowed; background: #EEE; box-shadow: none; }
+.lock-overlay { position: absolute; top: -8px; right: -8px; font-size: 1rem; background: #FF5252; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+.star { color: #FFD700; text-shadow: 1px 1px 0 #FFA000; }
+.star.dim { color: #CFD8DC; text-shadow: none; opacity: 0.5; }
 
-/* --- HET SPEL BORD --- */
-.memory-game-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    height: 100%;
-}
+/* --- GAME BORD --- */
+.memory-game-container { display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; }
+.score-board { display: flex; gap: 10px; padding: 5px 10px; background: rgba(255,255,255,0.7); border-radius: 50px; margin-bottom: 10px; flex-wrap: wrap; justify-content: center; }
 
-.score-board {
-    display: flex;
-    gap: 10px;
-    padding: 5px 10px;
-    background: rgba(255,255,255,0.7);
-    border-radius: 50px;
-    margin-bottom: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
+.player-badge { background: white; padding: 5px 15px; border-radius: 30px; display: flex; align-items: center; gap: 8px; border: 3px solid #EEE; font-family: 'Fredoka One', cursive; color: #777; opacity: 0.6; transition: all 0.3s; }
+.player-badge.active { opacity: 1; transform: scale(1.1); box-shadow: 0 4px 12px rgba(0,0,0,0.15); background: #FFF; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
 
-/* SCORE BADGES */
-.player-badge {
-    background: white;
-    padding: 5px 15px;
-    border-radius: 30px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border: 3px solid #EEE;
-    font-family: 'Fredoka One', cursive;
-    color: #777;
-    opacity: 0.6;
-    transition: all 0.3s;
-}
-
-.player-badge.active {
-    opacity: 1;
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    background: #FFF;
-    color: white; /* Tekst wordt wit, background wordt spelerkleur (via JS) */
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-}
-
-.badge-icon { font-size: 1.4rem; }
-.badge-score { font-size: 1.2rem; }
-
-/* GRID VAN KAARTEN */
-.memory-grid {
-    display: grid;
-    gap: 10px;
-    width: 100%;
-    flex: 1; /* Vul rest van ruimte */
-    max-height: 80vh;
-    margin-bottom: 10px;
-}
-
-.memory-card {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    user-select: none;
-}
-
-.memory-card-inner {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    transform-style: preserve-3d;
-    transition: transform 0.5s;
-    border-radius: 12px;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-}
+.memory-grid { display: grid; gap: 10px; width: 100%; flex: 1; max-height: 80vh; margin-bottom: 10px; }
+.memory-card { position: relative; width: 100%; height: 100%; }
+.memory-card-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.5s; border-radius: 12px; box-shadow: 0 3px 6px rgba(0,0,0,0.15); }
 .memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
-
-.card-front, .card-back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: white;
-    overflow: hidden;
-}
-
-/* ACHTERKANT (DEKSEL) */
-.card-front {
-    background: linear-gradient(135deg, #4FC3F7, #0288D1);
-    border: 3px solid white;
-}
+.card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: white; overflow: hidden; }
+.card-front { background: linear-gradient(135deg, #4FC3F7, #0288D1); border: 3px solid white; }
 .card-cover-emoji { font-size: 3rem; text-shadow: 0 2px 0 rgba(0,0,0,0.2); }
 .card-cover-img { width: 100%; height: 100%; object-fit: cover; }
-
-/* VOORKANT (HET PLAATJE) */
-.card-back {
-    transform: rotateY(180deg);
-    border: 3px solid #FFC107;
-}
+.card-back { transform: rotateY(180deg); border: 3px solid #FFC107; }
 .card-img { width: 100%; height: 100%; object-fit: cover; }
 .card-emoji { font-size: 4rem; }
 
-/* MOBIEL FIX: Onder elkaar als scherm te smal is */
 @media (max-width: 650px) {
     .setup-columns { flex-direction: column; }
-    .setup-group { max-height: 33%; }
-    .start-btn { font-size: 1.5rem; padding: 12px; }
+    .setup-group { max-height: none; }
 }
