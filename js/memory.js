@@ -1,51 +1,120 @@
-// VERVANG DE startMemorySetup FUNCTIE MET DEZE:
+/* CONTAINER & TITELS */
+.memory-setup {
+    text-align: center;
+    width: 100%;
+    max-width: 800px;
+}
 
-function startMemorySetup() {
-    const board = document.getElementById('game-board');
-    
-    board.innerHTML = `
-        <div class="memory-setup">
-            
-            <div class="setup-group">
-                <h3>👥</h3>
-                <button class="option-btn selected" onclick="setPlayers(1, this)">👤</button>
-                <button class="option-btn" onclick="setPlayers(2, this)">👤👤</button>
-                <button class="option-btn" onclick="setPlayers(3, this)">👤👤👤</button>
-                <button class="option-btn" onclick="setPlayers(4, this)">👤👤👤👤</button>
-            </div>
+.setup-group {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05); /* Zachte schaduw ipv rand */
+}
 
-            <div class="setup-group">
-                <h3>🎨</h3>
-                <button class="option-btn selected" onclick="setTheme('boerderij', this)">🚜</button>
-                <button class="option-btn" onclick="setTheme('dino', this)">🦖</button>
-                <button class="option-btn" onclick="setTheme('studio100', this)">🤡</button>
-                <button class="option-btn" onclick="setTheme('marvel', this)">🕷️</button>
-                <button class="option-btn" onclick="setTheme('natuur', this)">🌳</button>
-                <button class="option-btn" onclick="setTheme('beroepen', this)">👩‍🚒</button>
-            </div>
+.setup-group h3 {
+    color: #00BCD4;
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
 
-            <div class="setup-group">
-                <h3>🧠</h3>
-                
-                <button class="option-btn selected" onclick="setSize(12, this)">
-                    <span class="star">★</span><span class="star dim">★</span><span class="star dim">★</span>
-                </button>
-                
-                <button class="option-btn" onclick="setSize(16, this)">
-                    <span class="star">★</span><span class="star">★</span><span class="star dim">★</span>
-                </button>
-                
-                <button class="option-btn" onclick="setSize(24, this)">
-                    <span class="star">★</span><span class="star">★</span><span class="star">★</span>
-                </button>
-            </div>
+/* DE KNOPPEN (TEGELS) */
+.option-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+}
 
-            <button class="start-btn" onclick="startMemoryGame()">▶️</button>
-        </div>
-    `;
-    
-    // Reset state naar standaarden
-    memoryState.players = 1;
-    memoryState.theme = 'boerderij';
-    memoryState.gridSize = 12;
+.option-btn {
+    background: #F5F5F5;
+    border: none; /* Geen randen meer! */
+    color: #555;
+    padding: 15px 20px;
+    border-radius: 15px;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 100px;
+}
+
+/* Label tekst onder icoon */
+.btn-label {
+    font-size: 1rem;
+    margin-top: 5px;
+    font-family: 'Fredoka One', cursive;
+    color: #888;
+}
+
+/* GESELECTEERDE STAAT (Mooi blauw/groen) */
+.option-btn.selected {
+    background: #00BCD4; /* Fris blauw */
+    color: white;
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 188, 212, 0.4); /* Gloed */
+}
+
+.option-btn.selected .btn-label {
+    color: white;
+}
+
+/* STERREN */
+.star { color: #FFD700; text-shadow: 0 2px 0 #D4AF37; }
+.star.dim { color: #DDD; text-shadow: none; }
+
+/* SPELER NAMEN SPECIFIEK */
+.player-input-container {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+#custom-player-name {
+    padding: 10px;
+    border-radius: 10px;
+    border: 2px solid #EEE;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    width: 150px;
+}
+
+.add-btn {
+    background: #FFCA28;
+    border: none;
+    border-radius: 10px;
+    width: 40px;
+    font-size: 1.5rem;
+    color: white;
+    cursor: pointer;
+}
+
+/* START KNOP */
+.start-btn {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 15px 60px;
+    font-size: 2rem;
+    border-radius: 50px;
+    margin-top: 10px;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
+    transition: transform 0.2s;
+}
+
+.start-btn:active {
+    transform: scale(0.95);
+}
+
+.start-btn:disabled {
+    background: #ccc;
+    box-shadow: none;
+    cursor: not-allowed;
 }
