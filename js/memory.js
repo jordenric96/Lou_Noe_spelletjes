@@ -1,302 +1,227 @@
-// MEMORY SPEL LOGICA
+/* --- SETUP SCHERM STIJL --- */
 
-// Configuratie en Status
-let memoryState = {
-    theme: 'boerderij',
-    gridSize: 12,
-    playerNames: [], // Hier komen de namen: ['Lou', 'Papa']
-    currentPlayerIndex: 0,
-    scores: {}, // Scores per naam: {'Lou': 2, 'Papa': 4}
-    cards: [],
-    flippedCards: [],
-    lockBoard: false, 
-    useImages: false, // Zet op true voor foto's
-    matchedPairs: 0
-};
-
-// Vaste spelers
-const predefinedPlayers = ["Lou", "Noé", "Mama", "Papa"];
-
-const themes = {
-    'boerderij': { emoji: ['🐮', '🐷', '🐔', '🐑', '🐴', '🐶', '🐱', '🦆', '🚜', '🌾', '🍎', '🥕'], path: 'assets/images/memory/boerderij/' },
-    'dino': { emoji: ['🦖', '🦕', '🐊', '🌋', '🥚', '🦴', '🌿', '🦎', '🐢', '🦂', '☄️', '🌴'], path: 'assets/images/memory/dino/' },
-    'studio100': { emoji: ['🐶', '🎈', '🤡', '🦸', '🏴‍☠️', '🧚', '🐺', '🌲', '🍄', '🎻', '👓', '🍬'], path: 'assets/images/memory/studio100/' },
-    'marvel': { emoji: ['🕷️', '🛡️', '🔨', '👊', '🦇', '🦸‍♂️', '🦹', '🕸️', '⚡', '🟢', '🤖', '🇺🇸'], path: 'assets/images/memory/marvel/' },
-    'natuur': { emoji: ['🌳', '🌻', '🌹', '🌵', '🍄', '🍂', '🦋', '🐝', '🐞', '🐌', '🌈', '☀️'], path: 'assets/images/memory/natuur/' },
-    'beroepen': { emoji: ['👮', '👩‍🚒', '👨‍⚕️', '👩‍🏫', '👨‍🍳', '👩‍🚀', '👨‍🎨', '👩‍🔧', '👨‍⚖️', '👷', '🕵️', '🧙'], path: 'assets/images/memory/beroepen/' }
-};
-
-// 1. SETUP SCHERM
-function startMemorySetup() {
-    const board = document.getElementById('game-board');
-    
-    // We maken de HTML voor de spelers knoppen
-    let playerButtonsHTML = predefinedPlayers.map(name => 
-        `<button class="option-btn" onclick="togglePlayer('${name}', this)">
-            <span>👤</span>
-            <span class="btn-label">${name}</span>
-        </button>`
-    ).join('');
-
-    board.innerHTML = `
-        <div class="memory-setup">
-            
-            <div class="setup-group">
-                <h3>Wie speelt er mee?</h3>
-                <div class="option-grid" id="player-selection">
-                    ${playerButtonsHTML}
-                </div>
-                
-                <div class="player-input-container">
-                    <input type="text" id="custom-player-name" placeholder="Andere naam...">
-                    <button class="add-btn" onclick="addCustomPlayer()">+</button>
-                </div>
-            </div>
-
-            <div class="setup-group">
-                <h3>Kies een thema</h3>
-                <div class="option-grid">
-                    <button class="option-btn selected" onclick="setTheme('boerderij', this)"><span>🚜</span><span class="btn-label">Boer</span></button>
-                    <button class="option-btn" onclick="setTheme('dino', this)"><span>🦖</span><span class="btn-label">Dino</span></button>
-                    <button class="option-btn" onclick="setTheme('studio100', this)"><span>🤡</span><span class="btn-label">Studio</span></button>
-                    <button class="option-btn" onclick="setTheme('marvel', this)"><span>🕷️</span><span class="btn-label">Held</span></button>
-                    <button class="option-btn" onclick="setTheme('natuur', this)"><span>🌳</span><span class="btn-label">Natuur</span></button>
-                    <button class="option-btn" onclick="setTheme('beroepen', this)"><span>👩‍🚒</span><span class="btn-label">Werk</span></button>
-                </div>
-            </div>
-
-            <div class="setup-group">
-                <h3>Hoeveel kaartjes?</h3>
-                <div class="option-grid">
-                    <button class="option-btn selected" onclick="setSize(12, this)">
-                        <span>★☆☆</span>
-                        <span class="btn-label">12</span>
-                    </button>
-                    <button class="option-btn" onclick="setSize(16, this)">
-                        <span>★★☆</span>
-                        <span class="btn-label">16</span>
-                    </button>
-                    <button class="option-btn" onclick="setSize(24, this)">
-                        <span>★★★</span>
-                        <span class="btn-label">24</span>
-                    </button>
-                </div>
-            </div>
-
-            <button id="start-btn" class="start-btn" onclick="startMemoryGame()" disabled>Start ▶️</button>
-        </div>
-    `;
-    
-    // Reset en selecteer standaard Lou
-    memoryState.playerNames = [];
-    memoryState.theme = 'boerderij';
-    memoryState.gridSize = 12;
+.memory-setup {
+    text-align: center;
+    width: 100%;
+    max-width: 900px;
+    padding: 20px;
 }
 
-// Speler toevoegen/verwijderen uit lijst
-function togglePlayer(name, btn) {
-    const index = memoryState.playerNames.indexOf(name);
-    
-    if (index === -1) {
-        // Toevoegen
-        if (memoryState.playerNames.length >= 4) return; // Max 4
-        memoryState.playerNames.push(name);
-        btn.classList.add('selected');
-    } else {
-        // Verwijderen
-        memoryState.playerNames.splice(index, 1);
-        btn.classList.remove('selected');
-    }
-    checkStartButton();
+/* De containers (de "balken") */
+.setup-group {
+    background: #FFF; /* Schone witte achtergrond */
+    border-radius: 30px; /* Lekker rond */
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08); /* Zachte schaduw */
+    position: relative;
+    border: 3px solid #E0F7FA; /* Heel licht blauw randje */
 }
 
-function addCustomPlayer() {
-    const input = document.getElementById('custom-player-name');
-    const name = input.value.trim();
-    if (name && !memoryState.playerNames.includes(name)) {
-        // Maak nieuwe knop aan en klik er direct op
-        const container = document.getElementById('player-selection');
-        const btnHTML = document.createElement('button');
-        btnHTML.className = 'option-btn';
-        btnHTML.onclick = function() { togglePlayer(name, this) };
-        btnHTML.innerHTML = `<span>👤</span><span class="btn-label">${name}</span>`;
-        container.appendChild(btnHTML);
-        
-        // Voeg direct toe
-        togglePlayer(name, btnHTML);
-        input.value = '';
-    }
+/* Specifieke kleuraccenten per groep */
+.group-players { border-color: #B3E5FC; } /* Lichtblauw accent */
+.group-theme { border-color: #C8E6C9; } /* Lichtgroen accent */
+.group-size { border-color: #FFF9C4; } /* Lichtgeel accent */
+
+
+.setup-group h3 {
+    color: #0277BD;
+    margin-bottom: 20px;
+    font-size: 1.6rem;
+    font-family: 'Fredoka One', cursive;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-function checkStartButton() {
-    const btn = document.getElementById('start-btn');
-    // Knop alleen actief als er minimaal 1 speler is
-    if (memoryState.playerNames.length > 0) {
-        btn.disabled = false;
-        btn.innerText = `Start met ${memoryState.playerNames.join(' & ')}`;
-    } else {
-        btn.disabled = true;
-        btn.innerText = "Kies spelers...";
-    }
+/* DE NIEUWE KNOPPEN (Bubbels) */
+.option-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
 }
 
-function setTheme(name, btn) {
-    memoryState.theme = name;
-    selectSingleBtn(btn);
+.option-btn {
+    /* Standaard staat (niet geselecteerd) */
+    background: #E1F5FE; /* Heel licht blauw */
+    color: #0288D1;
+    border: none;
+    padding: 15px 25px;
+    border-radius: 25px;
+    font-size: 2.5rem; /* Grote emoji's */
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* "Bounce" effect */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 110px;
+    box-shadow: 0 4px 0 #B3E5FC; /* 3D randje onderaan */
 }
 
-function setSize(size, btn) {
-    memoryState.gridSize = size;
-    selectSingleBtn(btn);
+.option-btn .btn-label {
+    font-size: 1.1rem;
+    margin-top: 8px;
+    font-family: 'Fredoka One', cursive;
+    color: #555;
+    font-weight: bold;
 }
 
-function selectSingleBtn(btn) {
-    let parent = btn.parentElement;
-    Array.from(parent.children).forEach(child => child.classList.remove('selected'));
-    btn.classList.add('selected');
+/* GESELECTEERDE STAAT (Pop!) */
+.option-btn.selected {
+    background: #00BCD4; /* Fel Cyaan/Blauw */
+    color: white;
+    transform: translateY(-6px) scale(1.05); /* Komt omhoog en wordt iets groter */
+    box-shadow: 0 10px 20px rgba(0, 188, 212, 0.4); /* Grote gloed */
 }
 
-// 2. SPEL STARTEN
-function startMemoryGame() {
-    if (memoryState.playerNames.length === 0) return;
-
-    const board = document.getElementById('game-board');
-    
-    // Scorebord maken met namen
-    let scoreHTML = '<div class="score-board">';
-    memoryState.playerNames.forEach((name, index) => {
-        scoreHTML += `<div class="player-score ${index===0?'active':''}" id="score-${index}">
-            ${name}: 0
-        </div>`;
-        memoryState.scores[name] = 0; // Reset score
-    });
-    scoreHTML += '</div>';
-
-    // Grid opbouw (de rest blijft grotendeels hetzelfde als vorige keer)
-    let gridStyle = '';
-    if(memoryState.gridSize === 12) gridStyle = 'grid-template-columns: repeat(3, 1fr);'; 
-    if(memoryState.gridSize === 16) gridStyle = 'grid-template-columns: repeat(4, 1fr);'; 
-    if(memoryState.gridSize === 24) gridStyle = 'grid-template-columns: repeat(4, 1fr);'; 
-
-    board.innerHTML = `
-        <div class="memory-game-container">
-            ${scoreHTML}
-            <div class="memory-grid" id="memory-grid" style="${gridStyle}"></div>
-        </div>
-    `;
-
-    memoryState.currentPlayerIndex = 0;
-    memoryState.flippedCards = [];
-    memoryState.lockBoard = false;
-    memoryState.matchedPairs = 0;
-
-    generateCards();
+.option-btn.selected .btn-label {
+    color: white;
 }
 
-// 3. GENERATE CARDS (Dezelfde als voorheen, maar even opnieuw voor de zekerheid)
-function generateCards() {
-    const grid = document.getElementById('memory-grid');
-    const themeData = themes[memoryState.theme];
-    const pairsNeeded = memoryState.gridSize / 2;
-    
-    let items = [];
-    if (memoryState.useImages) {
-        for (let i = 1; i <= pairsNeeded; i++) items.push(i);
-    } else {
-        items = themeData.emoji.slice(0, pairsNeeded);
-    }
+/* Thema specifieke kleuren als ze geselecteerd zijn (optioneel, maar leuk) */
+.group-theme .option-btn.selected { background: #4CAF50; box-shadow: 0 10px 20px rgba(76, 175, 80, 0.4); } /* Groen */
+.group-size .option-btn.selected { background: #FFC107; box-shadow: 0 10px 20px rgba(255, 193, 7, 0.4); } /* Geel/Goud */
 
-    let deck = [...items, ...items];
-    deck.sort(() => 0.5 - Math.random());
-
-    grid.innerHTML = '';
-
-    deck.forEach((item) => {
-        const card = document.createElement('div');
-        card.classList.add('memory-card');
-        card.dataset.value = item;
-        
-        let content = memoryState.useImages 
-            ? `<img src="${themeData.path}${item}.jpg" class="card-img" draggable="false">` 
-            : item;
-
-        card.innerHTML = `
-            <div class="memory-card-inner">
-                <div class="card-front">?</div>
-                <div class="card-back">${content}</div>
-            </div>
-        `;
-
-        card.addEventListener('click', flipCard);
-        grid.appendChild(card);
-    });
+/* STERREN - Veel leuker nu */
+.star { 
+    color: #FFD700; /* Goud */ 
+    text-shadow: 2px 2px 0 #FFA000; /* Oranje randje voor diepte */
+}
+.star.dim { 
+    color: #CFD8DC; /* Zacht blauw-grijs ipv vies grijs */
+    text-shadow: none; 
+    opacity: 0.6;
 }
 
-// 4. SPEL LOGICA (Flip, Match, Score)
-function flipCard() {
-    if (memoryState.lockBoard) return;
-    if (this === memoryState.flippedCards[0]) return;
-
-    this.classList.add('flipped');
-    memoryState.flippedCards.push(this);
-
-    if (memoryState.flippedCards.length === 2) {
-        checkForMatch();
-    }
+/* Input veld voor extra speler */
+.player-input-container {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 2px dashed #EEE;
 }
 
-function checkForMatch() {
-    let card1 = memoryState.flippedCards[0];
-    let card2 = memoryState.flippedCards[1];
-
-    let isMatch = card1.dataset.value === card2.dataset.value;
-
-    if (isMatch) {
-        disableCards();
-    } else {
-        unflipCards();
-    }
+#custom-player-name {
+    padding: 12px 20px;
+    border-radius: 30px;
+    border: 2px solid #B3E5FC;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.1rem;
+    outline: none;
 }
 
-function disableCards() {
-    memoryState.flippedCards = [];
-    memoryState.matchedPairs++;
-    
-    // Huidige speler krijgt punt
-    let currentPlayerName = memoryState.playerNames[memoryState.currentPlayerIndex];
-    memoryState.scores[currentPlayerName]++;
-    
-    // Update score tekst
-    document.getElementById(`score-${memoryState.currentPlayerIndex}`).innerText = 
-        `${currentPlayerName}: ${memoryState.scores[currentPlayerName]}`;
+.add-btn {
+    background: #FFC107;
+    border: none;
+    border-radius: 50%; /* Rond */
+    width: 50px; height: 50px;
+    font-size: 2rem;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #FFA000;
+}
+.add-btn:active { transform: translateY(4px); box-shadow: none; }
 
-    if (memoryState.matchedPairs === memoryState.gridSize / 2) {
-        setTimeout(() => alert('Gewonnen!'), 500);
-    }
-    // Bij match mag je nog eens, dus we wisselen NIET van speler
+
+/* START KNOP - Gigantisch en groen */
+.start-btn {
+    background: linear-gradient(to bottom, #66BB6A, #43A047); /* Gradiënt groen */
+    color: white;
+    border: none;
+    padding: 20px 80px;
+    font-size: 2.2rem;
+    border-radius: 60px;
+    margin-top: 20px;
+    cursor: pointer;
+    box-shadow: 0 8px 0 #2E7D32, 0 15px 30px rgba(76, 175, 80, 0.4);
+    font-family: 'Fredoka One', cursive;
+    transition: transform 0.1s;
+    width: 90%;
+    max-width: 500px;
 }
 
-function unflipCards() {
-    memoryState.lockBoard = true;
-    setTimeout(() => {
-        memoryState.flippedCards[0].classList.remove('flipped');
-        memoryState.flippedCards[1].classList.remove('flipped');
-        memoryState.flippedCards = [];
-        memoryState.lockBoard = false;
-        switchPlayer();
-    }, 1500); // Iets langer wachten om te kijken
+.start-btn:active {
+    transform: translateY(8px);
+    box-shadow: 0 0 0 #2E7D32, 0 5px 15px rgba(76, 175, 80, 0.4);
 }
 
-function switchPlayer() {
-    // Haal highlight weg
-    document.getElementById(`score-${memoryState.currentPlayerIndex}`).classList.remove('active');
+.start-btn:disabled {
+    background: #CFD8DC;
+    color: #90A4AE;
+    box-shadow: none;
+    cursor: not-allowed;
+}
 
-    // Volgende speler
-    memoryState.currentPlayerIndex++;
-    if (memoryState.currentPlayerIndex >= memoryState.playerNames.length) {
-        memoryState.currentPlayerIndex = 0;
-    }
+/* --- HET SPELBORD FIX --- */
+.memory-game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding-bottom: 20px;
+}
 
-    // Zet highlight
-    document.getElementById(`score-${memoryState.currentPlayerIndex}`).classList.add('active');
+.memory-grid {
+    display: grid;
+    gap: 15px;
+    width: 95%;
+    max-width: 700px; /* Zorgt dat het niet te breed wordt op PC */
+    margin: 20px auto;
+    /* De kolommen worden in JS gezet */
+}
+
+.memory-card {
+    background-color: transparent;
+    cursor: pointer;
+    perspective: 1000px;
+    aspect-ratio: 1 / 1; /* Altijd vierkant */
+    width: 100%; /* Vul de grid cel */
+}
+
+.memory-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1); /* Snellere flip */
+    transform-style: preserve-3d;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.memory-card.flipped .memory-card-inner {
+    transform: rotateY(180deg);
+}
+
+.card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* Belangrijk voor foto's */
+}
+
+/* Achterkant (Vraagteken) */
+.card-front {
+    background: linear-gradient(135deg, #4DD0E1, #00BCD4);
+    color: white;
+    font-family: 'Fredoka One', cursive;
+    font-size: 4rem;
+    border: 4px solid white;
+}
+
+/* Voorkant (Plaatje/Emoji) */
+.card-back {
+    background-color: white;
+    transform: rotateY(180deg);
+    border: 4px solid #FFC107; /* Geel randje bij het plaatje */
+    font-size: 5rem; /* Grote emoji's! */
 }
