@@ -1,6 +1,6 @@
 // MEMORY SPEL LOGICA
 
-// Configuratie en Status
+// Configuratie
 let memoryState = {
     theme: 'boerderij',
     gridSize: 12,
@@ -10,32 +10,32 @@ let memoryState = {
     cards: [],
     flippedCards: [],
     lockBoard: false, 
-    useImages: false, 
+    useImages: false, // ZET DEZE OP TRUE VOOR FOTO'S
     matchedPairs: 0
 };
 
-// Vaste spelers (AANGEPAST: Mama heeft nu bruin haar)
+// Vaste spelers
 const predefinedPlayers = [
     { name: "Lou", icon: "👦🏼" },
     { name: "Noé", icon: "👶🏼" },
-    { name: "Mama", icon: "👩🏻" }, // <--- Bruin haar
+    { name: "Mama", icon: "👩🏻" },
     { name: "Papa", icon: "👨🏻" }
 ];
 
+// Thema's - 'coverIcon' is de fallback als je nog geen cover.jpg hebt
 const themes = {
-    'boerderij': { emoji: ['🐮', '🐷', '🐔', '🐑', '🐴', '🐶', '🐱', '🦆', '🚜', '🌾', '🍎', '🥕'], path: 'assets/images/memory/boerderij/' },
-    'dino': { emoji: ['🦖', '🦕', '🐊', '🌋', '🥚', '🦴', '🌿', '🦎', '🐢', '🦂', '☄️', '🌴'], path: 'assets/images/memory/dino/' },
-    'studio100': { emoji: ['🐶', '🎈', '🤡', '🦸', '🏴‍☠️', '🧚', '🐺', '🌲', '🍄', '🎻', '👓', '🍬'], path: 'assets/images/memory/studio100/' },
-    'marvel': { emoji: ['🕷️', '🛡️', '🔨', '👊', '🦇', '🦸‍♂️', '🦹', '🕸️', '⚡', '🟢', '🤖', '🇺🇸'], path: 'assets/images/memory/marvel/' },
-    'natuur': { emoji: ['🌳', '🌻', '🌹', '🌵', '🍄', '🍂', '🦋', '🐝', '🐞', '🐌', '🌈', '☀️'], path: 'assets/images/memory/natuur/' },
-    'beroepen': { emoji: ['👮', '👩‍🚒', '👨‍⚕️', '👩‍🏫', '👨‍🍳', '👩‍🚀', '👨‍🎨', '👩‍🔧', '👨‍⚖️', '👷', '🕵️', '🧙'], path: 'assets/images/memory/beroepen/' }
+    'boerderij': { coverIcon: '🚜', emoji: ['🐮', '🐷', '🐔', '🐑', '🐴', '🐶', '🐱', '🦆', '🚜', '🌾', '🍎', '🥕'], path: 'assets/images/memory/boerderij/' },
+    'dino': { coverIcon: '🦖', emoji: ['🦖', '🦕', '🐊', '🌋', '🥚', '🦴', '🌿', '🦎', '🐢', '🦂', '☄️', '🌴'], path: 'assets/images/memory/dino/' },
+    'studio100': { coverIcon: '🤡', emoji: ['🐶', '🎈', '🤡', '🦸', '🏴‍☠️', '🧚', '🐺', '🌲', '🍄', '🎻', '👓', '🍬'], path: 'assets/images/memory/studio100/' },
+    'marvel': { coverIcon: '🛡️', emoji: ['🕷️', '🛡️', '🔨', '👊', '🦇', '🦸‍♂️', '🦹', '🕸️', '⚡', '🟢', '🤖', '🇺🇸'], path: 'assets/images/memory/marvel/' },
+    'natuur': { coverIcon: '🌳', emoji: ['🌳', '🌻', '🌹', '🌵', '🍄', '🍂', '🦋', '🐝', '🐞', '🐌', '🌈', '☀️'], path: 'assets/images/memory/natuur/' },
+    'beroepen': { coverIcon: '🚒', emoji: ['👮', '👩‍🚒', '👨‍⚕️', '👩‍🏫', '👨‍🍳', '👩‍🚀', '👨‍🎨', '👩‍🔧', '👨‍⚖️', '👷', '🕵️', '🧙'], path: 'assets/images/memory/beroepen/' }
 };
 
 // 1. SETUP SCHERM
 function startMemorySetup() {
     const board = document.getElementById('game-board');
     
-    // Spelers knoppen
     let playerButtonsHTML = predefinedPlayers.map(p => 
         `<button class="option-btn" onclick="togglePlayer('${p.name}', this)">
             <span>${p.icon}</span>
@@ -43,10 +43,8 @@ function startMemorySetup() {
         </button>`
     ).join('');
 
-    // NIEUWE STRUCTUUR: setup-columns div toegevoegd
     board.innerHTML = `
         <div class="memory-setup">
-            
             <div class="setup-columns">
                 <div class="setup-group group-players">
                     <h3>Wie?</h3>
@@ -89,7 +87,6 @@ function startMemorySetup() {
                     </div>
                 </div>
             </div>
-
             <button id="start-btn" class="start-btn" onclick="startMemoryGame()" disabled>Kies eerst spelers...</button>
         </div>
     `;
@@ -99,10 +96,9 @@ function startMemorySetup() {
     memoryState.gridSize = 12;
 }
 
-// Speler logica
+// Speler Selectie Functies
 function togglePlayer(name, btn) {
     const index = memoryState.playerNames.indexOf(name);
-    
     if (index === -1) {
         if (memoryState.playerNames.length >= 4) return; 
         memoryState.playerNames.push(name);
@@ -148,12 +144,10 @@ function setTheme(name, btn) {
     memoryState.theme = name;
     selectSingleBtn(btn);
 }
-
 function setSize(size, btn) {
     memoryState.gridSize = size;
     selectSingleBtn(btn);
 }
-
 function selectSingleBtn(btn) {
     let parent = btn.parentElement;
     Array.from(parent.children).forEach(child => child.classList.remove('selected'));
@@ -166,24 +160,28 @@ function startMemoryGame() {
 
     const board = document.getElementById('game-board');
     
+    // NIEUW SCOREBORD GENEREREN (Badges)
     let scoreHTML = '<div class="score-board">';
     memoryState.playerNames.forEach((name, index) => {
         let playerIcon = "👤";
         let predefined = predefinedPlayers.find(p => p.name === name);
         if(predefined) playerIcon = predefined.icon;
 
-        scoreHTML += `<div class="player-score ${index===0?'active':''}" id="score-${index}">
-            ${playerIcon} ${name}: 0
+        scoreHTML += `
+        <div class="player-badge ${index===0?'active':''}" id="badge-${index}">
+            <span class="badge-icon">${playerIcon}</span>
+            <span class="badge-name">${name}</span>
+            <span class="badge-score" id="score-${index}">0</span>
         </div>`;
+        
         memoryState.scores[name] = 0;
     });
     scoreHTML += '</div>';
 
-    // Flexibele grid kolommen
     let gridStyle = '';
-    if(memoryState.gridSize === 12) gridStyle = 'grid-template-columns: repeat(4, 1fr);'; // 4x3
-    if(memoryState.gridSize === 16) gridStyle = 'grid-template-columns: repeat(4, 1fr);'; // 4x4
-    if(memoryState.gridSize === 24) gridStyle = 'grid-template-columns: repeat(6, 1fr);'; // 6x4
+    if(memoryState.gridSize === 12) gridStyle = 'grid-template-columns: repeat(4, 1fr);'; 
+    if(memoryState.gridSize === 16) gridStyle = 'grid-template-columns: repeat(4, 1fr);'; 
+    if(memoryState.gridSize === 24) gridStyle = 'grid-template-columns: repeat(6, 1fr);'; 
 
     board.innerHTML = `
         <div class="memory-game-container">
@@ -200,7 +198,7 @@ function startMemoryGame() {
     generateCards();
 }
 
-// 3. GENERATE CARDS
+// 3. GENERATE CARDS (Aangepast voor Covers)
 function generateCards() {
     const grid = document.getElementById('memory-grid');
     const themeData = themes[memoryState.theme];
@@ -223,13 +221,25 @@ function generateCards() {
         card.classList.add('memory-card');
         card.dataset.value = item;
         
+        // DE INHOUD (ACHTER HET DEURTJE)
         let content = memoryState.useImages 
             ? `<img src="${themeData.path}${item}.jpg" class="card-img" draggable="false">` 
             : item;
 
+        // DE COVER (HET DEURTJE)
+        let coverContent = '';
+        if (memoryState.useImages) {
+            // Zoekt naar: assets/images/memory/boerderij/cover.jpg
+            // Zorg dat je een plaatje 'cover.jpg' in de map zet!
+            coverContent = `<img src="${themeData.path}cover.jpg" class="card-cover-img" draggable="false">`;
+        } else {
+            // Fallback: toon de emoji van het thema als cover
+            coverContent = `<span class="card-cover-emoji">${themeData.coverIcon}</span>`;
+        }
+
         card.innerHTML = `
             <div class="memory-card-inner">
-                <div class="card-front">?</div>
+                <div class="card-front">${coverContent}</div>
                 <div class="card-back">${content}</div>
             </div>
         `;
@@ -272,12 +282,8 @@ function disableCards() {
     let currentPlayerName = memoryState.playerNames[memoryState.currentPlayerIndex];
     memoryState.scores[currentPlayerName]++;
     
-    let playerIcon = "👤";
-    let predefined = predefinedPlayers.find(p => p.name === currentPlayerName);
-    if(predefined) playerIcon = predefined.icon;
-
-    document.getElementById(`score-${memoryState.currentPlayerIndex}`).innerText = 
-        `${playerIcon} ${currentPlayerName}: ${memoryState.scores[currentPlayerName]}`;
+    // UPDATE SCORE ALLEEN CIJFER
+    document.getElementById(`score-${memoryState.currentPlayerIndex}`).innerText = memoryState.scores[currentPlayerName];
 
     if (memoryState.matchedPairs === memoryState.gridSize / 2) {
         setTimeout(() => alert('Gewonnen! 🎉'), 500);
@@ -296,12 +302,14 @@ function unflipCards() {
 }
 
 function switchPlayer() {
-    document.getElementById(`score-${memoryState.currentPlayerIndex}`).classList.remove('active');
+    // Verwijder active class van huidige badge
+    document.getElementById(`badge-${memoryState.currentPlayerIndex}`).classList.remove('active');
 
     memoryState.currentPlayerIndex++;
     if (memoryState.currentPlayerIndex >= memoryState.playerNames.length) {
         memoryState.currentPlayerIndex = 0;
     }
 
-    document.getElementById(`score-${memoryState.currentPlayerIndex}`).classList.add('active');
+    // Voeg active class toe aan nieuwe badge
+    document.getElementById(`badge-${memoryState.currentPlayerIndex}`).classList.add('active');
 }
