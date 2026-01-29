@@ -1,120 +1,302 @@
-/* CONTAINER & TITELS */
-.memory-setup {
-    text-align: center;
-    width: 100%;
-    max-width: 800px;
+// MEMORY SPEL LOGICA
+
+// Configuratie en Status
+let memoryState = {
+    theme: 'boerderij',
+    gridSize: 12,
+    playerNames: [], // Hier komen de namen: ['Lou', 'Papa']
+    currentPlayerIndex: 0,
+    scores: {}, // Scores per naam: {'Lou': 2, 'Papa': 4}
+    cards: [],
+    flippedCards: [],
+    lockBoard: false, 
+    useImages: false, // Zet op true voor foto's
+    matchedPairs: 0
+};
+
+// Vaste spelers
+const predefinedPlayers = ["Lou", "Noé", "Mama", "Papa"];
+
+const themes = {
+    'boerderij': { emoji: ['🐮', '🐷', '🐔', '🐑', '🐴', '🐶', '🐱', '🦆', '🚜', '🌾', '🍎', '🥕'], path: 'assets/images/memory/boerderij/' },
+    'dino': { emoji: ['🦖', '🦕', '🐊', '🌋', '🥚', '🦴', '🌿', '🦎', '🐢', '🦂', '☄️', '🌴'], path: 'assets/images/memory/dino/' },
+    'studio100': { emoji: ['🐶', '🎈', '🤡', '🦸', '🏴‍☠️', '🧚', '🐺', '🌲', '🍄', '🎻', '👓', '🍬'], path: 'assets/images/memory/studio100/' },
+    'marvel': { emoji: ['🕷️', '🛡️', '🔨', '👊', '🦇', '🦸‍♂️', '🦹', '🕸️', '⚡', '🟢', '🤖', '🇺🇸'], path: 'assets/images/memory/marvel/' },
+    'natuur': { emoji: ['🌳', '🌻', '🌹', '🌵', '🍄', '🍂', '🦋', '🐝', '🐞', '🐌', '🌈', '☀️'], path: 'assets/images/memory/natuur/' },
+    'beroepen': { emoji: ['👮', '👩‍🚒', '👨‍⚕️', '👩‍🏫', '👨‍🍳', '👩‍🚀', '👨‍🎨', '👩‍🔧', '👨‍⚖️', '👷', '🕵️', '🧙'], path: 'assets/images/memory/beroepen/' }
+};
+
+// 1. SETUP SCHERM
+function startMemorySetup() {
+    const board = document.getElementById('game-board');
+    
+    // We maken de HTML voor de spelers knoppen
+    let playerButtonsHTML = predefinedPlayers.map(name => 
+        `<button class="option-btn" onclick="togglePlayer('${name}', this)">
+            <span>👤</span>
+            <span class="btn-label">${name}</span>
+        </button>`
+    ).join('');
+
+    board.innerHTML = `
+        <div class="memory-setup">
+            
+            <div class="setup-group">
+                <h3>Wie speelt er mee?</h3>
+                <div class="option-grid" id="player-selection">
+                    ${playerButtonsHTML}
+                </div>
+                
+                <div class="player-input-container">
+                    <input type="text" id="custom-player-name" placeholder="Andere naam...">
+                    <button class="add-btn" onclick="addCustomPlayer()">+</button>
+                </div>
+            </div>
+
+            <div class="setup-group">
+                <h3>Kies een thema</h3>
+                <div class="option-grid">
+                    <button class="option-btn selected" onclick="setTheme('boerderij', this)"><span>🚜</span><span class="btn-label">Boer</span></button>
+                    <button class="option-btn" onclick="setTheme('dino', this)"><span>🦖</span><span class="btn-label">Dino</span></button>
+                    <button class="option-btn" onclick="setTheme('studio100', this)"><span>🤡</span><span class="btn-label">Studio</span></button>
+                    <button class="option-btn" onclick="setTheme('marvel', this)"><span>🕷️</span><span class="btn-label">Held</span></button>
+                    <button class="option-btn" onclick="setTheme('natuur', this)"><span>🌳</span><span class="btn-label">Natuur</span></button>
+                    <button class="option-btn" onclick="setTheme('beroepen', this)"><span>👩‍🚒</span><span class="btn-label">Werk</span></button>
+                </div>
+            </div>
+
+            <div class="setup-group">
+                <h3>Hoeveel kaartjes?</h3>
+                <div class="option-grid">
+                    <button class="option-btn selected" onclick="setSize(12, this)">
+                        <span>★☆☆</span>
+                        <span class="btn-label">12</span>
+                    </button>
+                    <button class="option-btn" onclick="setSize(16, this)">
+                        <span>★★☆</span>
+                        <span class="btn-label">16</span>
+                    </button>
+                    <button class="option-btn" onclick="setSize(24, this)">
+                        <span>★★★</span>
+                        <span class="btn-label">24</span>
+                    </button>
+                </div>
+            </div>
+
+            <button id="start-btn" class="start-btn" onclick="startMemoryGame()" disabled>Start ▶️</button>
+        </div>
+    `;
+    
+    // Reset en selecteer standaard Lou
+    memoryState.playerNames = [];
+    memoryState.theme = 'boerderij';
+    memoryState.gridSize = 12;
 }
 
-.setup-group {
-    background: white;
-    border-radius: 20px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05); /* Zachte schaduw ipv rand */
+// Speler toevoegen/verwijderen uit lijst
+function togglePlayer(name, btn) {
+    const index = memoryState.playerNames.indexOf(name);
+    
+    if (index === -1) {
+        // Toevoegen
+        if (memoryState.playerNames.length >= 4) return; // Max 4
+        memoryState.playerNames.push(name);
+        btn.classList.add('selected');
+    } else {
+        // Verwijderen
+        memoryState.playerNames.splice(index, 1);
+        btn.classList.remove('selected');
+    }
+    checkStartButton();
 }
 
-.setup-group h3 {
-    color: #00BCD4;
-    margin-bottom: 15px;
-    font-size: 1.5rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+function addCustomPlayer() {
+    const input = document.getElementById('custom-player-name');
+    const name = input.value.trim();
+    if (name && !memoryState.playerNames.includes(name)) {
+        // Maak nieuwe knop aan en klik er direct op
+        const container = document.getElementById('player-selection');
+        const btnHTML = document.createElement('button');
+        btnHTML.className = 'option-btn';
+        btnHTML.onclick = function() { togglePlayer(name, this) };
+        btnHTML.innerHTML = `<span>👤</span><span class="btn-label">${name}</span>`;
+        container.appendChild(btnHTML);
+        
+        // Voeg direct toe
+        togglePlayer(name, btnHTML);
+        input.value = '';
+    }
 }
 
-/* DE KNOPPEN (TEGELS) */
-.option-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
+function checkStartButton() {
+    const btn = document.getElementById('start-btn');
+    // Knop alleen actief als er minimaal 1 speler is
+    if (memoryState.playerNames.length > 0) {
+        btn.disabled = false;
+        btn.innerText = `Start met ${memoryState.playerNames.join(' & ')}`;
+    } else {
+        btn.disabled = true;
+        btn.innerText = "Kies spelers...";
+    }
 }
 
-.option-btn {
-    background: #F5F5F5;
-    border: none; /* Geen randen meer! */
-    color: #555;
-    padding: 15px 20px;
-    border-radius: 15px;
-    font-size: 2rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 100px;
+function setTheme(name, btn) {
+    memoryState.theme = name;
+    selectSingleBtn(btn);
 }
 
-/* Label tekst onder icoon */
-.btn-label {
-    font-size: 1rem;
-    margin-top: 5px;
-    font-family: 'Fredoka One', cursive;
-    color: #888;
+function setSize(size, btn) {
+    memoryState.gridSize = size;
+    selectSingleBtn(btn);
 }
 
-/* GESELECTEERDE STAAT (Mooi blauw/groen) */
-.option-btn.selected {
-    background: #00BCD4; /* Fris blauw */
-    color: white;
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0, 188, 212, 0.4); /* Gloed */
+function selectSingleBtn(btn) {
+    let parent = btn.parentElement;
+    Array.from(parent.children).forEach(child => child.classList.remove('selected'));
+    btn.classList.add('selected');
 }
 
-.option-btn.selected .btn-label {
-    color: white;
+// 2. SPEL STARTEN
+function startMemoryGame() {
+    if (memoryState.playerNames.length === 0) return;
+
+    const board = document.getElementById('game-board');
+    
+    // Scorebord maken met namen
+    let scoreHTML = '<div class="score-board">';
+    memoryState.playerNames.forEach((name, index) => {
+        scoreHTML += `<div class="player-score ${index===0?'active':''}" id="score-${index}">
+            ${name}: 0
+        </div>`;
+        memoryState.scores[name] = 0; // Reset score
+    });
+    scoreHTML += '</div>';
+
+    // Grid opbouw (de rest blijft grotendeels hetzelfde als vorige keer)
+    let gridStyle = '';
+    if(memoryState.gridSize === 12) gridStyle = 'grid-template-columns: repeat(3, 1fr);'; 
+    if(memoryState.gridSize === 16) gridStyle = 'grid-template-columns: repeat(4, 1fr);'; 
+    if(memoryState.gridSize === 24) gridStyle = 'grid-template-columns: repeat(4, 1fr);'; 
+
+    board.innerHTML = `
+        <div class="memory-game-container">
+            ${scoreHTML}
+            <div class="memory-grid" id="memory-grid" style="${gridStyle}"></div>
+        </div>
+    `;
+
+    memoryState.currentPlayerIndex = 0;
+    memoryState.flippedCards = [];
+    memoryState.lockBoard = false;
+    memoryState.matchedPairs = 0;
+
+    generateCards();
 }
 
-/* STERREN */
-.star { color: #FFD700; text-shadow: 0 2px 0 #D4AF37; }
-.star.dim { color: #DDD; text-shadow: none; }
+// 3. GENERATE CARDS (Dezelfde als voorheen, maar even opnieuw voor de zekerheid)
+function generateCards() {
+    const grid = document.getElementById('memory-grid');
+    const themeData = themes[memoryState.theme];
+    const pairsNeeded = memoryState.gridSize / 2;
+    
+    let items = [];
+    if (memoryState.useImages) {
+        for (let i = 1; i <= pairsNeeded; i++) items.push(i);
+    } else {
+        items = themeData.emoji.slice(0, pairsNeeded);
+    }
 
-/* SPELER NAMEN SPECIFIEK */
-.player-input-container {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin-top: 15px;
+    let deck = [...items, ...items];
+    deck.sort(() => 0.5 - Math.random());
+
+    grid.innerHTML = '';
+
+    deck.forEach((item) => {
+        const card = document.createElement('div');
+        card.classList.add('memory-card');
+        card.dataset.value = item;
+        
+        let content = memoryState.useImages 
+            ? `<img src="${themeData.path}${item}.jpg" class="card-img" draggable="false">` 
+            : item;
+
+        card.innerHTML = `
+            <div class="memory-card-inner">
+                <div class="card-front">?</div>
+                <div class="card-back">${content}</div>
+            </div>
+        `;
+
+        card.addEventListener('click', flipCard);
+        grid.appendChild(card);
+    });
 }
 
-#custom-player-name {
-    padding: 10px;
-    border-radius: 10px;
-    border: 2px solid #EEE;
-    font-family: 'Nunito', sans-serif;
-    font-size: 1rem;
-    width: 150px;
+// 4. SPEL LOGICA (Flip, Match, Score)
+function flipCard() {
+    if (memoryState.lockBoard) return;
+    if (this === memoryState.flippedCards[0]) return;
+
+    this.classList.add('flipped');
+    memoryState.flippedCards.push(this);
+
+    if (memoryState.flippedCards.length === 2) {
+        checkForMatch();
+    }
 }
 
-.add-btn {
-    background: #FFCA28;
-    border: none;
-    border-radius: 10px;
-    width: 40px;
-    font-size: 1.5rem;
-    color: white;
-    cursor: pointer;
+function checkForMatch() {
+    let card1 = memoryState.flippedCards[0];
+    let card2 = memoryState.flippedCards[1];
+
+    let isMatch = card1.dataset.value === card2.dataset.value;
+
+    if (isMatch) {
+        disableCards();
+    } else {
+        unflipCards();
+    }
 }
 
-/* START KNOP */
-.start-btn {
-    background: #4CAF50;
-    color: white;
-    border: none;
-    padding: 15px 60px;
-    font-size: 2rem;
-    border-radius: 50px;
-    margin-top: 10px;
-    cursor: pointer;
-    box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
-    transition: transform 0.2s;
+function disableCards() {
+    memoryState.flippedCards = [];
+    memoryState.matchedPairs++;
+    
+    // Huidige speler krijgt punt
+    let currentPlayerName = memoryState.playerNames[memoryState.currentPlayerIndex];
+    memoryState.scores[currentPlayerName]++;
+    
+    // Update score tekst
+    document.getElementById(`score-${memoryState.currentPlayerIndex}`).innerText = 
+        `${currentPlayerName}: ${memoryState.scores[currentPlayerName]}`;
+
+    if (memoryState.matchedPairs === memoryState.gridSize / 2) {
+        setTimeout(() => alert('Gewonnen!'), 500);
+    }
+    // Bij match mag je nog eens, dus we wisselen NIET van speler
 }
 
-.start-btn:active {
-    transform: scale(0.95);
+function unflipCards() {
+    memoryState.lockBoard = true;
+    setTimeout(() => {
+        memoryState.flippedCards[0].classList.remove('flipped');
+        memoryState.flippedCards[1].classList.remove('flipped');
+        memoryState.flippedCards = [];
+        memoryState.lockBoard = false;
+        switchPlayer();
+    }, 1500); // Iets langer wachten om te kijken
 }
 
-.start-btn:disabled {
-    background: #ccc;
-    box-shadow: none;
-    cursor: not-allowed;
+function switchPlayer() {
+    // Haal highlight weg
+    document.getElementById(`score-${memoryState.currentPlayerIndex}`).classList.remove('active');
+
+    // Volgende speler
+    memoryState.currentPlayerIndex++;
+    if (memoryState.currentPlayerIndex >= memoryState.playerNames.length) {
+        memoryState.currentPlayerIndex = 0;
+    }
+
+    // Zet highlight
+    document.getElementById(`score-${memoryState.currentPlayerIndex}`).classList.add('active');
 }
