@@ -10,18 +10,24 @@ let mazeState = {
     isGameActive: false
 };
 
+// --- HIER ZIT DE UPDATE ---
+// Zorg dat deze lijst Mario EN Pokemon bevat
 const mazeThemes = {
     'mario': { locked: false, icon: '🍄', path: 'assets/images/doolhof/mario/' },
+    'pokemon': { locked: false, icon: '⚡', path: 'assets/images/doolhof/pokemon/' }, 
 };
 
-// 1. SETUP SCHERM
 function startDoolhofSetup() {
     const board = document.getElementById('game-board');
+    
+    // Deze code maakt automatisch knoppen voor alles wat in 'mazeThemes' staat
     let themeButtons = Object.keys(mazeThemes).map(key => {
         const t = mazeThemes[key];
         const isLocked = t.locked ? 'locked' : '';
+        const label = key.charAt(0).toUpperCase() + key.slice(1);
+        
         return `<button class="option-btn ${isLocked}" onclick="setMazeTheme('${key}', this)">
-            <span>${t.icon}</span><span class="btn-label">${key}</span></button>`;
+            <span>${t.icon}</span><span class="btn-label">${label}</span></button>`;
     }).join('');
 
     board.innerHTML = `
@@ -44,31 +50,21 @@ function startDoolhofSetup() {
         </div>
     `;
 
+    // Selecteer standaard de eerste
     setTimeout(() => {
         const defaultTheme = document.querySelector(`.option-btn[onclick="setMazeTheme('mario', this)"]`);
         if(defaultTheme) defaultTheme.classList.add('selected');
     }, 10);
+    
     mazeState.theme = 'mario';
     mazeState.difficulty = 'medium';
     mazeState.gridSize = 15;
 }
 
-function setMazeTheme(name, btn) {
-    if(mazeThemes[name].locked) return;
-    mazeState.theme = name;
-    selectSingleBtn(btn);
-}
-function setMazeDiff(diff, size, btn) {
-    mazeState.difficulty = diff;
-    mazeState.gridSize = size;
-    selectSingleBtn(btn);
-}
-function selectSingleBtn(btn) {
-    Array.from(btn.parentElement.children).forEach(c => c.classList.remove('selected'));
-    btn.classList.add('selected');
-}
+function setMazeTheme(name, btn) { if(mazeThemes[name].locked) return; mazeState.theme = name; selectSingleBtn(btn); }
+function setMazeDiff(diff, size, btn) { mazeState.difficulty = diff; mazeState.gridSize = size; selectSingleBtn(btn); }
+function selectSingleBtn(btn) { Array.from(btn.parentElement.children).forEach(c => c.classList.remove('selected')); btn.classList.add('selected'); }
 
-// 2. GAME START
 function startDoolhofGame() {
     const board = document.getElementById('game-board');
     board.innerHTML = `
@@ -114,11 +110,11 @@ function generateMaze(size) {
     mazeState.mazeGrid[mazeState.goalPosition.y][mazeState.goalPosition.x] = 0; 
 }
 
-// BEREKEN CELGROOTTE (Responsive)
 function calculateCellSize() {
     const size = mazeState.gridSize;
-    const maxW = window.innerWidth * 0.95;
-    const maxH = window.innerHeight * 0.70;
+    const maxW = window.innerWidth * 0.95; 
+    // Fix voor tablet hoogte (zodat het past met knoppen)
+    const maxH = window.innerHeight - 240; 
     const cellW = Math.floor(maxW / size);
     const cellH = Math.floor(maxH / size);
     return Math.min(cellW, cellH, 40);
@@ -151,9 +147,13 @@ function drawMaze() {
 
 function placePlayer() {
     const gridEl = document.getElementById('maze-grid');
+    const old = document.getElementById('player');
+    if(old) old.remove();
+
     const player = document.createElement('div');
     player.id = 'player';
     
+    // Hier pakt hij het juiste plaatje (mario of pokemon)
     const themeData = mazeThemes[mazeState.theme];
     player.style.backgroundImage = `url('${themeData.path}player.png')`;
 
@@ -172,7 +172,6 @@ function updatePlayerPositionVisually() {
     playerEl.style.top = `${mazeState.playerPosition.y * cellSize}px`;
 }
 
-// CONTROLS
 function setupControls() {
     document.addEventListener('keydown', handleKeyPress);
     document.getElementById('btn-up').addEventListener('click', () => movePlayer(0, -1));
@@ -223,7 +222,6 @@ function cleanupDoolhof() {
     mazeState.isGameActive = false;
 }
 
-// Resize listener
 window.addEventListener('resize', () => {
     if(document.getElementById('maze-grid') && mazeState.isGameActive) {
         drawMaze(); 
