@@ -23,30 +23,11 @@ const predefinedPlayers = [
     { name: "Papa", icon: "👨🏻" }
 ];
 
-// THEMA CONFIGURATIE
-// 'extension' is standaard 'jpg' als je het weglaat.
+// THEMA CONFIGURATIE (JPG vs PNG)
 const themes = {
-    'boerderij': { 
-        locked: false, 
-        extension: 'jpg', // Oude thema's zijn jpg
-        coverIcon: '🚜', 
-        emoji: [], 
-        path: 'assets/images/memory/boerderij/' 
-    },
-    'mario': { 
-        locked: false, 
-        extension: 'png', // NIEUW: Mario is png
-        coverIcon: '🍄', 
-        emoji: [], 
-        path: 'assets/images/memory/mario/' 
-    },
-    'pokemon': { 
-        locked: false, 
-        extension: 'png', // NIEUW: Pokemon is png
-        coverIcon: '⚡', 
-        emoji: [], 
-        path: 'assets/images/memory/pokemon/' 
-    },
+    'boerderij': { locked: false, extension: 'jpg', coverIcon: '🚜', emoji: [], path: 'assets/images/memory/boerderij/' },
+    'mario': { locked: false, extension: 'png', coverIcon: '🍄', emoji: [], path: 'assets/images/memory/mario/' },
+    'pokemon': { locked: false, extension: 'png', coverIcon: '⚡', emoji: [], path: 'assets/images/memory/pokemon/' },
     'dino': { locked: true, extension: 'jpg', coverIcon: '🦖', emoji: [], path: 'assets/images/memory/dino/' },
     'studio100': { locked: true, extension: 'jpg', coverIcon: '🤡', emoji: [], path: 'assets/images/memory/studio100/' },
     'marvel': { locked: true, extension: 'jpg', coverIcon: '🛡️', emoji: [], path: 'assets/images/memory/marvel/' },
@@ -73,7 +54,6 @@ function startMemorySetup() {
         const isLocked = t.locked ? 'locked' : '';
         const lockIcon = t.locked ? '<span class="lock-overlay">🔒</span>' : '';
         const label = key.charAt(0).toUpperCase() + key.slice(1);
-        
         return `<button class="option-btn ${isLocked}" onclick="setTheme('${key}', this)">
             ${lockIcon}<span>${t.coverIcon}</span><span class="btn-label">${label}</span>
         </button>`;
@@ -93,26 +73,21 @@ function startMemorySetup() {
                         <button class="add-btn" onclick="addCustomPlayer()">+</button>
                     </div>
                 </div>
-
                 <div class="setup-group group-theme">
                     <h3>Wat spelen we?</h3>
                     <div class="option-grid">${themeButtonsHTML}</div>
                 </div>
-
                 <div class="setup-group group-size">
                     <h3>Grootte?</h3>
                     <div class="option-grid">
                         <button class="option-btn selected" onclick="setSize(12, this)">
-                            <span><span class="star">★</span></span>
-                            <span class="btn-label">12</span>
+                            <span><span class="star">★</span></span><span class="btn-label">12</span>
                         </button>
                         <button class="option-btn" onclick="setSize(16, this)">
-                            <span><span class="star">★</span><span class="star">★</span></span>
-                            <span class="btn-label">16</span>
+                            <span><span class="star">★</span><span class="star">★</span></span><span class="btn-label">16</span>
                         </button>
                         <button class="option-btn" onclick="setSize(30, this)">
-                            <span><span class="star">★</span><span class="star">★</span><span class="star">★</span></span>
-                            <span class="btn-label">30</span>
+                            <span><span class="star">★</span><span class="star">★</span><span class="star">★</span></span><span class="btn-label">30</span>
                         </button>
                     </div>
                 </div>
@@ -121,10 +96,8 @@ function startMemorySetup() {
         </div>
     `;
     
-    // Startwaarden
     memoryState.playerNames = [];
-    memoryState.theme = 'boerderij'; // Standaard
-    
+    memoryState.theme = 'boerderij'; 
     setTimeout(() => {
         const dots = document.querySelectorAll('.color-dot');
         if(dots.length > 3) selectPaletteColor(palette[3], dots[3]); 
@@ -133,7 +106,6 @@ function startMemorySetup() {
     }, 10);
 }
 
-// (Functies selectPaletteColor, togglePlayer, addCustomPlayer, checkStartButton... blijven hetzelfde als vorige keer)
 function selectPaletteColor(color, dotElement) {
     memoryState.activeColor = color;
     document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
@@ -223,16 +195,11 @@ function startMemoryGame() {
     });
     scoreHTML += '</div>';
 
-    // GRID AANPASSING VOOR 30 KAARTEN
     let gridStyle = '';
     if(memoryState.gridSize === 12) gridStyle = 'grid-template-columns: repeat(4, 1fr);'; 
     if(memoryState.gridSize === 16) gridStyle = 'grid-template-columns: repeat(4, 1fr);'; 
-    if(memoryState.gridSize === 30) gridStyle = 'grid-template-columns: repeat(6, 1fr);'; // 6 kolommen x 5 rijen
-
-    // Mobiel aanpassing (als scherm smal is, misschien 5 kolommen?)
-    if(window.innerWidth < 600 && memoryState.gridSize === 30) {
-        gridStyle = 'grid-template-columns: repeat(5, 1fr);'; // 5x6
-    }
+    if(memoryState.gridSize === 30) gridStyle = 'grid-template-columns: repeat(6, 1fr);';
+    if(window.innerWidth < 600 && memoryState.gridSize === 30) gridStyle = 'grid-template-columns: repeat(5, 1fr);';
 
     board.innerHTML = `
         <div class="memory-game-container">
@@ -259,12 +226,10 @@ function updateActiveBadgeColor() {
     if(activeBadge) { activeBadge.classList.add('active'); activeBadge.style.backgroundColor = currentP.color; activeBadge.style.color = 'white'; }
 }
 
-// 3. GENERATE CARDS (NU MET .PNG ONDERSTEUNING)
 function generateCards() {
     const grid = document.getElementById('memory-grid');
     const themeData = themes[memoryState.theme];
     const pairsNeeded = memoryState.gridSize / 2;
-    // Bepaal de extensie (standaard jpg als het niet gedefinieerd is)
     const ext = themeData.extension || 'jpg';
     
     let items = [];
@@ -287,14 +252,9 @@ function generateCards() {
             ? `<img src="${themeData.path}${item}.${ext}" class="card-img" draggable="false">` 
             : `<span class="card-emoji">${item}</span>`;
 
-        // Cover logica (ook rekening houden met png/jpg)
-        let coverContent = '';
-        if (memoryState.useImages) {
-            coverContent = `<img src="${themeData.path}cover.${ext}" class="card-cover-img" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-                            <span class="fallback-icon" style="display:none; font-size:3rem; color:white;">${themeData.coverIcon}</span>`;
-        } else {
-            coverContent = `<span class="card-cover-emoji">${themeData.coverIcon}</span>`;
-        }
+        let coverContent = memoryState.useImages 
+            ? `<img src="${themeData.path}cover.${ext}" class="card-cover-img" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="fallback-icon" style="display:none; font-size:3rem; color:white;">${themeData.coverIcon}</span>`
+            : `<span class="card-cover-emoji">${themeData.coverIcon}</span>`;
 
         card.innerHTML = `<div class="memory-card-inner"><div class="card-front">${coverContent}</div><div class="card-back">${content}</div></div>`;
         card.addEventListener('click', flipCard);
@@ -302,7 +262,6 @@ function generateCards() {
     });
 }
 
-// (Rest van de logica: flipCard, checkForMatch... ongewijzigd)
 function flipCard() {
     if (memoryState.lockBoard) return;
     if (this === memoryState.flippedCards[0]) return;
@@ -318,12 +277,27 @@ function checkForMatch() {
 }
 
 function disableCards() {
-    memoryState.flippedCards = [];
+    memoryState.flippedCards.forEach(card => card.classList.add('matched'));
     memoryState.matchedPairs++;
+    
     let currentP = memoryState.playerNames[memoryState.currentPlayerIndex];
     memoryState.scores[currentP.name]++;
     document.getElementById(`score-${memoryState.currentPlayerIndex}`).innerText = memoryState.scores[currentP.name];
-    if (memoryState.matchedPairs === memoryState.gridSize / 2) { setTimeout(() => alert('Gewonnen! 🎉'), 500); }
+    
+    memoryState.flippedCards = [];
+
+    if (memoryState.matchedPairs === memoryState.gridSize / 2) {
+        setTimeout(() => {
+            let leaderboard = memoryState.playerNames.map(p => ({
+                name: p.name, score: memoryState.scores[p.name], color: p.color
+            })).sort((a, b) => b.score - a.score);
+            
+            let winner = leaderboard[0].name;
+            if (leaderboard.length > 1 && leaderboard[0].score === leaderboard[1].score) winner = "Gelijkspel!";
+            
+            showWinnerModal(winner, leaderboard);
+        }, 800);
+    }
 }
 
 function unflipCards() {
