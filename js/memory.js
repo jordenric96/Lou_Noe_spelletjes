@@ -4,44 +4,98 @@
 let memoryState = {
     theme: 'boerderij',
     gridSize: 12,
-    playerNames: [], 
+    playerNames: [], // Wordt nu: [{name: 'Lou', color: '#FF5722'}, ...]
     currentPlayerIndex: 0,
     scores: {},
     cards: [],
     flippedCards: [],
     lockBoard: false, 
-    useImages: false, // ZET DEZE OP TRUE VOOR FOTO'S
+    
+    // --- HIER ZET JE DE FOTO'S AAN ---
+    useImages: true, 
+    
     matchedPairs: 0
 };
 
-// Vaste spelers
+// Vaste spelers MET hun eigen KLEUR
+// Tip: Je kunt hier hex-codes kiezen (bijv #FF0000) of namen (red, blue)
 const predefinedPlayers = [
-    { name: "Lou", icon: "👦🏼" },
-    { name: "Noé", icon: "👶🏼" },
-    { name: "Mama", icon: "👩🏻" },
-    { name: "Papa", icon: "👨🏻" }
+    { name: "Lou", icon: "👦🏼", color: "#2196F3" }, // Blauw
+    { name: "Noé", icon: "👶🏼", color: "#4CAF50" }, // Groen
+    { name: "Mama", icon: "👩🏻", color: "#E91E63" }, // Roze
+    { name: "Papa", icon: "👨🏻", color: "#FF9800" }  // Oranje
 ];
 
-// Thema's - 'coverIcon' is de fallback als je nog geen cover.jpg hebt
+// Kleurenpalet voor "Andere" spelers (wordt willekeurig gekozen)
+const randomColors = ["#9C27B0", "#00BCD4", "#FFC107", "#795548", "#607D8B"];
+
+// Thema's configuratie
+// ZET 'locked: true' ALS JE DE FOTO'S NOG NIET HEBT
 const themes = {
-    'boerderij': { coverIcon: '🚜', emoji: ['🐮', '🐷', '🐔', '🐑', '🐴', '🐶', '🐱', '🦆', '🚜', '🌾', '🍎', '🥕'], path: 'assets/images/memory/boerderij/' },
-    'dino': { coverIcon: '🦖', emoji: ['🦖', '🦕', '🐊', '🌋', '🥚', '🦴', '🌿', '🦎', '🐢', '🦂', '☄️', '🌴'], path: 'assets/images/memory/dino/' },
-    'studio100': { coverIcon: '🤡', emoji: ['🐶', '🎈', '🤡', '🦸', '🏴‍☠️', '🧚', '🐺', '🌲', '🍄', '🎻', '👓', '🍬'], path: 'assets/images/memory/studio100/' },
-    'marvel': { coverIcon: '🛡️', emoji: ['🕷️', '🛡️', '🔨', '👊', '🦇', '🦸‍♂️', '🦹', '🕸️', '⚡', '🟢', '🤖', '🇺🇸'], path: 'assets/images/memory/marvel/' },
-    'natuur': { coverIcon: '🌳', emoji: ['🌳', '🌻', '🌹', '🌵', '🍄', '🍂', '🦋', '🐝', '🐞', '🐌', '🌈', '☀️'], path: 'assets/images/memory/natuur/' },
-    'beroepen': { coverIcon: '🚒', emoji: ['👮', '👩‍🚒', '👨‍⚕️', '👩‍🏫', '👨‍🍳', '👩‍🚀', '👨‍🎨', '👩‍🔧', '👨‍⚖️', '👷', '🕵️', '🧙'], path: 'assets/images/memory/beroepen/' }
+    'boerderij': { 
+        locked: false, // <--- DEZE IS OPEN
+        coverIcon: '🚜', 
+        emoji: ['🐮', '🐷', '🐔', '🐑', '🐴', '🐶', '🐱', '🦆', '🚜', '🌾', '🍎', '🥕'], 
+        path: 'assets/images/memory/boerderij/' 
+    },
+    'dino': { 
+        locked: true, // <--- DEZE ZIT NOG OP SLOT (verander naar false als mapje klaar is)
+        coverIcon: '🦖', 
+        emoji: ['🦖', '🦕', '🐊', '🌋', '🥚', '🦴', '🌿', '🦎', '🐢', '🦂', '☄️', '🌴'], 
+        path: 'assets/images/memory/dino/' 
+    },
+    'studio100': { 
+        locked: true, 
+        coverIcon: '🤡', 
+        emoji: ['🐶', '🎈', '🤡', '🦸', '🏴‍☠️', '🧚', '🐺', '🌲', '🍄', '🎻', '👓', '🍬'], 
+        path: 'assets/images/memory/studio100/' 
+    },
+    'marvel': { 
+        locked: true, 
+        coverIcon: '🛡️', 
+        emoji: ['🕷️', '🛡️', '🔨', '👊', '🦇', '🦸‍♂️', '🦹', '🕸️', '⚡', '🟢', '🤖', '🇺🇸'], 
+        path: 'assets/images/memory/marvel/' 
+    },
+    'natuur': { 
+        locked: true, 
+        coverIcon: '🌳', 
+        emoji: ['🌳', '🌻', '🌹', '🌵', '🍄', '🍂', '🦋', '🐝', '🐞', '🐌', '🌈', '☀️'], 
+        path: 'assets/images/memory/natuur/' 
+    },
+    'beroepen': { 
+        locked: true, 
+        coverIcon: '🚒', 
+        emoji: ['👮', '👩‍🚒', '👨‍⚕️', '👩‍🏫', '👨‍🍳', '👩‍🚀', '👨‍🎨', '👩‍🔧', '👨‍⚖️', '👷', '🕵️', '🧙'], 
+        path: 'assets/images/memory/beroepen/' 
+    }
 };
 
-// 1. SETUP SCHERM
+// 1. SETUP SCHERM GENEREREN
 function startMemorySetup() {
     const board = document.getElementById('game-board');
     
+    // Spelers knoppen genereren met kleur-indicatie
     let playerButtonsHTML = predefinedPlayers.map(p => 
-        `<button class="option-btn" onclick="togglePlayer('${p.name}', this)">
+        `<button class="option-btn player-btn" onclick="togglePlayer('${p.name}', '${p.color}', this)" style="border-bottom-color: ${p.color}">
             <span>${p.icon}</span>
-            <span class="btn-label">${p.name}</span>
+            <span class="btn-label" style="color: ${p.color}">${p.name}</span>
         </button>`
     ).join('');
+
+    // Thema knoppen genereren (Checken op slotjes!)
+    let themeButtonsHTML = Object.keys(themes).map(key => {
+        const t = themes[key];
+        const isLocked = t.locked ? 'locked' : '';
+        const lockIcon = t.locked ? '<span class="lock-overlay">🔒</span>' : '';
+        // We halen de naam uit de key (boerderij) en maken 1e letter hoofdletter
+        const label = key.charAt(0).toUpperCase() + key.slice(1);
+        
+        return `<button class="option-btn ${isLocked}" onclick="setTheme('${key}', this)">
+            ${lockIcon}
+            <span>${t.coverIcon}</span>
+            <span class="btn-label">${label}</span>
+        </button>`;
+    }).join('');
 
     board.innerHTML = `
         <div class="memory-setup">
@@ -60,12 +114,7 @@ function startMemorySetup() {
                 <div class="setup-group group-theme">
                     <h3>Wat?</h3>
                     <div class="option-grid">
-                        <button class="option-btn selected" onclick="setTheme('boerderij', this)"><span>🚜</span><span class="btn-label">Boer</span></button>
-                        <button class="option-btn" onclick="setTheme('dino', this)"><span>🦖</span><span class="btn-label">Dino</span></button>
-                        <button class="option-btn" onclick="setTheme('studio100', this)"><span>🤡</span><span class="btn-label">Studio</span></button>
-                        <button class="option-btn" onclick="setTheme('marvel', this)"><span>🕷️</span><span class="btn-label">Held</span></button>
-                        <button class="option-btn" onclick="setTheme('natuur', this)"><span>🌳</span><span class="btn-label">Natuur</span></button>
-                        <button class="option-btn" onclick="setTheme('beroepen', this)"><span>👩‍🚒</span><span class="btn-label">Werk</span></button>
+                        ${themeButtonsHTML}
                     </div>
                 </div>
 
@@ -91,21 +140,38 @@ function startMemorySetup() {
         </div>
     `;
     
+    // Selecteer standaard de eerste beschikbare (niet gelockte) thema
+    // Of fallback naar boerderij
     memoryState.playerNames = [];
     memoryState.theme = 'boerderij';
-    memoryState.gridSize = 12;
+    
+    // Zoek de juiste knop om 'selected' te maken bij start
+    setTimeout(() => {
+        const defaultThemeBtn = document.querySelector(`.option-btn[onclick="setTheme('boerderij', this)"]`);
+        if(defaultThemeBtn) selectSingleBtn(defaultThemeBtn);
+    }, 10);
 }
 
-// Speler Selectie Functies
-function togglePlayer(name, btn) {
-    const index = memoryState.playerNames.indexOf(name);
-    if (index === -1) {
+// SPELER FUNCTIES (Nu met kleur!)
+function togglePlayer(name, color, btn) {
+    // Check of speler al bestaat in de lijst
+    const existingIndex = memoryState.playerNames.findIndex(p => p.name === name);
+    
+    if (existingIndex === -1) {
+        // Toevoegen
         if (memoryState.playerNames.length >= 4) return; 
-        memoryState.playerNames.push(name);
+        memoryState.playerNames.push({ name: name, color: color });
         btn.classList.add('selected');
+        // Geef de knop de kleur van de speler als achtergrond bij selectie
+        btn.style.backgroundColor = color;
+        btn.querySelector('.btn-label').style.color = 'white';
     } else {
-        memoryState.playerNames.splice(index, 1);
+        // Verwijderen
+        memoryState.playerNames.splice(existingIndex, 1);
         btn.classList.remove('selected');
+        // Reset kleuren
+        btn.style.backgroundColor = '#E1F5FE';
+        btn.querySelector('.btn-label').style.color = color;
     }
     checkStartButton();
 }
@@ -113,14 +179,24 @@ function togglePlayer(name, btn) {
 function addCustomPlayer() {
     const input = document.getElementById('custom-player-name');
     const name = input.value.trim();
-    if (name && !memoryState.playerNames.includes(name)) {
+    // Check of naam niet al bestaat
+    const exists = memoryState.playerNames.some(p => p.name === name);
+
+    if (name && !exists) {
+        // Kies een random kleur
+        const randomColor = randomColors[Math.floor(Math.random() * randomColors.length)];
+        
         const container = document.getElementById('player-selection');
         const btnHTML = document.createElement('button');
-        btnHTML.className = 'option-btn';
-        btnHTML.onclick = function() { togglePlayer(name, this) };
-        btnHTML.innerHTML = `<span>👤</span><span class="btn-label">${name}</span>`;
+        btnHTML.className = 'option-btn player-btn';
+        btnHTML.style.borderBottomColor = randomColor;
+        
+        // We moeten de onclick functie dynamisch koppelen
+        btnHTML.onclick = function() { togglePlayer(name, randomColor, this) };
+        btnHTML.innerHTML = `<span>👤</span><span class="btn-label" style="color:${randomColor}">${name}</span>`;
+        
         container.appendChild(btnHTML);
-        togglePlayer(name, btnHTML);
+        togglePlayer(name, randomColor, btnHTML);
         input.value = '';
     }
 }
@@ -129,10 +205,13 @@ function checkStartButton() {
     const btn = document.getElementById('start-btn');
     if (memoryState.playerNames.length > 0) {
         btn.disabled = false;
-        if(memoryState.playerNames.length <= 3) {
-             btn.innerText = `START MET ${memoryState.playerNames.join(' & ').toUpperCase()} ▶️`;
+        // Map alleen de namen voor de tekst op de knop
+        const namesOnly = memoryState.playerNames.map(p => p.name);
+        
+        if(namesOnly.length <= 3) {
+             btn.innerText = `START MET ${namesOnly.join(' & ').toUpperCase()} ▶️`;
         } else {
-             btn.innerText = `START SPEL (${memoryState.playerNames.length} SPELERS) ▶️`;
+             btn.innerText = `START SPEL (${namesOnly.length} SPELERS) ▶️`;
         }
     } else {
         btn.disabled = true;
@@ -141,6 +220,9 @@ function checkStartButton() {
 }
 
 function setTheme(name, btn) {
+    // Als thema locked is, doe niets!
+    if(themes[name].locked) return;
+
     memoryState.theme = name;
     selectSingleBtn(btn);
 }
@@ -149,32 +231,38 @@ function setSize(size, btn) {
     selectSingleBtn(btn);
 }
 function selectSingleBtn(btn) {
+    // Zoek de parent en haal selected weg bij kinderen
     let parent = btn.parentElement;
     Array.from(parent.children).forEach(child => child.classList.remove('selected'));
+    
+    // Voeg selected toe (maar let op bij thema's voor custom styling)
     btn.classList.add('selected');
 }
 
-// 2. SPEL STARTEN
+// 2. SPEL STARTEN (Met gekleurde badges!)
 function startMemoryGame() {
     if (memoryState.playerNames.length === 0) return;
 
     const board = document.getElementById('game-board');
     
-    // NIEUW SCOREBORD GENEREREN (Badges)
+    // Scorebord Genereren
     let scoreHTML = '<div class="score-board">';
-    memoryState.playerNames.forEach((name, index) => {
+    memoryState.playerNames.forEach((player, index) => {
+        // Zoek icoon
         let playerIcon = "👤";
-        let predefined = predefinedPlayers.find(p => p.name === name);
+        let predefined = predefinedPlayers.find(p => p.name === player.name);
         if(predefined) playerIcon = predefined.icon;
 
+        // Hier passen we de kleur toe op de badge (border en tekst)
         scoreHTML += `
-        <div class="player-badge ${index===0?'active':''}" id="badge-${index}">
+        <div class="player-badge ${index===0?'active':''}" id="badge-${index}" 
+             style="border-color: ${player.color}; color: ${player.color}">
             <span class="badge-icon">${playerIcon}</span>
-            <span class="badge-name">${name}</span>
+            <span class="badge-name">${player.name}</span>
             <span class="badge-score" id="score-${index}">0</span>
         </div>`;
         
-        memoryState.scores[name] = 0;
+        memoryState.scores[player.name] = 0;
     });
     scoreHTML += '</div>';
 
@@ -198,7 +286,7 @@ function startMemoryGame() {
     generateCards();
 }
 
-// 3. GENERATE CARDS (Aangepast voor Covers)
+// 3. GENERATE CARDS (Ongewijzigd, behalve dat lock logic in thema zit)
 function generateCards() {
     const grid = document.getElementById('memory-grid');
     const themeData = themes[memoryState.theme];
@@ -221,19 +309,17 @@ function generateCards() {
         card.classList.add('memory-card');
         card.dataset.value = item;
         
-        // DE INHOUD (ACHTER HET DEURTJE)
         let content = memoryState.useImages 
             ? `<img src="${themeData.path}${item}.jpg" class="card-img" draggable="false">` 
             : item;
 
-        // DE COVER (HET DEURTJE)
+        // Check cover logic
         let coverContent = '';
         if (memoryState.useImages) {
-            // Zoekt naar: assets/images/memory/boerderij/cover.jpg
-            // Zorg dat je een plaatje 'cover.jpg' in de map zet!
-            coverContent = `<img src="${themeData.path}cover.jpg" class="card-cover-img" draggable="false">`;
+            // Probeer cover.jpg te gebruiken, maar voor veiligheid (als hij mist) fallback naar icoon kan later
+            coverContent = `<img src="${themeData.path}cover.jpg" class="card-cover-img" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                            <span class="fallback-icon" style="display:none; font-size:3rem; color:white;">${themeData.coverIcon}</span>`;
         } else {
-            // Fallback: toon de emoji van het thema als cover
             coverContent = `<span class="card-cover-emoji">${themeData.coverIcon}</span>`;
         }
 
@@ -249,7 +335,7 @@ function generateCards() {
     });
 }
 
-// 4. SPEL LOGICA
+// 4. SPEL LOGICA (KLEINE UPDATE VOOR SCORE UPDATE)
 function flipCard() {
     if (memoryState.lockBoard) return;
     if (this === memoryState.flippedCards[0]) return;
@@ -279,11 +365,11 @@ function disableCards() {
     memoryState.flippedCards = [];
     memoryState.matchedPairs++;
     
-    let currentPlayerName = memoryState.playerNames[memoryState.currentPlayerIndex];
-    memoryState.scores[currentPlayerName]++;
+    // Let op: playerNames is nu een lijst van objecten!
+    let currentPlayerObj = memoryState.playerNames[memoryState.currentPlayerIndex];
+    memoryState.scores[currentPlayerObj.name]++;
     
-    // UPDATE SCORE ALLEEN CIJFER
-    document.getElementById(`score-${memoryState.currentPlayerIndex}`).innerText = memoryState.scores[currentPlayerName];
+    document.getElementById(`score-${memoryState.currentPlayerIndex}`).innerText = memoryState.scores[currentPlayerObj.name];
 
     if (memoryState.matchedPairs === memoryState.gridSize / 2) {
         setTimeout(() => alert('Gewonnen! 🎉'), 500);
@@ -302,14 +388,23 @@ function unflipCards() {
 }
 
 function switchPlayer() {
-    // Verwijder active class van huidige badge
-    document.getElementById(`badge-${memoryState.currentPlayerIndex}`).classList.remove('active');
+    // Verwijder active en extra stijlen van huidige
+    let oldBadge = document.getElementById(`badge-${memoryState.currentPlayerIndex}`);
+    oldBadge.classList.remove('active');
+    oldBadge.style.backgroundColor = "white"; 
+    oldBadge.style.color = memoryState.playerNames[memoryState.currentPlayerIndex].color; // Terug naar tekstkleur
 
     memoryState.currentPlayerIndex++;
     if (memoryState.currentPlayerIndex >= memoryState.playerNames.length) {
         memoryState.currentPlayerIndex = 0;
     }
 
-    // Voeg active class toe aan nieuwe badge
-    document.getElementById(`badge-${memoryState.currentPlayerIndex}`).classList.add('active');
+    // Nieuwe speler highlighten
+    let newBadge = document.getElementById(`badge-${memoryState.currentPlayerIndex}`);
+    newBadge.classList.add('active');
+    let pColor = memoryState.playerNames[memoryState.currentPlayerIndex].color;
+    
+    // Maak de badge helemaal ingekleurd voor duidelijkheid
+    newBadge.style.backgroundColor = pColor;
+    newBadge.style.color = "white"; // Witte tekst op gekleurde achtergrond
 }
