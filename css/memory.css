@@ -1,211 +1,123 @@
-/* --- SETUP DASHBOARD --- */
-.memory-setup {
+/* --- HET SPELBORD --- */
+.memory-game-container {
     display: flex;
     flex-direction: column;
+    align-items: center;
     width: 100%;
     height: 100%;
-    padding: 15px;
-    background: #FAFAFA;
 }
 
-.setup-columns {
-    display: flex;
-    flex-direction: row;
-    gap: 15px;
+.memory-grid {
+    display: grid;
+    gap: 10px;
+    width: 100%;
     flex: 1;
-    min-height: 0;
+    max-height: 80vh;
+    margin-bottom: 10px;
+    /* Zorg dat grid cells niet groter worden dan nodig */
+    justify-content: center; 
 }
 
-.setup-group {
-    background: #FFF;
-    border-radius: 20px;
-    padding: 15px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-    border: 3px solid #E0F7FA;
-    flex: 1;
+.memory-card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    user-select: none;
+    aspect-ratio: 1 / 1; /* Forceer vierkant */
+}
+
+.memory-card-inner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Leuke 'bounce' bij draaien */
+    border-radius: 12px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+}
+
+.memory-card.flipped .memory-card-inner {
+    transform: rotateY(180deg);
+}
+
+/* DE KAART KANTEN */
+.card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden; /* Safari fix */
+    backface-visibility: hidden;
+    border-radius: 12px;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    overflow-y: auto;
-}
-
-/* Accentkleuren */
-.group-players { border-color: #B3E5FC; }
-.group-theme { border-color: #C8E6C9; }
-.group-size { border-color: #FFF9C4; }
-
-.setup-group h3 {
-    color: #0277BD;
-    margin: 0 0 15px 0;
-    font-size: 1.2rem;
-    font-family: 'Fredoka One', cursive;
-    text-transform: uppercase;
-    text-align: center;
-    width: 100%;
-}
-
-/* --- DE VERFPOTJES (KLEUREN) --- */
-.color-picker-title {
-    font-size: 0.9rem;
-    color: #888;
-    margin-bottom: 5px;
-    font-family: 'Nunito', sans-serif;
-}
-
-.color-row {
-    display: flex;
     justify-content: center;
-    gap: 12px;
-    margin-bottom: 20px;
-    padding: 10px;
-    background: #F1F1F1;
-    border-radius: 50px;
-    width: 100%;
+    overflow: hidden; /* DIT IS BELANGRIJK: Knipt alles af wat uitsteekt */
 }
 
-.color-dot {
-    width: 35px; /* Lekker groot */
-    height: 35px;
-    border-radius: 50%;
+/* ACHTERKANT (DEKSEL) */
+.card-front {
+    background: linear-gradient(135deg, #4FC3F7, #0288D1);
     border: 3px solid white;
-    cursor: pointer;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-    transition: transform 0.2s, box-shadow 0.2s;
+    z-index: 2;
 }
 
-/* Actieve kleur springt eruit */
-.color-dot.active {
-    transform: scale(1.3);
-    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
-    border-color: #333;
-    z-index: 5;
-}
+.card-cover-emoji { font-size: 3rem; text-shadow: 0 2px 0 rgba(0,0,0,0.2); }
+.card-cover-img { width: 100%; height: 100%; object-fit: cover; }
 
-/* --- KNOPPEN --- */
-.option-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 12px;
-    width: 100%;
-}
-
-.option-btn {
-    background: #E1F5FE;
-    color: #0288D1;
-    border: none;
-    padding: 10px;
-    border-radius: 15px;
-    font-size: 1.8rem;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 85px;
-    box-shadow: 0 4px 0 #B3E5FC;
-    transition: all 0.2s;
+/* VOORKANT (HET PLAATJE) */
+.card-back {
+    background: white;
+    transform: rotateY(180deg);
+    border: 3px solid #FFC107; /* Geel randje */
     position: relative;
 }
 
-.option-btn .btn-label {
-    font-size: 0.9rem;
-    margin-top: 5px;
-    font-family: 'Fredoka One', cursive;
-    color: #555;
+/* DE FOTO FIX: Hij mag niet groter zijn dan 85% van het kaartje */
+.card-img {
+    width: 85%; 
+    height: 85%;
+    object-fit: contain; /* Zorgt dat de hele Mario/Koe zichtbaar is zonder uitrekken */
+    display: block;
 }
 
-/* Geselecteerde knoppen */
-.option-btn.selected {
-    transform: translateY(-2px);
-    color: white;
-    /* Background wordt door JS gezet voor spelers */
-}
-.option-btn.selected .btn-label { color: white; }
-
-/* Thema en Size selectie kleuren */
-.group-theme .option-btn.selected { background: #4CAF50; box-shadow: 0 4px 0 #2E7D32; }
-.group-size .option-btn.selected { background: #FFC107; box-shadow: 0 4px 0 #FFA000; }
-
-/* Speler knop specifiek (witte achtergrond, kleur via border hint) */
-.player-btn {
-    background: white;
-    border: 3px solid #EEE;
-    box-shadow: 0 4px 0 #EEE;
-}
-.player-btn .btn-label { color: #888; }
-
-
-/* Input veld */
-.player-input-container {
-    display: flex;
-    gap: 5px;
-    margin-top: auto;
-    padding-top: 15px;
-    width: 100%;
-    border-top: 2px dashed #EEE;
-}
-
-#custom-player-name {
-    flex: 1;
-    padding: 10px;
-    border-radius: 15px;
-    border: 2px solid #B3E5FC;
-    font-family: 'Nunito', sans-serif;
-    font-size: 1rem;
-}
-
-.add-btn {
-    background: #FFC107;
-    border: none;
-    border-radius: 12px;
-    width: 45px;
-    color: white;
-    font-size: 1.5rem;
-}
-
-/* Start knop */
-.start-btn {
-    background: linear-gradient(to bottom, #66BB6A, #43A047);
-    color: white;
-    border: none;
-    padding: 15px;
-    font-size: 2rem;
-    border-radius: 20px;
-    margin-top: 15px;
-    width: 100%;
-    cursor: pointer;
-    box-shadow: 0 6px 0 #2E7D32;
-    font-family: 'Fredoka One', cursive;
-    flex-shrink: 0;
-}
-.start-btn:disabled { background: #CFD8DC; color: #90A4AE; box-shadow: none; cursor: not-allowed; }
-
-/* Slotjes */
-.option-btn.locked { filter: grayscale(100%); opacity: 0.5; cursor: not-allowed; background: #EEE; box-shadow: none; }
-.lock-overlay { position: absolute; top: -8px; right: -8px; font-size: 1rem; background: #FF5252; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-.star { color: #FFD700; text-shadow: 1px 1px 0 #FFA000; }
-.star.dim { color: #CFD8DC; text-shadow: none; opacity: 0.5; }
-
-/* --- GAME BORD --- */
-.memory-game-container { display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; }
-.score-board { display: flex; gap: 10px; padding: 5px 10px; background: rgba(255,255,255,0.7); border-radius: 50px; margin-bottom: 10px; flex-wrap: wrap; justify-content: center; }
-
-.player-badge { background: white; padding: 5px 15px; border-radius: 30px; display: flex; align-items: center; gap: 8px; border: 3px solid #EEE; font-family: 'Fredoka One', cursive; color: #777; opacity: 0.6; transition: all 0.3s; }
-.player-badge.active { opacity: 1; transform: scale(1.1); box-shadow: 0 4px 12px rgba(0,0,0,0.15); background: #FFF; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
-
-.memory-grid { display: grid; gap: 10px; width: 100%; flex: 1; max-height: 80vh; margin-bottom: 10px; }
-.memory-card { position: relative; width: 100%; height: 100%; }
-.memory-card-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.5s; border-radius: 12px; box-shadow: 0 3px 6px rgba(0,0,0,0.15); }
-.memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
-.card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: white; overflow: hidden; }
-.card-front { background: linear-gradient(135deg, #4FC3F7, #0288D1); border: 3px solid white; }
-.card-cover-emoji { font-size: 3rem; text-shadow: 0 2px 0 rgba(0,0,0,0.2); }
-.card-cover-img { width: 100%; height: 100%; object-fit: cover; }
-.card-back { transform: rotateY(180deg); border: 3px solid #FFC107; }
-.card-img { width: 100%; height: 100%; object-fit: cover; }
 .card-emoji { font-size: 4rem; }
 
+/* --- NIEUW: HET GROENE VINKJE (MATCH FEEDBACK) --- */
+.match-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(255, 255, 255, 0.6);
+    display: flex; justify-content: center; align-items: center;
+    border-radius: 10px;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: none;
+    z-index: 10;
+}
+
+.checkmark {
+    font-size: 4rem;
+    color: #4CAF50; /* Groen */
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Als er een match is, toon de overlay */
+.memory-card.matched .match-overlay {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* De kaart zelf krijgt ook een groen randje bij match */
+.memory-card.matched .card-back {
+    border-color: #4CAF50;
+    box-shadow: 0 0 15px #4CAF50; /* Groene gloed */
+}
+
+/* RESPONSIVE FIXES */
 @media (max-width: 650px) {
     .setup-columns { flex-direction: column; }
-    .setup-group { max-height: none; }
+    .start-btn { font-size: 1.5rem; padding: 12px; }
+    /* Op mobiel iets minder marge rond de foto */
+    .card-img { width: 90%; height: 90%; } 
 }
