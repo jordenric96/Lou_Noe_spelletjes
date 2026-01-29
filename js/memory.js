@@ -1,3 +1,5 @@
+// MEMORY SPEL LOGICA
+
 let memoryState = { theme: 'boerderij', gridSize: 12, playerNames: [], currentPlayerIndex: 0, scores: {}, cards: [], flippedCards: [], lockBoard: false, useImages: true, matchedPairs: 0, activeColor: '#2196F3' };
 const palette = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#4CAF50', '#FF9800'];
 const predefinedPlayers = [{ name: "Lou", icon: "👦🏼" }, { name: "Noé", icon: "👶🏼" }, { name: "Mama", icon: "👩🏻" }, { name: "Papa", icon: "👨🏻" }];
@@ -84,9 +86,23 @@ function setTheme(name, btn) { if(themes[name].locked) return; memoryState.theme
 function setSize(size, btn) { memoryState.gridSize = size; selectSingleBtn(btn); }
 function selectSingleBtn(btn) { Array.from(btn.parentElement.children).forEach(c => c.classList.remove('selected')); btn.classList.add('selected'); }
 
+// NIEUWE FUNCTIE: BEREKEN KAARTGROOTTE
+function calculateCardSize(cols, rows) {
+    // Totale ruimte beschikbaar (Scherm min scorebord min marge)
+    const containerW = document.getElementById('game-board').offsetWidth;
+    const containerH = document.getElementById('game-board').offsetHeight - 80; // 80px voor scorebord
+
+    const cardW = Math.floor((containerW - (cols * 10)) / cols); // minus gaps
+    const cardH = Math.floor((containerH - (rows * 10)) / rows);
+
+    // Houd het vierkant!
+    return Math.min(cardW, cardH, 120); // Max 120px
+}
+
 function startMemoryGame() {
     if (memoryState.playerNames.length === 0) return;
     const board = document.getElementById('game-board');
+    
     let scoreHTML = '<div class="score-board">';
     memoryState.playerNames.forEach((player, index) => {
         let playerIcon = "👤";
@@ -97,16 +113,28 @@ function startMemoryGame() {
     });
     scoreHTML += '</div>';
 
-    let gridStyle = '';
-    if(memoryState.gridSize === 12) gridStyle = 'grid-template-columns: repeat(4, 1fr);'; 
-    if(memoryState.gridSize === 16) gridStyle = 'grid-template-columns: repeat(4, 1fr);'; 
-    if(memoryState.gridSize === 30) gridStyle = 'grid-template-columns: repeat(6, 1fr);';
-    if(window.innerWidth < 600 && memoryState.gridSize === 30) gridStyle = 'grid-template-columns: repeat(5, 1fr);';
+    // Bepaal kolommen en rijen
+    let cols = 4;
+    let rows = 3;
+    if(memoryState.gridSize === 16) { cols = 4; rows = 4; }
+    if(memoryState.gridSize === 30) { cols = 6; rows = 5; }
+    
+    // Op mobiel: bij 30 kaarten liever 5 breed en 6 hoog
+    if(window.innerWidth < 650 && memoryState.gridSize === 30) { cols = 5; rows = 6; }
 
-    board.innerHTML = `<div class="memory-game-container">${scoreHTML}<div class="memory-grid" id="memory-grid" style="${gridStyle}"></div></div>`;
+    board.innerHTML = `<div class="memory-game-container">${scoreHTML}<div class="memory-grid" id="memory-grid"></div></div>`;
+    
+    // Grid instellen met JS zodat het past
+    const grid = document.getElementById('memory-grid');
+    const cardSize = calculateCardSize(cols, rows);
+    
+    grid.style.gridTemplateColumns = `repeat(${cols}, ${cardSize}px)`;
+    // grid.style.gridTemplateRows = `repeat(${rows}, ${cardSize}px)`; // Optioneel
+    grid.style.width = 'fit-content';
+    
     memoryState.currentPlayerIndex = 0; memoryState.flippedCards = []; memoryState.lockBoard = false; memoryState.matchedPairs = 0;
     updateActiveBadgeColor();
-    generateCards();
+    generateCards(cardSize); // Geef grootte mee
 }
 
 function updateActiveBadgeColor() {
@@ -116,11 +144,12 @@ function updateActiveBadgeColor() {
     if(activeBadge) { activeBadge.classList.add('active'); activeBadge.style.backgroundColor = currentP.color; activeBadge.style.color = 'white'; }
 }
 
-function generateCards() {
+function generateCards(sizePx) {
     const grid = document.getElementById('memory-grid');
     const themeData = themes[memoryState.theme];
     const pairsNeeded = memoryState.gridSize / 2;
     const ext = themeData.extension || 'jpg';
+    
     let items = [];
     if (memoryState.useImages) { for (let i = 1; i <= pairsNeeded; i++) items.push(i); } else { items = themeData.emoji.slice(0, pairsNeeded); }
     let deck = [...items, ...items];
@@ -131,8 +160,16 @@ function generateCards() {
         const card = document.createElement('div');
         card.classList.add('memory-card');
         card.dataset.value = item;
+        
+        // Hoogte en breedte instellen
+        if(sizePx) {
+            card.style.width = `${sizePx}px`;
+            card.style.height = `${sizePx}px`;
+        }
+
         let content = memoryState.useImages ? `<img src="${themeData.path}${item}.${ext}" class="card-img" draggable="false">` : `<span class="card-emoji">${item}</span>`;
         let coverContent = memoryState.useImages ? `<img src="${themeData.path}cover.${ext}" class="card-cover-img" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="fallback-icon" style="display:none; font-size:3rem; color:white;">${themeData.coverIcon}</span>` : `<span class="card-cover-emoji">${themeData.coverIcon}</span>`;
+        
         card.innerHTML = `<div class="memory-card-inner"><div class="card-front">${coverContent}</div><div class="card-back">${content}<div class="match-overlay"><span class="checkmark">✅</span></div></div></div>`;
         card.addEventListener('click', flipCard);
         grid.appendChild(card);
@@ -186,3 +223,10 @@ function switchPlayer() {
     if (memoryState.currentPlayerIndex >= memoryState.playerNames.length) memoryState.currentPlayerIndex = 0;
     updateActiveBadgeColor();
 }
+
+// Zorg dat het herschaalt als je het scherm draait
+window.addEventListener('resize', () => {
+    if(document.getElementById('memory-grid') && memoryState.playerNames.length > 0 && !document.querySelector('.memory-setup')) {
+        startMemoryGame(); // Herstarten/Hertekenen is makkelijkst om grid opnieuw te berekenen
+    }
+});
