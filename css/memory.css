@@ -1,260 +1,54 @@
-/* --- SETUP SCHERM (DASHBOARD STIJL) --- */
-.memory-setup {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-    padding: 10px;
-    box-sizing: border-box;
-}
+/* --- TOEVOEGEN AAN CSS --- */
 
-.setup-columns {
-    display: flex;
-    flex-direction: row;
-    gap: 15px;
-    flex: 1;
-    min-height: 0;
-}
-
-.setup-group {
-    background: #FFF;
-    border-radius: 20px;
-    padding: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    border: 3px solid #E0F7FA;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow-y: auto;
-}
-
-/* Kleuraccenten */
-.group-players { border-color: #B3E5FC; }
-.group-theme { border-color: #C8E6C9; }
-.group-size { border-color: #FFF9C4; }
-
-.setup-group h3 {
-    color: #0277BD;
-    margin: 5px 0 15px 0;
-    font-size: 1.2rem;
-    font-family: 'Fredoka One', cursive;
-    text-transform: uppercase;
-    text-align: center;
-}
-
-/* KNOPPEN */
-.option-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
-}
-
-.option-btn {
-    background: #E1F5FE;
-    color: #0288D1;
-    border: none;
-    padding: 10px;
-    border-radius: 15px;
-    font-size: 2rem;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 80px;
-    box-shadow: 0 3px 0 #B3E5FC;
-}
-
-.option-btn .btn-label {
-    font-size: 0.9rem;
-    margin-top: 5px;
-    font-family: 'Fredoka One', cursive;
-    color: #555;
-}
-
-.option-btn.selected {
-    background: #00BCD4;
-    color: white;
-    transform: translateY(-3px);
-    box-shadow: 0 5px 10px rgba(0, 188, 212, 0.4);
-}
-.option-btn.selected .btn-label { color: white; }
-.group-theme .option-btn.selected { background: #4CAF50; }
-.group-size .option-btn.selected { background: #FFC107; }
-
-.star { color: #FFD700; text-shadow: 1px 1px 0 #FFA000; }
-.star.dim { color: #CFD8DC; text-shadow: none; opacity: 0.6; }
-
-/* SPELER NAAM INVULLEN */
-.player-input-container {
-    display: flex;
-    gap: 5px;
-    margin-top: auto;
-    padding-top: 10px;
-    width: 100%;
-}
-
-#custom-player-name {
-    flex: 1;
-    padding: 8px;
-    border-radius: 15px;
-    border: 2px solid #B3E5FC;
-    font-family: 'Nunito', sans-serif;
-    font-size: 0.9rem;
-    width: 100%;
-}
-
-.add-btn {
-    background: #FFC107;
-    border: none;
-    border-radius: 10px;
-    width: 40px;
-    font-size: 1.5rem;
-    color: white;
-}
-
-/* START KNOP */
-.start-btn {
-    background: linear-gradient(to bottom, #66BB6A, #43A047);
-    color: white;
-    border: none;
-    padding: 15px;
-    font-size: 1.8rem;
-    border-radius: 20px;
-    margin-top: 10px;
-    width: 100%;
-    cursor: pointer;
-    box-shadow: 0 6px 0 #2E7D32;
-    font-family: 'Fredoka One', cursive;
-    flex-shrink: 0;
-}
-.start-btn:disabled { background: #CFD8DC; color: #90A4AE; box-shadow: none; }
-
-/* --- NIEUW SCOREBORD --- */
-.memory-game-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    height: 100%;
-}
-
-.score-board {
-    display: flex;
-    gap: 15px;
-    padding: 10px;
-    background: rgba(255,255,255,0.5); /* Beetje doorzichtig */
-    border-radius: 20px;
-    margin-bottom: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-.player-badge {
-    background: white;
-    padding: 8px 20px;
-    border-radius: 50px; /* Mooie pil-vorm */
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    box-shadow: 0 4px 0 #EEE;
-    border: 2px solid transparent;
-    transition: all 0.3s ease;
-    font-family: 'Fredoka One', cursive;
-    color: #555;
-    opacity: 0.7; /* Niet actieve spelers beetje dimmen */
-}
-
-/* De actieve speler stijl */
-.player-badge.active {
-    opacity: 1;
-    background: #FFFDE7; /* Heel licht geel */
-    border: 3px solid #FFC107; /* Goud randje */
-    color: #333;
-    transform: scale(1.15); /* Wordt groter! */
-    box-shadow: 0 8px 15px rgba(255, 193, 7, 0.3);
-    z-index: 10;
-    animation: bounce 1s infinite alternate; /* Klein hupje */
-}
-
-@keyframes bounce {
-    from { transform: scale(1.15) translateY(0); }
-    to { transform: scale(1.15) translateY(-3px); }
-}
-
-.badge-icon { font-size: 1.5rem; }
-.badge-score { font-size: 1.2rem; }
-
-/* --- SPELBORD --- */
-.memory-grid {
-    display: grid;
-    gap: 10px;
-    width: 100%;
-    height: 100%;
-    max-height: 80vh;
-    margin: 10px 0;
-}
-
-.memory-card {
+/* SLOTJES LOGICA */
+.option-btn.locked {
     position: relative;
-    width: 100%;
-    height: 100%;
+    opacity: 0.6;
+    cursor: not-allowed;
+    filter: grayscale(100%); /* Maakt het icoon grijs */
+    background: #EEEEEE;
 }
 
-.memory-card-inner {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    transform-style: preserve-3d;
-    transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
-    border-radius: 12px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+.option-btn.locked:active {
+    transform: none; /* Geen klik effect */
+    box-shadow: 0 3px 0 #CCC;
 }
-.memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
 
-.card-front, .card-back {
+.lock-overlay {
     position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    border-radius: 12px;
+    top: -10px;
+    right: -10px;
+    background: #FF5252; /* Rood slotje */
+    color: white;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    font-size: 0.9rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 2;
 }
 
-/* DE NIEUWE ACHTERKANT (DE DEKSEL) */
-.card-front { 
-    background: linear-gradient(135deg, #81D4FA, #29B6F6); 
-    border: 3px solid white; 
+/* SPELERS KNOPPEN MET KLEURRANDJES */
+.player-btn {
+    border-bottom-width: 5px;
+    border-bottom-style: solid;
+    /* Kleur wordt via JS ingesteld */
 }
 
-/* Het plaatje op de achterkant (de cover) */
-.card-cover-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-/* Of als fallback de emoji */
-.card-cover-emoji {
-    font-size: 3.5rem;
-    color: white;
-    text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+/* SCOREBORD UPDATE VOOR KLEUREN */
+.player-badge {
+    border-width: 3px;
+    border-style: solid;
+    /* Border-color komt via JS */
+    background: white;
+    transition: all 0.3s ease;
 }
 
-/* DE VOORKANT (HET PLAATJE DAT JE ZOEKT) */
-.card-back { 
-    background: white; 
-    transform: rotateY(180deg); 
-    border: 3px solid #FFC107; 
-    font-size: 4rem; 
-}
-.card-img { width: 100%; height: 100%; object-fit: cover; }
-
-/* Mobiel fix */
-@media (max-width: 700px) {
-    .setup-columns { flex-direction: column; overflow-y: auto; }
+.player-badge.active {
+    transform: scale(1.15);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    /* Background color wordt via JS ingesteld op de spelerkleur */
 }
