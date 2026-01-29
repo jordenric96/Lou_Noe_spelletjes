@@ -1,7 +1,7 @@
 // BLOKKEN SPEL - "MCQUEEN RACE" EDITIE
-// Versie: Fixed & Standalone
+// Versie: Met Speler Knoppen Fix
 
-console.log("Blokken.js is geladen!"); // Check of dit in de console verschijnt
+console.log("Blokken.js geladen...");
 
 let blokkenState = {
     playerNames: [],
@@ -14,62 +14,48 @@ let blokkenState = {
     timer: null,
     timeLeft: 60,
     isGameActive: false,
-    activeColor: '#2196F3' // Standaard blauw
+    activeColor: '#2196F3' 
 };
 
 const blokkenPalette = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#4CAF50', '#FF9800'];
 
+// DE STANDAARD SPELERS (Nieuw toegevoegd!)
+const blokkenSpelersLijst = [
+    { name: "Lou", icon: "👦🏼" },
+    { name: "Noé", icon: "👶🏼" },
+    { name: "Mama", icon: "👩🏻" },
+    { name: "Papa", icon: "👨🏻" }
+];
+
 // DE PUZZELS
 const levelsDatabase = {
     'easy': [
-        [ // Level 1
-            { id: 'hero', x: 1, y: 2, w: 2, h: 1, color: 'hero', dir: 'h' },
-            { id: 'b1', x: 3, y: 1, w: 1, h: 3, color: 'car', dir: 'v' },
-            { id: 'b2', x: 0, y: 0, w: 1, h: 2, color: 'car', dir: 'v' },
-            { id: 'b3', x: 4, y: 4, w: 2, h: 1, color: 'car', dir: 'h' }
-        ],
-        [ // Level 2
-            { id: 'hero', x: 0, y: 2, w: 2, h: 1, color: 'hero', dir: 'h' },
-            { id: 'b1', x: 2, y: 2, w: 1, h: 3, color: 'car', dir: 'v' },
-            { id: 'b2', x: 3, y: 3, w: 3, h: 1, color: 'car', dir: 'h' }
-        ]
+        [ { id: 'hero', x: 1, y: 2, w: 2, h: 1, color: 'hero', dir: 'h' }, { id: 'b1', x: 3, y: 1, w: 1, h: 3, color: 'car', dir: 'v' }, { id: 'b2', x: 0, y: 0, w: 1, h: 2, color: 'car', dir: 'v' }, { id: 'b3', x: 4, y: 4, w: 2, h: 1, color: 'car', dir: 'h' } ],
+        [ { id: 'hero', x: 0, y: 2, w: 2, h: 1, color: 'hero', dir: 'h' }, { id: 'b1', x: 2, y: 2, w: 1, h: 3, color: 'car', dir: 'v' }, { id: 'b2', x: 3, y: 3, w: 3, h: 1, color: 'car', dir: 'h' } ]
     ],
     'medium': [
-        [ // Level 1
-            { id: 'hero', x: 1, y: 2, w: 2, h: 1, color: 'hero', dir: 'h' },
-            { id: 'b1', x: 3, y: 1, w: 1, h: 2, color: 'car', dir: 'v' },
-            { id: 'b2', x: 0, y: 0, w: 1, h: 3, color: 'car', dir: 'v', type: 'truck' },
-            { id: 'b3', x: 3, y: 3, w: 2, h: 1, color: 'car', dir: 'h' },
-            { id: 'b4', x: 5, y: 0, w: 1, h: 3, color: 'car', dir: 'v', type: 'truck' }
-        ],
-         [ // Level 2
-            { id: 'hero', x: 0, y: 2, w: 2, h: 1, color: 'hero', dir: 'h' },
-            { id: 'b1', x: 2, y: 0, w: 1, h: 3, color: 'car', dir: 'v', type: 'truck' },
-            { id: 'b2', x: 3, y: 1, w: 1, h: 2, color: 'car', dir: 'v' },
-            { id: 'b3', x: 2, y: 3, w: 2, h: 1, color: 'car', dir: 'h' },
-            { id: 'b4', x: 4, y: 4, w: 2, h: 1, color: 'car', dir: 'h' }
-        ]
+        [ { id: 'hero', x: 1, y: 2, w: 2, h: 1, color: 'hero', dir: 'h' }, { id: 'b1', x: 3, y: 1, w: 1, h: 2, color: 'car', dir: 'v' }, { id: 'b2', x: 0, y: 0, w: 1, h: 3, color: 'car', dir: 'v', type: 'truck' }, { id: 'b3', x: 3, y: 3, w: 2, h: 1, color: 'car', dir: 'h' }, { id: 'b4', x: 5, y: 0, w: 1, h: 3, color: 'car', dir: 'v', type: 'truck' } ],
+        [ { id: 'hero', x: 0, y: 2, w: 2, h: 1, color: 'hero', dir: 'h' }, { id: 'b1', x: 2, y: 0, w: 1, h: 3, color: 'car', dir: 'v', type: 'truck' }, { id: 'b2', x: 3, y: 1, w: 1, h: 2, color: 'car', dir: 'v' }, { id: 'b3', x: 2, y: 3, w: 2, h: 1, color: 'car', dir: 'h' }, { id: 'b4', x: 4, y: 4, w: 2, h: 1, color: 'car', dir: 'h' } ]
     ],
     'hard': [
-        [ // Level 1 (Complex)
-            { id: 'hero', x: 0, y: 2, w: 2, h: 1, color: 'hero', dir: 'h' },
-            { id: 'b1', x: 2, y: 0, w: 1, h: 3, color: 'car', dir: 'v', type: 'truck' },
-            { id: 'b2', x: 3, y: 0, w: 3, h: 1, color: 'car', dir: 'h', type: 'truck' },
-            { id: 'b3', x: 2, y: 3, w: 2, h: 1, color: 'car', dir: 'h' },
-            { id: 'b4', x: 4, y: 4, w: 2, h: 1, color: 'car', dir: 'h' },
-            { id: 'b5', x: 0, y: 5, w: 3, h: 1, color: 'car', dir: 'h', type: 'truck' }
-        ]
+        [ { id: 'hero', x: 0, y: 2, w: 2, h: 1, color: 'hero', dir: 'h' }, { id: 'b1', x: 2, y: 0, w: 1, h: 3, color: 'car', dir: 'v', type: 'truck' }, { id: 'b2', x: 3, y: 0, w: 3, h: 1, color: 'car', dir: 'h', type: 'truck' }, { id: 'b3', x: 2, y: 3, w: 2, h: 1, color: 'car', dir: 'h' }, { id: 'b4', x: 4, y: 4, w: 2, h: 1, color: 'car', dir: 'h' }, { id: 'b5', x: 0, y: 5, w: 3, h: 1, color: 'car', dir: 'h', type: 'truck' } ]
     ]
 };
 
 // 1. SETUP SCHERM
 function startBlokkenGame() {
-    console.log("Start Blokken Game...");
     const board = document.getElementById('game-board');
     
-    // HTML Genereren
+    // HTML Genereren voor kleuren
     let paletteHTML = blokkenPalette.map(color => 
         `<div class="color-dot" style="background-color: ${color}" onclick="selectBlokkenColor('${color}', this)"></div>`
+    ).join('');
+
+    // HTML Genereren voor vaste spelers (Lou, Noé, etc.)
+    let buttonsHTML = blokkenSpelersLijst.map(p => 
+        `<button class="option-btn player-btn" onclick="toggleBlokkenPlayer('${p.name}', this)">
+            <span>${p.icon}</span><span class="btn-label">${p.name}</span>
+        </button>`
     ).join('');
     
     board.innerHTML = `
@@ -77,11 +63,17 @@ function startBlokkenGame() {
             <div class="setup-columns">
                 <div class="setup-group group-players">
                     <h3>Wie racet er?</h3>
+                    <div class="color-picker-title">1. Kies kleur</div>
                     <div class="color-row">${paletteHTML}</div>
-                    <div class="option-grid" id="blokken-player-selection"></div>
+                    
+                    <div class="color-picker-title">2. Kies Speler</div>
+                    <div class="option-grid" id="blokken-player-selection">
+                        ${buttonsHTML}
+                    </div>
+                    
                     <div class="player-input-container">
-                        <input type="text" id="custom-blokken-name" placeholder="Naam...">
-                        <button class="add-btn" onclick="addBlokkenPlayer()">+</button>
+                        <input type="text" id="custom-blokken-name" placeholder="Andere naam...">
+                        <button class="add-btn" onclick="addCustomBlokkenPlayer()">+</button>
                     </div>
                 </div>
 
@@ -94,20 +86,34 @@ function startBlokkenGame() {
                     </div>
                 </div>
             </div>
-            <button id="start-blokken-btn" class="start-btn" onclick="initRace()" disabled>Kies spelers...</button>
+            <button id="start-blokken-btn" class="start-btn" onclick="initRace()" disabled>Kies minstens 1 speler...</button>
         </div>
     `;
 
     blokkenState.playerNames = [];
     blokkenState.difficulty = 'medium';
-    selectBlokkenColor(blokkenPalette[3], document.querySelector('.color-dot:nth-child(4)'));
+    // Selecteer standaard blauw
+    setTimeout(() => {
+        const dots = document.querySelectorAll('.memory-setup .color-dot');
+        if(dots.length > 3) selectBlokkenColor(blokkenPalette[3], dots[3]);
+    }, 50);
 }
 
 function selectBlokkenColor(color, btn) {
     if(!btn) return;
     blokkenState.activeColor = color;
-    document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+    // Let op: selecteer alleen dots binnen de blokken setup om conflicten te voorkomen
+    const container = document.querySelector('.memory-setup');
+    if(container) {
+        container.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+    }
     btn.classList.add('active');
+    
+    // Update randkleur van niet-geselecteerde spelers
+    document.querySelectorAll('.player-btn:not(.selected)').forEach(b => {
+        b.style.borderColor = color;
+        b.style.color = color;
+    });
 }
 
 function setBlokkenDiff(diff, btn) {
@@ -116,30 +122,47 @@ function setBlokkenDiff(diff, btn) {
     btn.classList.add('selected');
 }
 
-function addBlokkenPlayer() {
+// Speler toevoegen/verwijderen via de knoppen (Lou, Noé...)
+function toggleBlokkenPlayer(name, btn) {
+    const existingIndex = blokkenState.playerNames.findIndex(p => p.name === name);
+    
+    if (existingIndex === -1) {
+        // Toevoegen
+        blokkenState.playerNames.push({ name: name, color: blokkenState.activeColor });
+        btn.classList.add('selected');
+        btn.style.backgroundColor = blokkenState.activeColor;
+        btn.style.borderColor = blokkenState.activeColor;
+        btn.style.color = 'white';
+        btn.querySelector('.btn-label').style.color = 'white';
+    } else {
+        // Verwijderen
+        blokkenState.playerNames.splice(existingIndex, 1);
+        btn.classList.remove('selected');
+        btn.style.backgroundColor = 'white';
+        btn.style.borderColor = blokkenState.activeColor;
+        btn.style.color = blokkenState.activeColor;
+        btn.querySelector('.btn-label').style.color = '#888';
+    }
+    checkBlokkenStart();
+}
+
+// Speler toevoegen via typen
+function addCustomBlokkenPlayer() {
     const input = document.getElementById('custom-blokken-name');
     const name = input.value.trim();
     if (name && !blokkenState.playerNames.some(p => p.name === name)) {
-        blokkenState.playerNames.push({ name: name, color: blokkenState.activeColor });
-        renderBlokkenPlayers();
+        // We maken een tijdelijke knop aan voor deze nieuwe speler
+        const container = document.getElementById('blokken-player-selection');
+        const btnHTML = document.createElement('button');
+        btnHTML.className = 'option-btn player-btn';
+        btnHTML.onclick = function() { toggleBlokkenPlayer(name, this) };
+        btnHTML.innerHTML = `<span>👤</span><span class="btn-label">${name}</span>`;
+        container.appendChild(btnHTML);
+        
+        // Meteen selecteren
+        toggleBlokkenPlayer(name, btnHTML);
         input.value = '';
-        checkBlokkenStart();
     }
-}
-
-function renderBlokkenPlayers() {
-    const container = document.getElementById('blokken-player-selection');
-    container.innerHTML = blokkenState.playerNames.map(p => 
-        `<button class="option-btn selected" style="background-color:${p.color}; color:white;" onclick="removeBlokkenPlayer('${p.name}')">
-            <span>👤</span><span class="btn-label" style="color:white">${p.name}</span>
-        </button>`
-    ).join('');
-}
-
-function removeBlokkenPlayer(name) {
-    blokkenState.playerNames = blokkenState.playerNames.filter(p => p.name !== name);
-    renderBlokkenPlayers();
-    checkBlokkenStart();
 }
 
 function checkBlokkenStart() {
@@ -182,7 +205,6 @@ function startTurn() {
     `;
     
     blokkenState.currentLevelData = JSON.parse(JSON.stringify(randomLevel));
-    // Even wachten zodat DOM klaar is voor grootte berekening
     setTimeout(() => {
         loadBlocks(blokkenState.currentLevelData);
         startTimer();
@@ -227,7 +249,6 @@ function endTurn(success) {
     if(success) {
         blokkenState.scores[currentPlayer.name]++;
         if(blokkenState.scores[currentPlayer.name] >= 5) {
-             // Oplossing voor ranglijst: Map scores naar array
              let leaderboard = Object.keys(blokkenState.scores).map(name => ({
                 name: name, 
                 score: blokkenState.scores[name], 
@@ -253,11 +274,7 @@ function endTurn(success) {
 }
 
 function resetCurrentLevel() {
-    // Simpele reset: herlaad de blokken op hun huidige posities (of herstart beurt als je echt opnieuw wilt)
-    // Voor nu: we herstarten de beurt NIET, maar zetten blokken terug.
-    // Omdat we 'original' data niet hebben opgeslagen in deze simpele versie, doen we reloadTurn
-    // Maar dat reset de tijd... voor nu prima.
-    startTurn(); 
+    startTurn(); // Simpele reset door beurt opnieuw te starten
 }
 
 // 3. RENDER & DRAG
@@ -267,11 +284,13 @@ function loadBlocks(blocksData) {
     Array.from(gameArea.querySelectorAll('.block')).forEach(e => e.remove());
 
     const rect = gameArea.getBoundingClientRect();
+    // Grid alignment fix: 16px aftrekken voor de borders (8px links + 8px rechts)
     blokkenState.cellSize = (rect.width - 16) / 6; 
 
     blocksData.forEach((block, index) => {
         const el = document.createElement('div');
         el.className = `block ${block.color} ${block.type || ''}`;
+        
         el.style.width = (block.w * blokkenState.cellSize) + 'px';
         el.style.height = (block.h * blokkenState.cellSize) + 'px';
         el.style.left = (block.x * blokkenState.cellSize) + 'px';
@@ -342,7 +361,6 @@ function endDrag() {
     
     setTimeout(() => { if(activeBlock && activeBlock.el) activeBlock.el.style.transition = ''; }, 200);
     
-    // WIN CHECK (X=4 met breedte 2 = rechts aan de rand)
     if (activeBlock.data.id === 'hero' && activeBlock.data.x === 4) { 
         endTurn(true);
     }
