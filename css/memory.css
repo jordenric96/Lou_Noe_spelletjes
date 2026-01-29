@@ -3,33 +3,30 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 100%; /* Vul het hele scherm */
+    height: 100%;
     padding: 10px;
     box-sizing: border-box;
 }
 
-/* De container voor de 3 groepen (naast elkaar) */
 .setup-columns {
     display: flex;
-    flex-direction: row; /* Naast elkaar! */
+    flex-direction: row;
     gap: 15px;
-    flex: 1; /* Neem alle beschikbare ruimte in */
-    min-height: 0; /* Belangrijk voor flexbox scrolling preventie */
+    flex: 1;
+    min-height: 0;
 }
 
-/* De individuele blokken */
 .setup-group {
     background: #FFF;
     border-radius: 20px;
-    padding: 10px; /* Minder padding */
+    padding: 10px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     border: 3px solid #E0F7FA;
-    
-    flex: 1; /* Elke kolom is even breed */
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    overflow-y: auto; /* Alleen scrollen IN het blokje als het echt moet */
+    overflow-y: auto;
 }
 
 /* Kleuraccenten */
@@ -40,13 +37,13 @@
 .setup-group h3 {
     color: #0277BD;
     margin: 5px 0 15px 0;
-    font-size: 1.2rem; /* Iets kleiner font zodat het past */
+    font-size: 1.2rem;
     font-family: 'Fredoka One', cursive;
     text-transform: uppercase;
     text-align: center;
 }
 
-/* KNOPPEN GRID */
+/* KNOPPEN */
 .option-grid {
     display: flex;
     flex-wrap: wrap;
@@ -61,12 +58,12 @@
     border: none;
     padding: 10px;
     border-radius: 15px;
-    font-size: 2rem; /* Iets kleiner symbool */
+    font-size: 2rem;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 80px; /* Iets compacter */
+    min-width: 80px;
     box-shadow: 0 3px 0 #B3E5FC;
 }
 
@@ -77,7 +74,6 @@
     color: #555;
 }
 
-/* GESELECTEERD */
 .option-btn.selected {
     background: #00BCD4;
     color: white;
@@ -88,7 +84,6 @@
 .group-theme .option-btn.selected { background: #4CAF50; }
 .group-size .option-btn.selected { background: #FFC107; }
 
-/* STERREN */
 .star { color: #FFD700; text-shadow: 1px 1px 0 #FFA000; }
 .star.dim { color: #CFD8DC; text-shadow: none; opacity: 0.6; }
 
@@ -96,7 +91,7 @@
 .player-input-container {
     display: flex;
     gap: 5px;
-    margin-top: auto; /* Duw naar beneden */
+    margin-top: auto;
     padding-top: 10px;
     width: 100%;
 }
@@ -120,7 +115,7 @@
     color: white;
 }
 
-/* START KNOP (Onderaan, altijd zichtbaar) */
+/* START KNOP */
 .start-btn {
     background: linear-gradient(to bottom, #66BB6A, #43A047);
     color: white;
@@ -128,21 +123,16 @@
     padding: 15px;
     font-size: 1.8rem;
     border-radius: 20px;
-    margin-top: 10px; /* Ruimte boven knop */
+    margin-top: 10px;
     width: 100%;
     cursor: pointer;
     box-shadow: 0 6px 0 #2E7D32;
     font-family: 'Fredoka One', cursive;
-    flex-shrink: 0; /* Zorg dat hij niet geplet wordt */
+    flex-shrink: 0;
 }
+.start-btn:disabled { background: #CFD8DC; color: #90A4AE; box-shadow: none; }
 
-.start-btn:disabled {
-    background: #CFD8DC;
-    color: #90A4AE;
-    box-shadow: none;
-}
-
-/* SPELBORD */
+/* --- NIEUW SCOREBORD --- */
 .memory-game-container {
     display: flex;
     flex-direction: column;
@@ -151,20 +141,66 @@
     height: 100%;
 }
 
+.score-board {
+    display: flex;
+    gap: 15px;
+    padding: 10px;
+    background: rgba(255,255,255,0.5); /* Beetje doorzichtig */
+    border-radius: 20px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.player-badge {
+    background: white;
+    padding: 8px 20px;
+    border-radius: 50px; /* Mooie pil-vorm */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 0 #EEE;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    font-family: 'Fredoka One', cursive;
+    color: #555;
+    opacity: 0.7; /* Niet actieve spelers beetje dimmen */
+}
+
+/* De actieve speler stijl */
+.player-badge.active {
+    opacity: 1;
+    background: #FFFDE7; /* Heel licht geel */
+    border: 3px solid #FFC107; /* Goud randje */
+    color: #333;
+    transform: scale(1.15); /* Wordt groter! */
+    box-shadow: 0 8px 15px rgba(255, 193, 7, 0.3);
+    z-index: 10;
+    animation: bounce 1s infinite alternate; /* Klein hupje */
+}
+
+@keyframes bounce {
+    from { transform: scale(1.15) translateY(0); }
+    to { transform: scale(1.15) translateY(-3px); }
+}
+
+.badge-icon { font-size: 1.5rem; }
+.badge-score { font-size: 1.2rem; }
+
+/* --- SPELBORD --- */
 .memory-grid {
     display: grid;
     gap: 10px;
     width: 100%;
-    height: 100%; /* Gebruik alle hoogte */
-    max-height: 80vh; /* Niet hoger dan scherm */
-    aspect-ratio: auto; /* Laat los van vierkant grid */
+    height: 100%;
+    max-height: 80vh;
     margin: 10px 0;
 }
 
 .memory-card {
     position: relative;
     width: 100%;
-    height: 100%; /* Vul vakje */
+    height: 100%;
 }
 
 .memory-card-inner {
@@ -172,7 +208,9 @@
     height: 100%;
     position: relative;
     transform-style: preserve-3d;
-    transition: transform 0.6s;
+    transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 .memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
 
@@ -181,16 +219,42 @@
     width: 100%;
     height: 100%;
     backface-visibility: hidden;
-    border-radius: 10px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
 }
-.card-front { background: #4DD0E1; border: 3px solid white; font-size: 3rem; }
-.card-back { background: white; transform: rotateY(180deg); border: 3px solid #FFC107; font-size: 4rem; }
-.card-img { width: 100%; height: 100%; object-fit: cover; border-radius: 7px; }
 
-/* RESPONSIVE: Als het scherm echt te smal is (telefoon portrait), ga dan wel onder elkaar */
+/* DE NIEUWE ACHTERKANT (DE DEKSEL) */
+.card-front { 
+    background: linear-gradient(135deg, #81D4FA, #29B6F6); 
+    border: 3px solid white; 
+}
+
+/* Het plaatje op de achterkant (de cover) */
+.card-cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+/* Of als fallback de emoji */
+.card-cover-emoji {
+    font-size: 3.5rem;
+    color: white;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* DE VOORKANT (HET PLAATJE DAT JE ZOEKT) */
+.card-back { 
+    background: white; 
+    transform: rotateY(180deg); 
+    border: 3px solid #FFC107; 
+    font-size: 4rem; 
+}
+.card-img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Mobiel fix */
 @media (max-width: 700px) {
     .setup-columns { flex-direction: column; overflow-y: auto; }
 }
