@@ -2,13 +2,15 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Speelkwartier</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/memory.css"> <link rel="stylesheet" href="css/doolhof.css"> </head>
+    <link rel="stylesheet" href="css/memory.css">
+    <link rel="stylesheet" href="css/doolhof.css">
+</head>
 <body>
 
     <div id="app">
@@ -26,9 +28,10 @@
                     <span class="text">Doolhof</span>
                 </button>
 
-                 <button class="game-btn" onclick="selectGame('patroon')">
+                 <button class="game-btn locked">
                     <span class="icon">🔶</span>
                     <span class="text">Patroon</span>
+                    <div class="lock-badge">🔒</div>
                 </button>
             </div>
         </div>
@@ -44,6 +47,22 @@
         </div>
     </div>
 
+    <div id="winner-modal" class="modal hidden">
+        <div class="modal-content">
+            <div id="confetti-container"></div>
+            
+            <div class="trophy-animation">🏆</div>
+            
+            <h2 id="winner-title">Winnaar!</h2>
+            
+            <div id="winner-leaderboard"></div>
+
+            <button class="modal-btn" onclick="closeWinnerModal()">Nog een keer! 🔄</button>
+        </div>
+    </div>
+
     <script src="js/main.js"></script>
-    <script src="js/memory.js"></script> <script src="js/doolhof.js"></script> </body>
+    <script src="js/memory.js"></script>
+    <script src="js/doolhof.js"></script>
+</body>
 </html>
