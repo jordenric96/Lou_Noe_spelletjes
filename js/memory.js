@@ -14,11 +14,11 @@ let memoryState = {
     matchedPairs: 0
 };
 
-// Vaste spelers MET hun eigen icoon
+// Vaste spelers (AANGEPAST: Mama heeft nu bruin haar)
 const predefinedPlayers = [
     { name: "Lou", icon: "👦🏼" },
     { name: "Noé", icon: "👶🏼" },
-    { name: "Mama", icon: "👩🏼" },
+    { name: "Mama", icon: "👩🏻" }, // <--- Bruin haar
     { name: "Papa", icon: "👨🏻" }
 ];
 
@@ -35,7 +35,7 @@ const themes = {
 function startMemorySetup() {
     const board = document.getElementById('game-board');
     
-    // Spelers knoppen genereren met juiste icoon
+    // Spelers knoppen
     let playerButtonsHTML = predefinedPlayers.map(p => 
         `<button class="option-btn" onclick="togglePlayer('${p.name}', this)">
             <span>${p.icon}</span>
@@ -43,52 +43,54 @@ function startMemorySetup() {
         </button>`
     ).join('');
 
+    // NIEUWE STRUCTUUR: setup-columns div toegevoegd
     board.innerHTML = `
         <div class="memory-setup">
             
-            <div class="setup-group group-players">
-                <h3>Wie speelt er mee?</h3>
-                <div class="option-grid" id="player-selection">
-                    ${playerButtonsHTML}
+            <div class="setup-columns">
+                <div class="setup-group group-players">
+                    <h3>Wie?</h3>
+                    <div class="option-grid" id="player-selection">
+                        ${playerButtonsHTML}
+                    </div>
+                    <div class="player-input-container">
+                        <input type="text" id="custom-player-name" placeholder="Naam...">
+                        <button class="add-btn" onclick="addCustomPlayer()">+</button>
+                    </div>
                 </div>
-                
-                <div class="player-input-container">
-                    <input type="text" id="custom-player-name" placeholder="Andere naam...">
-                    <button class="add-btn" onclick="addCustomPlayer()">+</button>
+
+                <div class="setup-group group-theme">
+                    <h3>Wat?</h3>
+                    <div class="option-grid">
+                        <button class="option-btn selected" onclick="setTheme('boerderij', this)"><span>🚜</span><span class="btn-label">Boer</span></button>
+                        <button class="option-btn" onclick="setTheme('dino', this)"><span>🦖</span><span class="btn-label">Dino</span></button>
+                        <button class="option-btn" onclick="setTheme('studio100', this)"><span>🤡</span><span class="btn-label">Studio</span></button>
+                        <button class="option-btn" onclick="setTheme('marvel', this)"><span>🕷️</span><span class="btn-label">Held</span></button>
+                        <button class="option-btn" onclick="setTheme('natuur', this)"><span>🌳</span><span class="btn-label">Natuur</span></button>
+                        <button class="option-btn" onclick="setTheme('beroepen', this)"><span>👩‍🚒</span><span class="btn-label">Werk</span></button>
+                    </div>
+                </div>
+
+                <div class="setup-group group-size">
+                    <h3>Grootte?</h3>
+                    <div class="option-grid">
+                        <button class="option-btn selected" onclick="setSize(12, this)">
+                            <span><span class="star">★</span></span>
+                            <span class="btn-label">12</span>
+                        </button>
+                        <button class="option-btn" onclick="setSize(16, this)">
+                            <span><span class="star">★</span><span class="star">★</span></span>
+                            <span class="btn-label">16</span>
+                        </button>
+                        <button class="option-btn" onclick="setSize(24, this)">
+                            <span><span class="star">★</span><span class="star">★</span><span class="star">★</span></span>
+                            <span class="btn-label">24</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div class="setup-group group-theme">
-                <h3>Kies een thema</h3>
-                <div class="option-grid">
-                    <button class="option-btn selected" onclick="setTheme('boerderij', this)"><span>🚜</span><span class="btn-label">Boer</span></button>
-                    <button class="option-btn" onclick="setTheme('dino', this)"><span>🦖</span><span class="btn-label">Dino</span></button>
-                    <button class="option-btn" onclick="setTheme('studio100', this)"><span>🤡</span><span class="btn-label">Studio</span></button>
-                    <button class="option-btn" onclick="setTheme('marvel', this)"><span>🕷️</span><span class="btn-label">Held</span></button>
-                    <button class="option-btn" onclick="setTheme('natuur', this)"><span>🌳</span><span class="btn-label">Natuur</span></button>
-                    <button class="option-btn" onclick="setTheme('beroepen', this)"><span>👩‍🚒</span><span class="btn-label">Werk</span></button>
-                </div>
-            </div>
-
-            <div class="setup-group group-size">
-                <h3>Hoeveel kaartjes?</h3>
-                <div class="option-grid">
-                    <button class="option-btn selected" onclick="setSize(12, this)">
-                        <span><span class="star">★</span><span class="star dim">★</span><span class="star dim">★</span></span>
-                        <span class="btn-label">12</span>
-                    </button>
-                    <button class="option-btn" onclick="setSize(16, this)">
-                        <span><span class="star">★</span><span class="star">★</span><span class="star dim">★</span></span>
-                        <span class="btn-label">16</span>
-                    </button>
-                    <button class="option-btn" onclick="setSize(24, this)">
-                        <span><span class="star">★</span><span class="star">★</span><span class="star">★</span></span>
-                        <span class="btn-label">24</span>
-                    </button>
-                </div>
-            </div>
-
-            <button id="start-btn" class="start-btn" onclick="startMemoryGame()" disabled>KIES SPELERS...</button>
+            <button id="start-btn" class="start-btn" onclick="startMemoryGame()" disabled>Kies eerst spelers...</button>
         </div>
     `;
     
@@ -97,7 +99,7 @@ function startMemorySetup() {
     memoryState.gridSize = 12;
 }
 
-// Speler toevoegen/verwijderen uit lijst
+// Speler logica
 function togglePlayer(name, btn) {
     const index = memoryState.playerNames.indexOf(name);
     
@@ -120,10 +122,8 @@ function addCustomPlayer() {
         const btnHTML = document.createElement('button');
         btnHTML.className = 'option-btn';
         btnHTML.onclick = function() { togglePlayer(name, this) };
-        // Standaard icoon voor extra spelers
         btnHTML.innerHTML = `<span>👤</span><span class="btn-label">${name}</span>`;
         container.appendChild(btnHTML);
-        
         togglePlayer(name, btnHTML);
         input.value = '';
     }
@@ -133,13 +133,11 @@ function checkStartButton() {
     const btn = document.getElementById('start-btn');
     if (memoryState.playerNames.length > 0) {
         btn.disabled = false;
-        // Alleen namen tonen als het er 3 of minder zijn, anders wordt de knop te vol
         if(memoryState.playerNames.length <= 3) {
              btn.innerText = `START MET ${memoryState.playerNames.join(' & ').toUpperCase()} ▶️`;
         } else {
              btn.innerText = `START SPEL (${memoryState.playerNames.length} SPELERS) ▶️`;
         }
-       
     } else {
         btn.disabled = true;
         btn.innerText = "KIES EERST SPELERS...";
@@ -170,7 +168,6 @@ function startMemoryGame() {
     
     let scoreHTML = '<div class="score-board">';
     memoryState.playerNames.forEach((name, index) => {
-        // Zoek het juiste icoontje erbij voor het scorebord
         let playerIcon = "👤";
         let predefined = predefinedPlayers.find(p => p.name === name);
         if(predefined) playerIcon = predefined.icon;
@@ -182,15 +179,11 @@ function startMemoryGame() {
     });
     scoreHTML += '</div>';
 
+    // Flexibele grid kolommen
     let gridStyle = '';
-    if(memoryState.gridSize === 12) gridStyle = 'grid-template-columns: repeat(3, 1fr);'; 
-    if(memoryState.gridSize === 16) gridStyle = 'grid-template-columns: repeat(4, 1fr);'; 
-    if(memoryState.gridSize === 24) gridStyle = 'grid-template-columns: repeat(4, 1fr);'; 
-    // Op mobiel misschien iets andere indeling:
-    if(window.innerWidth < 600 && memoryState.gridSize === 24) {
-         gridStyle = 'grid-template-columns: repeat(3, 1fr);';
-    }
-
+    if(memoryState.gridSize === 12) gridStyle = 'grid-template-columns: repeat(4, 1fr);'; // 4x3
+    if(memoryState.gridSize === 16) gridStyle = 'grid-template-columns: repeat(4, 1fr);'; // 4x4
+    if(memoryState.gridSize === 24) gridStyle = 'grid-template-columns: repeat(6, 1fr);'; // 6x4
 
     board.innerHTML = `
         <div class="memory-game-container">
@@ -207,7 +200,7 @@ function startMemoryGame() {
     generateCards();
 }
 
-// 3. GENERATE CARDS 
+// 3. GENERATE CARDS
 function generateCards() {
     const grid = document.getElementById('memory-grid');
     const themeData = themes[memoryState.theme];
@@ -279,7 +272,6 @@ function disableCards() {
     let currentPlayerName = memoryState.playerNames[memoryState.currentPlayerIndex];
     memoryState.scores[currentPlayerName]++;
     
-    // Update score tekst met icoon
     let playerIcon = "👤";
     let predefined = predefinedPlayers.find(p => p.name === currentPlayerName);
     if(predefined) playerIcon = predefined.icon;
