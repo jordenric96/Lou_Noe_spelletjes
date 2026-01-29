@@ -1,1 +1,139 @@
+/* Algemene instellingen */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none; /* Voorkomt dat kinderen tekst selecteren per ongeluk */
+}
 
+body {
+    font-family: 'Nunito', sans-serif;
+    background-color: #E0F7FA; /* Zacht blauw */
+    color: #333;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Geen scrollbalken */
+}
+
+h1, h2, h3 {
+    font-family: 'Fredoka One', cursive;
+    color: #0097A7;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Het App Kader */
+#app {
+    width: 100%;
+    height: 100%;
+    max-width: 1024px; /* Tablet formaat max */
+    position: relative;
+    background: white;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    border-radius: 0; 
+}
+
+/* Schermen Wisselen */
+.screen {
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    display: none; /* Standaard verborgen */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.screen.active {
+    display: flex; /* Alleen het actieve scherm tonen */
+}
+
+/* Hoofdmenu Knoppen */
+.game-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+    width: 80%;
+}
+
+.game-btn {
+    background: #FFCA28; /* Geel */
+    border: none;
+    border-radius: 20px;
+    padding: 30px;
+    cursor: pointer;
+    transition: transform 0.1s, background 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 6px 0 #FFA000; /* 3D effect */
+}
+
+.game-btn:active {
+    transform: translateY(6px); /* Indruk effect */
+    box-shadow: none;
+}
+
+.game-btn .icon {
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+
+.game-btn .text {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #5D4037;
+    font-family: 'Fredoka One', cursive;
+}
+
+/* Game Header (Bovenbalk tijdens spel) */
+.game-header {
+    width: 100%;
+    height: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    background-color: #00BCD4;
+    color: white;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#back-btn {
+    background: #FF7043;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #D84315;
+}
+
+#back-btn:active {
+    transform: translateY(4px);
+    box-shadow: none;
+}
+
+#game-board {
+    margin-top: 60px; /* Ruimte voor de header */
+    width: 100%;
+    height: calc(100% - 60px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Tablet specifieke aanpassingen */
+@media (min-width: 768px) {
+    #app {
+        border-radius: 20px;
+        height: 95vh;
+        margin: 2.5vh;
+    }
+}
