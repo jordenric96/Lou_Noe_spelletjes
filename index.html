@@ -10,12 +10,12 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/memory.css">
     <link rel="stylesheet" href="css/doolhof.css">
-</head>
+    <link rel="stylesheet" href="css/blokken.css"> </head>
 <body>
 
     <div id="app">
         <div id="main-menu" class="screen active">
-           <h1>Lou & Noé's Speelkwartier 🚀</h1>
+            <h1>Lou & Noé's Speelkwartier 🚀</h1>
             
             <div class="game-grid">
                 <button class="game-btn" onclick="selectGame('memory')">
@@ -28,10 +28,9 @@
                     <span class="text">Doolhof</span>
                 </button>
 
-                 <button class="game-btn locked">
-                    <span class="icon">🔶</span>
-                    <span class="text">Patroon</span>
-                    <div class="lock-badge">🔒</div>
+                 <button class="game-btn" onclick="selectGame('blokken')">
+                    <span class="icon">🚗</span>
+                    <span class="text">De File</span>
                 </button>
             </div>
         </div>
@@ -53,12 +52,12 @@
             <div class="trophy-animation">🏆</div>
             <h2 id="winner-title">Winnaar!</h2>
             <div id="winner-leaderboard"></div>
-            <button class="modal-btn" onclick="closeWinnerModal()">Nog een keer! 🔄</button>
+            <button class="modal-btn" onclick="closeWinnerModal()">Volgend Level! ➡</button>
         </div>
     </div>
 
     <script src="js/main.js"></script>
     <script src="js/memory.js"></script>
     <script src="js/doolhof.js"></script>
-</body>
+    <script src="js/blokken.js"></script> </body>
 </html>
