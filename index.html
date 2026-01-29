@@ -5,12 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Speelkwartier</title>
     
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00BCD4">
+    <link rel="apple-touch-icon" href="assets/images/icon.png">
+
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/memory.css">
     <link rel="stylesheet" href="css/doolhof.css">
-    <link rel="stylesheet" href="css/blokken.css"> </head>
+    <link rel="stylesheet" href="css/blokken.css">
+</head>
 <body>
 
     <div id="app">
@@ -41,17 +46,20 @@
                 <h2 id="game-title">Spelletje</h2>
             </header>
 
-            <div id="game-board">
-                </div>
+            <div id="game-board"></div>
         </div>
     </div>
 
     <div id="winner-modal" class="modal hidden">
         <div class="modal-content">
             <div id="confetti-container"></div>
+            
             <div class="trophy-animation">🏆</div>
+            
             <h2 id="winner-title">Winnaar!</h2>
+            
             <div id="winner-leaderboard"></div>
+
             <button class="modal-btn" onclick="closeWinnerModal()">Volgende! ➡</button>
         </div>
     </div>
@@ -60,5 +68,15 @@
     <script src="js/memory.js"></script>
     <script src="js/doolhof.js"></script>
     <script src="js/blokken.js"></script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(reg => console.log('Service Worker geregistreerd!', reg))
+                    .catch(err => console.log('Service Worker fout:', err));
+            });
+        }
+    </script>
 </body>
 </html>
