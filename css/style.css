@@ -1,7 +1,26 @@
 /* Algemene instellingen */
 * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
-body { font-family: 'Nunito', sans-serif; background-color: #E0F7FA; color: #333; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-h1, h2, h3 { font-family: 'Fredoka One', cursive; color: #0097A7; margin-bottom: 20px; text-align: center; }
+/* --- css/style.css --- */
+
+/* ... (Bovenste deel met * { ... } blijft hetzelfde) */
+
+body {
+    font-family: 'Nunito', sans-serif;
+    
+    /* NIEUW: Een vrolijke, kleurrijke achtergrond (Snoepjes stijl) */
+    background: linear-gradient(135deg, #FFEFBA 0%, #FFFFFF 50%, #B2EBF2 100%);
+    /* Of als je het feller wilt: */
+    /* background: linear-gradient(120deg, #f6d365 0%, #fda085 100%); */
+    
+    color: #333;
+    height: 100vh; /* Volledige hoogte */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Belangrijk: voorkomt scrollen van de hele pagina */
+}
+
+/* ... (De rest van style.css blijft hetzelfde) ... */
 
 #app { width: 100%; height: 100%; max-width: 1024px; position: relative; background: white; box-shadow: 0 0 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
 
