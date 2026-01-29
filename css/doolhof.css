@@ -1,1 +1,127 @@
+/* DOOLHOF SPECIFIEKE STIJLEN */
 
+/* Het spelbord kader */
+#maze-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    background: #333; /* Donkere achtergrond rondom doolhof */
+}
+
+/* Het rooster zelf */
+#maze-grid {
+    display: grid;
+    /* grid-template-columns wordt in JS gezet op basis van moeilijkheid */
+    gap: 0; /* Geen ruimte tussen blokjes, muren moeten aansluiten */
+    background: white;
+    border: 4px solid #000;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    position: relative; /* Nodig voor de speler die er 'los' bovenop ligt */
+}
+
+/* Eén vakje in het rooster */
+.maze-cell {
+    width: 30px; /* Standaard grootte, kan aangepast worden op mobiel */
+    height: 30px;
+    box-sizing: border-box;
+}
+
+/* --- THEMA: MARIO --- */
+/* Muren */
+.theme-mario .wall {
+    background-color: #B71C1C; /* Baksteen rood */
+    background-image: 
+        linear-gradient(335deg, #D32F2F 23px, transparent 23px),
+        linear-gradient(155deg, #D32F2F 23px, transparent 23px),
+        linear-gradient(335deg, #D32F2F 23px, transparent 23px),
+        linear-gradient(155deg, #D32F2F 23px, transparent 23px);
+    background-size: 58px 58px;
+    background-position: 0px 2px, 4px 35px, 29px 31px, 34px 6px;
+    border: 1px solid #8B0000;
+}
+
+/* De vloer (het pad) */
+.theme-mario .path {
+    background-color: #FFECB3; /* Zandkleur */
+}
+
+/* Het doel (de finish) */
+.theme-mario .goal {
+    background-color: #FFD700; /* Goud */
+    position: relative;
+}
+.theme-mario .goal::after {
+    content: '⭐'; /* Sterretje als doel */
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.2rem;
+}
+
+
+/* --- DE SPELER (MARIO) --- */
+#player {
+    position: absolute; /* Hij zweeft boven het rooster */
+    top: 0;
+    left: 0;
+    /* Grootte moet gelijk zijn aan een .maze-cell */
+    width: 30px; 
+    height: 30px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 10; /* Altijd bovenop */
+    /* Zorgt voor soepele beweging tussen vakjes */
+    transition: top 0.15s ease-in-out, left 0.15s ease-in-out; 
+}
+
+/* HET SPIEGELEN! */
+/* Standaard kijkt Mario naar rechts (zoals het plaatje is) */
+
+/* Als de class 'facing-left' wordt toegevoegd door JS, spiegelen we hem */
+#player.facing-left {
+    transform: scaleX(-1); /* Dit is de magie: spiegel horizontaal */
+}
+
+
+/* MOBIELE CONTROLS (Knoppen op scherm) */
+#mobile-controls {
+    display: none; /* Standaard verborgen op PC */
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    grid-template-columns: repeat(3, 60px);
+    grid-template-rows: repeat(2, 60px);
+    gap: 10px;
+}
+
+.ctrl-btn {
+    background: rgba(255,255,255,0.3);
+    border: 2px solid white;
+    color: white;
+    font-size: 2rem;
+    border-radius: 15px;
+    cursor: pointer;
+    display: flex; justify-content: center; align-items: center;
+}
+.ctrl-btn:active { background: rgba(255,255,255,0.6); }
+#btn-up { grid-column: 2; grid-row: 1; }
+#btn-left { grid-column: 1; grid-row: 2; }
+#btn-down { grid-column: 2; grid-row: 2; }
+#btn-right { grid-column: 3; grid-row: 2; }
+
+/* Media Query voor mobiel/tablet */
+@media (max-width: 768px) {
+    #mobile-controls { display: grid; } /* Toon knoppen */
+    #maze-container { padding-bottom: 160px; /* Ruimte voor knoppen */ }
+    
+    /* Als het doolhof groot is, maak de vakjes kleiner op mobiel */
+    .maze-cell, #player {
+        width: 20px;
+        height: 20px;
+    }
+}
