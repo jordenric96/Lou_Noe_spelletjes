@@ -28,15 +28,45 @@
 .start-btn { background: linear-gradient(to bottom, #66BB6A, #43A047); color: white; border: none; padding: 15px; font-size: 2rem; border-radius: 20px; margin-top: 15px; width: 100%; cursor: pointer; box-shadow: 0 6px 0 #2E7D32; font-family: 'Fredoka One', cursive; flex-shrink: 0; }
 .start-btn:disabled { background: #CFD8DC; color: #90A4AE; box-shadow: none; cursor: not-allowed; }
 
-/* GAME BORD */
-.memory-game-container { display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; }
-.score-board { display: flex; gap: 10px; padding: 5px 10px; background: rgba(255,255,255,0.7); border-radius: 50px; margin-bottom: 10px; flex-wrap: wrap; justify-content: center; }
+/* GAME BORD CONTAINER */
+.memory-game-container { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    width: 100%; 
+    height: 100%; 
+    overflow: hidden; /* BELANGRIJK: Geen scrollbars */
+}
+.score-board { 
+    display: flex; 
+    gap: 10px; 
+    padding: 5px 10px; 
+    background: rgba(255,255,255,0.7); 
+    border-radius: 50px; 
+    margin-bottom: 5px; 
+    flex-wrap: wrap; 
+    justify-content: center;
+    flex-shrink: 0; /* Zorg dat scorebord niet krimpt */
+}
 .player-badge { background: white; padding: 5px 15px; border-radius: 30px; display: flex; align-items: center; gap: 8px; border: 3px solid #EEE; font-family: 'Fredoka One', cursive; color: #777; opacity: 0.6; transition: all 0.3s; }
 .player-badge.active { opacity: 1; transform: scale(1.1); box-shadow: 0 4px 12px rgba(0,0,0,0.15); background: #FFF; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
 
 /* GRID & KAARTEN */
-.memory-grid { display: grid; gap: 10px; width: 100%; flex: 1; max-height: 80vh; margin-bottom: 10px; justify-content: center; }
-.memory-card { position: relative; width: 100%; height: 100%; user-select: none; aspect-ratio: 1 / 1; }
+.memory-grid { 
+    display: grid; 
+    gap: 10px; 
+    /* Grootte wordt nu door JS bepaald, maar CSS helpt centreren */
+    margin: 0 auto;
+    justify-content: center;
+    align-content: center;
+}
+
+.memory-card { 
+    position: relative; 
+    /* Grootte wordt door JS gezet (style="width: ...") */
+    user-select: none; 
+    /* Geen vaste aspect-ratio hier, JS regelt de pixels */
+}
 .memory-card-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 12px; box-shadow: 0 3px 6px rgba(0,0,0,0.15); }
 .memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
 
