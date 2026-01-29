@@ -15,27 +15,30 @@ function selectGame(gameName) {
     } else if (gameName === 'doolhof') {
         gameTitle.innerText = "Doolhof";
         if (typeof startDoolhofSetup === "function") startDoolhofSetup();
-    } else if (gameName === 'patroon') {
-        gameTitle.innerText = "Patroon";
-        gameBoard.innerHTML = "<p>Patroon komt binnenkort!</p>";
+    } else if (gameName === 'blokken') {
+        gameTitle.innerText = "De File 🚗";
+        // Start het nieuwe spel
+        if (typeof startBlokkenGame === "function") startBlokkenGame();
     }
 }
 
 function goHome() {
     if (currentGame === 'doolhof' && typeof cleanupDoolhof === "function") cleanupDoolhof();
+    // Cleanup blokken (event listeners weghalen) wordt in blokken.js geregeld indien nodig
+    
     gameContainer.classList.remove('active'); gameContainer.classList.add('hidden');
     mainMenu.classList.remove('hidden'); mainMenu.classList.add('active');
     gameBoard.innerHTML = "";
     currentGame = null;
 }
 
-// WINNAAR LOGICA
+// WINNAAR LOGICA (Ongewijzigd, maar belangrijk voor de pop-up)
 function showWinnerModal(winnerName, leaderboardData) {
     const modal = document.getElementById('winner-modal');
     const title = document.getElementById('winner-title');
     const list = document.getElementById('winner-leaderboard');
     
-    title.innerText = winnerName ? `${winnerName} wint!` : "Gewonnen!";
+    title.innerText = winnerName ? `${winnerName}` : "Gewonnen!";
     list.innerHTML = '';
     
     if (leaderboardData && leaderboardData.length > 0) {
@@ -48,7 +51,7 @@ function showWinnerModal(winnerName, leaderboardData) {
                 if(index === 0) item.style.borderColor = player.color;
                 else { item.style.background = player.color; item.style.color = 'white'; }
             }
-            item.innerHTML = `<span>${index + 1}. ${player.name}</span><span>${player.score}</span>`;
+            item.innerHTML = `<span>${player.name}</span><span>${player.score}</span>`;
             list.appendChild(item);
         });
     }
@@ -61,8 +64,10 @@ function closeWinnerModal() {
     const modal = document.getElementById('winner-modal');
     modal.classList.remove('show');
     setTimeout(() => modal.classList.add('hidden'), 300);
+    
     if (currentGame === 'memory') startMemorySetup();
     if (currentGame === 'doolhof') startDoolhofSetup();
+    if (currentGame === 'blokken') nextLevelBlokken(); // Naar volgend level!
 }
 
 function startConfetti() {
