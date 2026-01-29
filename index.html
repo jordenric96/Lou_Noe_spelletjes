@@ -1,1 +1,49 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speelkwartier</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/memory.css"> <link rel="stylesheet" href="css/doolhof.css"> </head>
+<body>
 
+    <div id="app">
+        <div id="main-menu" class="screen active">
+            <h1>Kies een spel!</h1>
+            
+            <div class="game-grid">
+                <button class="game-btn" onclick="selectGame('memory')">
+                    <span class="icon">🎴</span>
+                    <span class="text">Memory</span>
+                </button>
+
+                <button class="game-btn" onclick="selectGame('doolhof')">
+                    <span class="icon">🌀</span>
+                    <span class="text">Doolhof</span>
+                </button>
+
+                 <button class="game-btn" onclick="selectGame('patroon')">
+                    <span class="icon">🔶</span>
+                    <span class="text">Patroon</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="game-container" class="screen hidden">
+            <header class="game-header">
+                <button id="back-btn" onclick="goHome()">⬅ Terug</button>
+                <h2 id="game-title">Spelletje</h2>
+            </header>
+
+            <div id="game-board">
+                </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/memory.js"></script> <script src="js/doolhof.js"></script> </body>
+</html>
