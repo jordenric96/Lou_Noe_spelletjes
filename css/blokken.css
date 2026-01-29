@@ -1,0 +1,97 @@
+/* BLOKKEN PUZZEL STIJLEN */
+
+#blokken-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: #FFECB3;
+    position: relative;
+    overflow: hidden;
+}
+
+#level-header {
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    font-family: 'Fredoka One', cursive;
+    color: #5D4037;
+    background: white;
+    padding: 10px 30px;
+    border-radius: 50px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+}
+
+/* HET SPELBORD */
+#game-area {
+    width: 90vw;
+    height: 90vw;
+    max-width: 500px;
+    max-height: 500px;
+    background: #8D6E63;
+    border: 8px solid #5D4037;
+    border-radius: 10px;
+    position: relative;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    
+    background-image: 
+        linear-gradient(#795548 2px, transparent 2px),
+        linear-gradient(90deg, #795548 2px, transparent 2px);
+    background-size: 16.66% 16.66%; 
+}
+
+/* De UITGANG */
+#exit-marker {
+    position: absolute;
+    right: -10px;
+    top: 33.33%;
+    width: 10px;
+    height: 16.66%;
+    background: repeating-linear-gradient(45deg, #FFEB3B, #FFEB3B 5px, #000 5px, #000 10px);
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    z-index: 1;
+}
+
+/* BLOKKEN */
+.block {
+    position: absolute;
+    box-sizing: border-box;
+    border-radius: 8px;
+    border: 2px solid rgba(0,0,0,0.2);
+    box-shadow: inset 0 2px 5px rgba(255,255,255,0.4), 0 3px 5px rgba(0,0,0,0.3);
+    cursor: grab;
+    touch-action: none; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.1s;
+}
+
+.block:active { cursor: grabbing; transform: scale(0.96); z-index: 100; }
+.block.hero { background-color: #F44336; border: 2px solid #B71C1C; z-index: 50; }
+.block::after { content: '🚙'; font-size: 1.5rem; opacity: 0.5; }
+.block.hero::after { content: '🚗'; opacity: 1; font-size: 2rem; }
+.block.truck::after { content: '🚚'; }
+
+.color-1 { background-color: #FF9800; } 
+.color-2 { background-color: #2196F3; } 
+.color-3 { background-color: #4CAF50; } 
+.color-4 { background-color: #9C27B0; } 
+.color-5 { background-color: #00BCD4; } 
+.color-6 { background-color: #E91E63; } 
+
+.reset-btn {
+    margin-top: 20px;
+    background: #FF7043;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 15px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 0 #D84315;
+    cursor: pointer;
+}
+.reset-btn:active { transform: translateY(4px); box-shadow: none; }
