@@ -1,20 +1,23 @@
+/* --- css/style.css --- */
+
 /* Algemene instellingen */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    user-select: none; /* Voorkomt dat kinderen tekst selecteren per ongeluk */
+    user-select: none; /* Voorkomt tekst selecteren */
+    -webkit-tap-highlight-color: transparent; /* Geen blauwe flits op mobiel */
 }
 
 body {
     font-family: 'Nunito', sans-serif;
-    background-color: #E0F7FA; /* Zacht blauw */
+    background-color: #E0F7FA; /* Zacht cyaan achtergrond */
     color: #333;
-    height: 100vh;
+    height: 100vh; /* Volledige hoogte */
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden; /* Geen scrollbalken */
+    overflow: hidden; /* Geen scrollbalken op de body */
 }
 
 h1, h2, h3 {
@@ -24,61 +27,66 @@ h1, h2, h3 {
     text-align: center;
 }
 
-/* Het App Kader */
+/* HET KADER (Tablet formaat) */
 #app {
     width: 100%;
     height: 100%;
-    max-width: 1024px; /* Tablet formaat max */
+    max-width: 1024px;
     position: relative;
     background: white;
     box-shadow: 0 0 20px rgba(0,0,0,0.1);
-    border-radius: 0; 
+    display: flex;
+    flex-direction: column;
 }
 
-/* Schermen Wisselen */
+/* SCHERMEN */
 .screen {
     width: 100%;
     height: 100%;
     padding: 20px;
-    display: none; /* Standaard verborgen */
+    display: none; /* Verberg alles standaard */
     flex-direction: column;
     align-items: center;
     justify-content: center;
 }
 
 .screen.active {
-    display: flex; /* Alleen het actieve scherm tonen */
+    display: flex; /* Toon alleen actieve */
 }
 
-/* Hoofdmenu Knoppen */
+/* --- HOOFDMENU KNOPPEN --- */
 .game-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 20px;
-    width: 80%;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 25px;
+    width: 90%;
+    max-width: 800px;
 }
 
 .game-btn {
     background: #FFCA28; /* Geel */
     border: none;
-    border-radius: 20px;
-    padding: 30px;
+    border-radius: 25px;
+    padding: 30px 20px;
     cursor: pointer;
     transition: transform 0.1s, background 0.2s;
     display: flex;
     flex-direction: column;
     align-items: center;
-    box-shadow: 0 6px 0 #FFA000; /* 3D effect */
+    box-shadow: 0 8px 0 #FFA000;
+    position: relative;
+    text-decoration: none;
+    color: inherit;
 }
 
 .game-btn:active {
-    transform: translateY(6px); /* Indruk effect */
+    transform: translateY(8px);
     box-shadow: none;
 }
 
 .game-btn .icon {
-    font-size: 3rem;
-    margin-bottom: 10px;
+    font-size: 3.5rem;
+    margin-bottom: 15px;
 }
 
 .game-btn .text {
@@ -88,31 +96,31 @@ h1, h2, h3 {
     font-family: 'Fredoka One', cursive;
 }
 
-/* Game Header (Bovenbalk tijdens spel) */
+/* --- GAME HEADER (Balk bovenin) --- */
 .game-header {
     width: 100%;
     height: 60px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 20px;
+    padding: 0 15px;
     background-color: #00BCD4;
     color: white;
-    position: absolute;
-    top: 0;
-    left: 0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    z-index: 100;
 }
 
 #back-btn {
     background: #FF7043;
     border: none;
-    padding: 10px 20px;
-    border-radius: 10px;
+    padding: 8px 15px;
+    border-radius: 12px;
     color: white;
     font-weight: bold;
     font-size: 1rem;
     cursor: pointer;
     box-shadow: 0 4px 0 #D84315;
+    font-family: 'Fredoka One', cursive;
 }
 
 #back-btn:active {
@@ -121,19 +129,52 @@ h1, h2, h3 {
 }
 
 #game-board {
-    margin-top: 60px; /* Ruimte voor de header */
     width: 100%;
-    height: calc(100% - 60px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    height: calc(100% - 60px); /* Rest van het scherm */
+    position: relative;
+    overflow: hidden;
 }
 
-/* Tablet specifieke aanpassingen */
+/* --- SLOTJES (LOCKED GAMES) --- */
+.game-btn.locked {
+    background: #EEEEEE;
+    cursor: not-allowed;
+    box-shadow: 0 8px 0 #BDBDBD;
+}
+
+.game-btn.locked .icon, 
+.game-btn.locked .text {
+    filter: grayscale(100%);
+    opacity: 0.4;
+}
+
+.game-btn.locked:active {
+    transform: none; /* Beweegt niet */
+    box-shadow: 0 8px 0 #BDBDBD;
+}
+
+.lock-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 1.5rem;
+    background: #FF5252;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Tablet optimalisatie */
 @media (min-width: 768px) {
     #app {
-        border-radius: 20px;
+        border-radius: 25px;
         height: 95vh;
         margin: 2.5vh;
+        overflow: hidden;
     }
 }
