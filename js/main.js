@@ -45,3 +45,77 @@ function goHome() {
     gameBoard.innerHTML = "";
     currentGame = null;
 }
+/* --- WINNAAR MODAL LOGICA --- */
+
+function showWinnerModal(winnerName, leaderboardData) {
+    const modal = document.getElementById('winner-modal');
+    const title = document.getElementById('winner-title');
+    const list = document.getElementById('winner-leaderboard');
+    
+    // Titel instellen
+    title.innerText = winnerName ? `${winnerName} wint!` : "Gewonnen!";
+    
+    // Ranglijst bouwen
+    list.innerHTML = '';
+    
+    if (leaderboardData && leaderboardData.length > 0) {
+        leaderboardData.forEach((player, index) => {
+            const item = document.createElement('div');
+            item.className = 'leaderboard-item';
+            if (index === 0) item.classList.add('winner'); // De winnaar krijgt extra stijl
+            
+            // Zet kleuren
+            if (player.color) {
+                item.style.color = player.color;
+                if(index === 0) {
+                    // Winnaar achtergrond wit, tekst in kleur
+                    item.style.borderColor = player.color;
+                } else {
+                    // Andere spelers andersom
+                    item.style.background = player.color;
+                    item.style.color = 'white';
+                }
+            }
+
+            item.innerHTML = `
+                <span>${index + 1}. ${player.name}</span>
+                <span>${player.score}</span>
+            `;
+            list.appendChild(item);
+        });
+    }
+
+    // Toon modal
+    modal.classList.remove('hidden');
+    setTimeout(() => modal.classList.add('show'), 10);
+    
+    // START CONFETTI!
+    startConfetti();
+}
+
+function closeWinnerModal() {
+    const modal = document.getElementById('winner-modal');
+    modal.classList.remove('show');
+    setTimeout(() => modal.classList.add('hidden'), 300);
+    
+    // Herstart het spel (reset)
+    if (currentGame === 'memory') startMemorySetup();
+    if (currentGame === 'doolhof') startDoolhofSetup();
+}
+
+// Simpele confetti generator
+function startConfetti() {
+    const container = document.getElementById('confetti-container');
+    container.innerHTML = ''; // Reset
+    const colors = ['#f00', '#0f0', '#00f', '#ff0', '#0ff', '#f0f', '#fff'];
+
+    for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDuration = (Math.random() * 2 + 2) + 's'; // 2-4 sec
+        confetti.style.opacity = Math.random();
+        container.appendChild(confetti);
+    }
+}
