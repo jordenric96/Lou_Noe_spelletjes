@@ -3,10 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Neon Speelkwartier</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Neon Zone">
+    
+    <title>Lou & Noé Neon Zone</title>
     
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1a1a1a">
     <link rel="apple-touch-icon" href="assets/images/icon.png">
 
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
@@ -15,7 +18,7 @@
     <link rel="stylesheet" href="css/memory.css">
     <link rel="stylesheet" href="css/doolhof.css">
     <link rel="stylesheet" href="css/blokken.css">
-    <link rel="stylesheet" href="css/newgames.css"> 
+    <link rel="stylesheet" href="css/newgames.css">
 </head>
 <body>
 
@@ -62,15 +65,12 @@
     <div id="winner-modal" class="modal hidden">
         <div class="modal-content neon-box">
             <div id="confetti-container"></div>
-            
             <div class="trophy-animation">🏆</div>
-            
             <h2 id="winner-title" class="neon-text">WINNAAR!</h2>
             
             <div id="new-sticker-display"></div> 
             
             <div id="winner-leaderboard"></div>
-
             <button class="modal-btn neon-btn" onclick="closeWinnerModal()">VERDER ▶</button>
         </div>
     </div>
@@ -89,12 +89,5 @@
     <script src="js/blokken.js"></script>
     <script src="js/newgames.js"></script>
 
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js').catch(err => console.log('SW Fout:', err));
-            });
-        }
-    </script>
 </body>
 </html>
