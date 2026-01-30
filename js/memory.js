@@ -1,6 +1,6 @@
-// MEMORY SPEL LOGICA
+// MEMORY SPEL LOGICA - ZONDER VINKJE
 
-console.log("Memory.js geladen...");
+console.log("Memory.js geladen (No Checkmark version)...");
 
 let memoryState = { 
     theme: 'boerderij', 
@@ -16,7 +16,6 @@ let memoryState = {
     pendingPlayer: null 
 };
 
-// KLEUREN PALET
 const palette = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#4CAF50', '#FFEB3B', '#FF9800'];
 
 const predefinedPlayers = [
@@ -27,28 +26,24 @@ const predefinedPlayers = [
 ];
 
 const themes = {
-    // HIER ZIT DE AANPASSING: extension staat nu op 'png'
     'boerderij': { locked: false, extension: 'png', path: 'assets/images/memory/boerderij/' },
     'mario': { locked: false, extension: 'png', path: 'assets/images/memory/mario/' },
     'pokemon': { locked: false, extension: 'png', path: 'assets/images/memory/pokemon/' },
     'dino': { locked: true, extension: 'jpg', path: 'assets/images/memory/dino/' },
-    'studio100': { locked: false, extension: 'png', path: 'assets/images/memory/studio100/' },
+    'studio100': { locked: false, extension: 'jpg', path: 'assets/images/memory/studio100/' },
     'marvel': { locked: true, extension: 'jpg', path: 'assets/images/memory/marvel/' },
     'natuur': { locked: true, extension: 'jpg', path: 'assets/images/memory/natuur/' },
     'beroepen': { locked: true, extension: 'jpg', path: 'assets/images/memory/beroepen/' }
 };
 
-// 1. SETUP SCHERM
+// 1. SETUP SCHERM (Ongewijzigd)
 function startMemorySetup() {
     const board = document.getElementById('game-board');
-    
-    // Thema knoppen
     let themeButtonsHTML = Object.keys(themes).map(key => {
         const t = themes[key];
         const isLocked = t.locked ? 'locked' : '';
         const lockIcon = t.locked ? '<div class="lock-overlay">🔒</div>' : '';
         const label = key.charAt(0).toUpperCase() + key.slice(1);
-        
         return `
             <button class="theme-card-btn ${isLocked}" onclick="setTheme('${key}', this)">
                 <div class="theme-img-container">
@@ -59,7 +54,6 @@ function startMemorySetup() {
             </button>`;
     }).join('');
 
-    // Speler knoppen
     let playerButtonsHTML = predefinedPlayers.map(p => 
         `<button class="option-btn player-btn" onclick="selectPerson('${p.name}', this)">
             <span>${p.icon}</span><span class="btn-label">${p.name}</span>
@@ -69,7 +63,6 @@ function startMemorySetup() {
     board.innerHTML = `
         <div class="memory-setup">
             <div class="setup-columns">
-                
                 <div class="setup-group group-players">
                     <h3>1. Wie speelt er?</h3>
                     <div class="option-grid" id="player-selection">${playerButtonsHTML}</div>
@@ -82,12 +75,10 @@ function startMemorySetup() {
                     <div class="color-row" id="color-palette"></div>
                     <div id="active-players-list"></div>
                 </div>
-
                 <div class="setup-group group-theme">
                     <h3>3. Kies Thema</h3>
                     <div class="theme-grid">${themeButtonsHTML}</div>
                 </div>
-
                 <div class="setup-group group-size">
                     <h3>4. Aantal Kaartjes</h3>
                     <div class="option-grid">
@@ -104,14 +95,12 @@ function startMemorySetup() {
     memoryState.theme = 'boerderij'; 
     memoryState.pendingPlayer = null; 
     renderPalette(); 
-    
     setTimeout(() => {
         const defaultThemeBtn = document.querySelector(`.theme-card-btn[onclick="setTheme('boerderij', this)"]`);
         if(defaultThemeBtn) defaultThemeBtn.classList.add('selected');
     }, 10);
 }
 
-// KLEUR EN SPELER LOGICA
 function renderPalette() {
     const container = document.getElementById('color-palette');
     const usedColors = memoryState.playerNames.map(p => p.color);
@@ -273,7 +262,6 @@ function generateCards(sizePx) {
     const grid = document.getElementById('memory-grid');
     const themeData = themes[memoryState.theme];
     const pairsNeeded = memoryState.gridSize / 2;
-    // Gebruik hier de extensie uit de config
     const ext = themeData.extension; 
     
     let items = [];
@@ -288,19 +276,16 @@ function generateCards(sizePx) {
         card.dataset.value = item;
         if(sizePx) { card.style.width = `${sizePx}px`; card.style.height = `${sizePx}px`; }
 
-        // Let op: Hier gebruiken we .${ext} voor de kaartjes!
         let content = `<img src="${themeData.path}${item}.${ext}" class="card-img" draggable="false">`;
         let cover = `<img src="${themeData.path}cover.png" class="card-cover-img" draggable="false">`;
         
+        // AANGEPAST: VINKJE HTML VERWIJDERD
         card.innerHTML = `
             <div class="memory-card-inner">
                 <div class="card-front">${cover}</div>
                 <div class="card-back">
                     ${content}
-                    <div class="match-overlay">
-                        <span class="checkmark">✅</span>
                     </div>
-                </div>
             </div>`;
         card.addEventListener('click', flipCard);
         grid.appendChild(card);
@@ -326,9 +311,10 @@ function disableCards() {
     
     memoryState.flippedCards.forEach(card => {
         card.classList.add('matched');
+        // Kleur de rand en gloed van de kaart
         card.querySelector('.card-back').style.borderColor = currentP.color;
         card.querySelector('.card-back').style.boxShadow = `0 0 15px ${currentP.color}`;
-        card.querySelector('.checkmark').style.color = currentP.color;
+        // AANGEPAST: Code voor het vinkje kleuren is verwijderd
     });
 
     memoryState.matchedPairs++;
