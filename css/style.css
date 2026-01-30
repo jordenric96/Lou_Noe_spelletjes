@@ -1,73 +1,84 @@
-/* Algemene instellingen */
-* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
-/* --- css/style.css --- */
-
-/* ... (Bovenste deel met * { ... } blijft hetzelfde) */
-
-/* --- css/style.css --- */
-
-/* ... (De * selector bovenaan mag blijven) ... */
-
+* { box-sizing: border-box; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
 body {
-    font-family: 'Nunito', sans-serif;
-    background: linear-gradient(135deg, #FFEFBA 0%, #FFFFFF 50%, #B2EBF2 100%);
-    color: #333;
-    
-    /* DE OPLOSSING VOOR TABLETS: */
-    width: 100vw;
-    height: 100vh; /* Fallback voor oude apparaten */
-    height: 100dvh; /* Dynamic Viewport Height: houdt rekening met browserbalken! */
-    
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden; /* Voorkomt dat de hele pagina stuitert */
+    margin: 0; padding: 0; font-family: 'Nunito', sans-serif;
+    background-color: #121212; color: white;
+    height: 100vh; overflow: hidden;
 }
 
-/* ... (De rest blijft hetzelfde) ... */
+/* NEON COLORS */
+:root {
+    --neon-bg: #121212; --neon-card: #1E1E1E;
+    --neon-pink: #FF00FF; --neon-blue: #00FFFF;
+    --neon-green: #00FF00; --neon-yellow: #FFFF00;
+    --neon-purple: #BC13FE;
+}
 
-/* ... (De rest van style.css blijft hetzelfde) ... */
+/* SETUP SCHERMEN ALGEMEEN */
+.memory-setup {
+    display: flex; flex-direction: column; width: 100%; height: 100%;
+    padding: 10px; padding-bottom: max(10px, env(safe-area-inset-bottom));
+    background: #111; overflow-y: auto;
+}
+.setup-group {
+    background: #222; border-radius: 20px; padding: 10px; margin-bottom: 10px;
+    border: 1px solid #444; box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    text-align: center;
+}
+.setup-group h3 { margin: 5px 0 10px 0; color: var(--neon-blue); font-family: 'Fredoka One'; text-transform: uppercase; }
 
-#app { width: 100%; height: 100%; max-width: 1024px; position: relative; background: white; box-shadow: 0 0 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+/* KNOPPEN */
+.game-btn {
+    background: var(--neon-card); border: 2px solid white; color: white;
+    border-radius: 15px; padding: 15px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; font-family: 'Fredoka One';
+    font-size: 1.2rem; cursor: pointer; transition: transform 0.1s;
+}
+.game-btn:active { transform: scale(0.95); }
+.game-btn .icon { font-size: 2.5rem; margin-bottom: 5px; }
 
-/* SCHERMEN */
-.screen { width: 100%; height: 100%; padding: 20px; display: none; flex-direction: column; align-items: center; justify-content: center; }
-.screen.active { display: flex; }
+/* NEON VARIANTEN */
+.neon-blue { border-color: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); }
+.neon-pink { border-color: var(--neon-pink); box-shadow: 0 0 10px var(--neon-pink); }
+.neon-green { border-color: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
+.neon-yellow { border-color: var(--neon-yellow); box-shadow: 0 0 10px var(--neon-yellow); }
+.neon-purple { border-color: var(--neon-purple); box-shadow: 0 0 10px var(--neon-purple); }
+.neon-cyan { border-color: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); }
+.neon-border { border-color: white; box-shadow: 0 0 10px white; }
+
+.neon-title {
+    font-family: 'Fredoka One'; color: white;
+    text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-pink);
+    text-align: center; margin: 20px 0; font-size: 2.5rem;
+}
+
+/* LAYOUT */
+#app { width: 100%; height: 100%; position: relative; }
+.screen { width: 100%; height: 100%; position: absolute; top: 0; left: 0; display: flex; flex-direction: column; background: #121212; }
 .hidden { display: none !important; }
+.game-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 20px; overflow-y: auto; max-width: 600px; margin: 0 auto; }
+.game-header { 
+    display: flex; align-items: center; padding: 10px; background: #000; 
+    border-bottom: 2px solid var(--neon-blue); height: 60px; flex-shrink: 0;
+}
+#game-title { flex: 1; text-align: center; margin: 0; font-family: 'Fredoka One'; color: var(--neon-blue); }
+#back-btn { background: #333; color: var(--neon-blue); border: 1px solid var(--neon-blue); padding: 5px 15px; border-radius: 20px; font-weight: bold; }
+#game-board { flex: 1; position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; }
 
-/* MENU */
-.game-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 25px; width: 90%; max-width: 800px; }
-.game-btn { background: #FFCA28; border: none; border-radius: 25px; padding: 30px 20px; cursor: pointer; display: flex; flex-direction: column; align-items: center; box-shadow: 0 8px 0 #FFA000; position: relative; color: inherit; }
-.game-btn:active { transform: translateY(8px); box-shadow: none; }
-.game-btn .icon { font-size: 3.5rem; margin-bottom: 15px; }
-.game-btn .text { font-size: 1.5rem; font-weight: bold; color: #5D4037; font-family: 'Fredoka One', cursive; }
-
-.game-btn.locked { background: #EEEEEE; cursor: not-allowed; box-shadow: 0 8px 0 #BDBDBD; }
-.game-btn.locked .icon, .game-btn.locked .text { filter: grayscale(100%); opacity: 0.4; }
-.game-btn.locked:active { transform: none; box-shadow: 0 8px 0 #BDBDBD; }
-.lock-badge { position: absolute; top: 15px; right: 15px; font-size: 1.5rem; background: #FF5252; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-
-/* HEADER */
-.game-header { width: 100%; height: 60px; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; background-color: #00BCD4; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 100; }
-#back-btn { background: #FF7043; border: none; padding: 8px 15px; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 #D84315; font-family: 'Fredoka One', cursive; }
-#back-btn:active { transform: translateY(4px); box-shadow: none; }
-#game-board { width: 100%; height: calc(100% - 60px); position: relative; overflow: hidden; }
-
-/* WINNAAR MODAL */
-.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-.modal.show { opacity: 1; pointer-events: all; }
-.modal-content { background: linear-gradient(135deg, #9C27B0, #673AB7); width: 90%; max-width: 400px; padding: 30px; border-radius: 30px; text-align: center; color: white; box-shadow: 0 10px 30px rgba(103, 58, 183, 0.5); border: 4px solid #E1BEE7; transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-.modal.show .modal-content { transform: scale(1); }
-.trophy-animation { font-size: 5rem; margin-bottom: 10px; animation: bounce 2s infinite; }
-#winner-title { font-family: 'Fredoka One', cursive; font-size: 2.5rem; color: #FFD700; text-shadow: 2px 2px 0 #E65100; margin-bottom: 20px; }
-#winner-leaderboard { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
-.leaderboard-item { background: rgba(255, 255, 255, 0.2); padding: 10px 20px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 1.2rem; }
-.leaderboard-item.winner { background: white; color: #333; font-size: 1.8rem; padding: 15px 20px; border: 3px solid #FFD700; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-.modal-btn { background: #FFD700; color: #5D4037; border: none; padding: 15px 30px; font-size: 1.5rem; border-radius: 50px; cursor: pointer; font-family: 'Fredoka One', cursive; box-shadow: 0 5px 0 #FFA000; transition: transform 0.1s; }
-.modal-btn:active { transform: translateY(4px); box-shadow: none; }
-
-/* Confetti */
-.confetti { position: absolute; width: 10px; height: 10px; background-color: #f00; animation: fall linear forwards; z-index: 1001; }
+/* MODAL */
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+.modal.show { opacity: 1; pointer-events: auto; }
+.modal-content.neon-box {
+    background: #111; border: 2px solid var(--neon-pink); padding: 20px; border-radius: 20px;
+    box-shadow: 0 0 20px var(--neon-pink), inset 0 0 20px rgba(255,0,255,0.2);
+    text-align: center; width: 90%; max-width: 400px;
+}
+.neon-text { color: white; text-shadow: 0 0 10px var(--neon-pink); }
+.neon-btn { 
+    background: transparent; border: 2px solid var(--neon-green); color: var(--neon-green);
+    padding: 10px 30px; border-radius: 30px; font-family: 'Fredoka One'; font-size: 1.2rem;
+    box-shadow: 0 0 10px var(--neon-green); margin-top: 15px;
+}
+.trophy-animation { font-size: 4rem; animation: bounce 1s infinite; margin-bottom: 10px; }
+@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+.confetti { position: absolute; width: 10px; height: 10px; background: #f00; animation: fall linear forwards; }
 @keyframes fall { to { transform: translateY(100vh) rotate(720deg); } }
-@keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-20px);} 60% {transform: translateY(-10px);} }
-@media (min-width: 768px) { #app { border-radius: 25px; height: 95vh; margin: 2.5vh; overflow: hidden; } }
