@@ -1,181 +1,396 @@
-// NEWGAMES.JS - MET ALLE FUNCTIES (SIMON THEMA, VANG ZE NIVEAUS, TEKENEN OPSLAAN)
+// NIEUWE SPELLEN & STICKERS LOGICA
 
-// Asset Config voor Stickers
+// Configuratie van afbeeldingen (Moet kloppen met Memory mapjes!)
 const assetConfig = {
-    'mario': { count: 15, ext: 'png' }, 'pokemon': { count: 15, ext: 'png' },
-    'studio100': { count: 15, ext: 'png' }, 'boerderij': { count: 15, ext: 'png' },
-    'dino': { count: 15, ext: 'jpg' }, 'marvel': { count: 15, ext: 'jpg' }
+    'mario':     { count: 15, ext: 'png' },
+    'pokemon':   { count: 15, ext: 'png' },
+    'studio100': { count: 15, ext: 'png' },
+    'boerderij': { count: 15, ext: 'png' },
+    'dino':      { count: 15, ext: 'jpg' },
+    'marvel':    { count: 15, ext: 'jpg' },
+    'natuur':    { count: 15, ext: 'jpg' },
+    'beroepen':  { count: 15, ext: 'jpg' }
 };
 
-// --- STICKERS ---
+// --- STICKERBOEK LOGICA ---
+
 function generateAllStickers() {
-    let all = [];
+    let allStickers = [];
     for (const [theme, data] of Object.entries(assetConfig)) {
-        for (let i=1; i<=data.count; i++) all.push({id:`${theme}-${i}`, src:`assets/images/memory/${theme}/${i}.${data.ext}`});
+        for (let i = 1; i <= data.count; i++) {
+            allStickers.push({
+                id: `${theme}-${i}`,
+                src: `assets/images/memory/${theme}/${i}.${data.ext}`
+            });
+        }
     }
-    return all;
-}
-function getUnlocked() { return JSON.parse(localStorage.getItem('myStickers') || '[]'); }
-function unlockRandomSticker() {
-    const all = generateAllStickers(); const unlocked = getUnlocked();
-    const locked = all.filter(s => !unlocked.includes(s.id));
-    if (locked.length === 0) return null;
-    const newS = locked[Math.floor(Math.random() * locked.length)];
-    unlocked.push(newS.id);
-    localStorage.setItem('myStickers', JSON.stringify(unlocked));
-    return newS;
-}
-function openStickerBook() {
-    const board = document.getElementById('game-board');
-    const unlocked = getUnlocked(); const all = generateAllStickers();
-    let html = `<div style="text-align:center; margin-bottom:10px; font-family:'Fredoka One'; color:#0277BD;">Mijn Verzameling (${unlocked.length}/${all.length})</div><div class="sticker-container">`;
-    if(unlocked.length===0) html+='<div style="text-align:center; width:100%; color:#888;">Win spelletjes voor stickers!</div>';
-    all.forEach(s => {
-        if(unlocked.includes(s.id)) html+=`<div class="sticker-slot unlocked" onclick="zoomImage('${s.src}',false)"><img src="${s.src}" class="sticker-img"></div>`;
-        else html+=`<div class="sticker-slot locked">🔒</div>`;
-    });
-    board.innerHTML = html + '</div>';
+    return allStickers;
 }
 
-// --- TEKENBORD (Met Opslaan & Diktes) ---
-let isDrawing=false, ctx, drawColor='#000', drawSize=5;
+function getUnlockedStickers() {
+    const stored = localStorage.getItem('myStickers');
+    return stored ? JSON.parse(stored) : [];
+}
+
+function unlockRandomSticker() {
+    const allStickers = generateAllStickers();
+    const unlockedIds = getUnlockedStickers();
+    
+    // FILTER: Pak alleen stickers die we nog NIET hebben
+    const lockedStickers = allStickers.filter(s => !unlockedIds.includes(s.id));
+    
+    if (lockedStickers.length === 0) return null; // Alles al verzameld!
+    
+    // KANS: 50% kans op sticker bij winst (zet op > 0 om altijd te winnen tijdens testen)
+    if (Math.random() > 0.5) { 
+        const newSticker = lockedStickers[Math.floor(Math.random() * lockedStickers.length)];
+        unlockedIds.push(newSticker.id);
+        localStorage.setItem('myStickers', JSON.stringify(unlockedIds));
+        return newSticker; // We geven het HELE sticker object terug om te tonen
+    }
+    return null; // Geen sticker deze keer
+}
+
+function openStickerBook() {
+    const board = document.getElementById('game-board');
+    const unlockedIds = getUnlockedStickers();
+    const allStickers = generateAllStickers();
+    
+    let html = `<div class="sticker-header">Mijn Verzameling (${unlockedIds.length}/${allStickers.length})</div>`;
+    html += '<div class="sticker-container">';
+    
+    if(unlockedIds.length === 0) {
+        html += '<div class="empty-msg">Win spelletjes om stickers te verdienen!</div>';
+    }
+    
+    // We tonen ALLE stickers (ook de dichte) zodat je ziet wat je mist
+    allStickers.forEach(s => {
+        const isUnlocked = unlockedIds.includes(s.id);
+        if (isUnlocked) {
+            html += `<div class="sticker-slot unlocked">
+                        <img src="${s.src}" class="sticker-img" loading="lazy">
+                     </div>`;
+        } else {
+            html += `<div class="sticker-slot locked">
+                        <span class="sticker-lock-icon">🔒</span>
+                     </div>`;
+        }
+    });
+    
+    html += '</div>';
+    board.innerHTML = html;
+}
+
+
+// --- VANG DE ... (WHACK A MOLE) ---
+
+let whackState = { player: null, score: 0, timer: 30, active: false, gridSize: 9, speed: 1000, moleTimer: null, gameTimer: null };
+
+function startWhackGame() {
+    const board = document.getElementById('game-board');
+    board.innerHTML = `
+        <div class="memory-setup">
+            <div class="setup-columns">
+                <div class="setup-group group-players">
+                    <h3>Wie speelt?</h3>
+                    <div class="option-grid">
+                        <button class="option-btn player-btn" onclick="setWhackPlayer('Lou', this)"><span>👦🏼</span><span class="btn-label">Lou</span></button>
+                        <button class="option-btn player-btn" onclick="setWhackPlayer('Noé', this)"><span>👶🏼</span><span class="btn-label">Noé</span></button>
+                        <button class="option-btn player-btn" onclick="setWhackPlayer('Mama', this)"><span>👩🏻</span><span class="btn-label">Mama</span></button>
+                        <button class="option-btn player-btn" onclick="setWhackPlayer('Papa', this)"><span>👨🏻</span><span class="btn-label">Papa</span></button>
+                    </div>
+                </div>
+                <div class="setup-group group-size">
+                    <h3>Niveau</h3>
+                    <div class="option-grid">
+                        <button class="option-btn" onclick="setWhackDiff('easy', this)"><span>🟢</span><span class="btn-label">Makkelijk</span></button>
+                        <button class="option-btn selected" onclick="setWhackDiff('medium', this)"><span>🟠</span><span class="btn-label">Normaal</span></button>
+                        <button class="option-btn" onclick="setWhackDiff('hard', this)"><span>🔴</span><span class="btn-label">Snel!</span></button>
+                    </div>
+                </div>
+            </div>
+            <button id="start-whack-btn" class="start-btn" onclick="runWhackGame()" disabled>Kies een speler...</button>
+        </div>
+    `;
+    whackState.player = null; whackState.speed = 900; whackState.gridSize = 9;
+}
+
+function setWhackPlayer(name, btn) {
+    playSound('click'); whackState.player = name;
+    document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    document.getElementById('start-whack-btn').disabled = false;
+    document.getElementById('start-whack-btn').innerText = "START " + name.toUpperCase() + " ▶️";
+}
+
+function setWhackDiff(diff, btn) {
+    playSound('click');
+    document.querySelectorAll('.group-size .option-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    if(diff === 'easy') { whackState.gridSize = 4; whackState.speed = 1500; }
+    else if(diff === 'medium') { whackState.gridSize = 9; whackState.speed = 900; }
+    else if(diff === 'hard') { whackState.gridSize = 16; whackState.speed = 550; }
+}
+
+function runWhackGame() {
+    playSound('win');
+    const board = document.getElementById('game-board');
+    whackState.score = 0; whackState.timer = 30; whackState.active = true;
+    
+    let gridClass = whackState.gridSize === 4 ? 'grid-2' : (whackState.gridSize === 16 ? 'grid-4' : 'grid-3');
+    let gridHTML = '';
+    for(let i=0; i<whackState.gridSize; i++) {
+        gridHTML += `<div class="whack-hole" id="hole-${i}" onmousedown="whack(this)" ontouchstart="whack(this)"><div class="whack-character"></div></div>`;
+    }
+    
+    board.innerHTML = `
+        <div class="whack-container">
+            <div class="whack-score-board">
+                <span>Speler: ${whackState.player}</span>
+                <span>Tijd: <span id="whack-time">30</span>s</span>
+                <span>Score: <span id="whack-score">0</span></span>
+            </div>
+            <div class="whack-grid ${gridClass}">${gridHTML}</div>
+        </div>
+    `;
+    
+    if(whackState.gameTimer) clearInterval(whackState.gameTimer);
+    whackState.gameTimer = setInterval(() => {
+        if(!whackState.active) return;
+        whackState.timer--;
+        const timeEl = document.getElementById('whack-time');
+        if(timeEl) timeEl.innerText = whackState.timer;
+        if(whackState.timer <= 0) endWhackGame();
+    }, 1000);
+    popUpMole();
+}
+
+function getRandomCharacterImage() {
+    const themes = ['mario', 'pokemon']; // Gebruik deze thema's
+    const randomTheme = themes[Math.floor(Math.random() * themes.length)];
+    const randomNr = Math.floor(Math.random() * 10) + 1;
+    return `assets/images/memory/${randomTheme}/${randomNr}.png`;
+}
+
+function popUpMole() {
+    if(!whackState.active) return;
+    const holes = document.querySelectorAll('.whack-hole');
+    const randomIdx = Math.floor(Math.random() * holes.length);
+    const hole = holes[randomIdx];
+    const char = hole.querySelector('.whack-character');
+    char.style.backgroundImage = `url('${getRandomCharacterImage()}')`;
+    hole.classList.add('up');
+    const duration = whackState.speed * (0.8 + Math.random() * 0.4); 
+    whackState.moleTimer = setTimeout(() => {
+        hole.classList.remove('up');
+        if(whackState.active) setTimeout(popUpMole, Math.random() * 300);
+    }, duration);
+}
+
+function whack(hole) {
+    if(!whackState.active || !hole.classList.contains('up') || hole.classList.contains('whacked')) return;
+    playSound('pop');
+    hole.classList.remove('up'); hole.classList.add('whacked');
+    setTimeout(() => hole.classList.remove('whacked'), 200);
+    whackState.score++;
+    document.getElementById('whack-score').innerText = whackState.score;
+}
+
+function endWhackGame() {
+    whackState.active = false;
+    clearInterval(whackState.gameTimer); clearTimeout(whackState.moleTimer);
+    playSound('win');
+    showWinnerModal(whackState.player, [{name: whackState.player, score: whackState.score + " ptn"}]);
+}
+function stopWhackGame() { whackState.active = false; clearInterval(whackState.gameTimer); clearTimeout(whackState.moleTimer); }
+
+
+// --- SIMON ZEGT (Met Vriendjes) ---
+
+let simonSequence = []; let playerSequence = []; let simonLevel = 0; let simonActive = false; let simonTheme = 'mario';
+
+const simonThemes = {
+    'mario':     { type: 'img', path: 'assets/images/memory/mario/', ext: 'png' },
+    'pokemon':   { type: 'img', path: 'assets/images/memory/pokemon/', ext: 'png' },
+    'studio100': { type: 'img', path: 'assets/images/memory/studio100/', ext: 'png' },
+    'boerderij': { type: 'img', path: 'assets/images/memory/boerderij/', ext: 'png' },
+    'kleuren':   { type: 'color', colors: ['#4CAF50', '#F44336', '#FFEB3B', '#2196F3'] }
+};
+
+function startSimonGame() {
+    const board = document.getElementById('game-board');
+    let themeHTML = '';
+    const themesList = ['mario', 'pokemon', 'studio100', 'boerderij', 'kleuren'];
+    
+    themesList.forEach(key => {
+        let label = key.charAt(0).toUpperCase() + key.slice(1);
+        let icon = key === 'mario' ? '🍄' : (key === 'pokemon' ? '⚡' : (key === 'studio100' ? '🎈' : (key === 'boerderij' ? '🐮' : '🎨')));
+        themeHTML += `<button class="option-btn" onclick="setSimonTheme('${key}', this)"><span>${icon}</span><span class="btn-label">${label}</span></button>`;
+    });
+
+    board.innerHTML = `
+        <div class="memory-setup">
+            <div class="setup-group" style="width:100%"><h3>Kies je vriendjes!</h3><div class="option-grid">${themeHTML}</div></div>
+            <button id="start-simon-real" class="start-btn" onclick="initSimonPlay()" disabled>Kies een thema...</button>
+        </div>
+    `;
+    setTimeout(() => { const btn = document.querySelector(`.option-btn[onclick="setSimonTheme('mario', this)"]`); if(btn) setSimonTheme('mario', btn); }, 10);
+}
+
+function setSimonTheme(key, btn) {
+    playSound('click'); simonTheme = key;
+    document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    document.getElementById('start-simon-real').disabled = false;
+    document.getElementById('start-simon-real').innerText = "START SIMON ▶️";
+}
+
+function initSimonPlay() {
+    const board = document.getElementById('game-board');
+    const highScore = localStorage.getItem('simonHighScore') || 0;
+    let buttonsHTML = '';
+    const t = simonThemes[simonTheme];
+    
+    for(let i=0; i<4; i++) {
+        let style = t.type === 'color' ? `background-color: ${t.colors[i]};` : `background-image: url('${t.path}${i+1}.${t.ext}'); background-size: cover; background-position: center; border: 4px solid white;`;
+        buttonsHTML += `<button class="simon-btn" id="btn-${i}" style="${style}" onclick="handleSimonInput(${i})"></button>`;
+    }
+
+    board.innerHTML = `
+        <div class="simon-container">
+            <div class="simon-info"><div class="simon-score">Score: <span id="simon-current-score">0</span></div><div class="simon-highscore">Record: ${highScore}</div><div id="simon-msg" class="simon-message">Let op...</div></div>
+            <div class="simon-board theme-${simonTheme}">${buttonsHTML}</div>
+            <button class="start-btn" id="simon-action-btn" onclick="nextSimonRound()" style="width:auto; padding: 10px 30px;">Start!</button>
+        </div>
+    `;
+    simonSequence = []; simonLevel = 0; simonActive = false;
+}
+
+function nextSimonRound() {
+    document.getElementById('simon-action-btn').style.display = 'none';
+    simonLevel++; playerSequence = [];
+    document.getElementById('simon-current-score').innerText = simonLevel - 1;
+    document.getElementById('simon-msg').innerText = "Kijk goed...";
+    simonSequence.push(Math.floor(Math.random() * 4));
+    setTimeout(playSequence, 500);
+}
+
+function playSequence() {
+    simonActive = false; let i = 0;
+    const interval = setInterval(() => {
+        activateSimonBtn(simonSequence[i]); i++;
+        if (i >= simonSequence.length) { clearInterval(interval); simonActive = true; document.getElementById('simon-msg').innerText = "Jouw beurt!"; }
+    }, 800);
+}
+
+function activateSimonBtn(index) {
+    const btn = document.getElementById(`btn-${index}`);
+    if(!btn) return;
+    btn.classList.add('lit'); playSound('pop');
+    setTimeout(() => btn.classList.remove('lit'), 400);
+}
+
+function handleSimonInput(index) {
+    if (!simonActive) return;
+    activateSimonBtn(index); playerSequence.push(index);
+    if (playerSequence[playerSequence.length - 1] !== simonSequence[playerSequence.length - 1]) {
+        playSound('lose'); document.getElementById('simon-msg').innerText = "Oei, foutje!"; simonActive = false;
+        const currentHigh = localStorage.getItem('simonHighScore') || 0;
+        if ((simonLevel - 1) > currentHigh) localStorage.setItem('simonHighScore', simonLevel - 1);
+        const actionBtn = document.getElementById('simon-action-btn'); actionBtn.innerText = "Opnieuw"; actionBtn.style.display = 'block'; actionBtn.onclick = initSimonPlay;
+        return;
+    }
+    if (playerSequence.length === simonSequence.length) {
+        simonActive = false; document.getElementById('simon-msg').innerText = "Goed zo! 👍"; playSound('win'); setTimeout(nextSimonRound, 1000);
+    }
+}
+function stopSimonGame() { simonActive = false; }
+
+// --- TEKENBORD ---
+let isDrawing = false; 
+let ctx; 
+let drawColor = '#000000'; 
+let drawSize = 5; // Standaard dikte
 
 function startDrawing() {
     const board = document.getElementById('game-board');
+    
+    // HTML met KLEUREN, LIJNTJE, DIKTES en GUM
     board.innerHTML = `
         <div class="drawing-container">
             <div class="drawing-controls">
-               <button class="tool-btn" onclick="openAlbum()">📁 Album</button>
-               <button class="tool-btn" style="background:#4CAF50; color:white;" onclick="saveDraw()">💾 Opslaan</button>
-            </div>
-            <div class="drawing-controls">
-                <div class="color-swatch active" style="background:black" onclick="setCol('black',this)"></div>
-                <div class="color-swatch" style="background:#F44336" onclick="setCol('#F44336',this)"></div>
-                <div class="color-swatch" style="background:#2196F3" onclick="setCol('#2196F3',this)"></div>
-                <div class="color-swatch" style="background:#FFEB3B" onclick="setCol('#FFEB3B',this)"></div>
-                <div style="width:1px; height:20px; background:#CCC; margin:0 5px;"></div>
-                <div class="size-btn active" onclick="setSize(5,this)"><div class="dot" style="width:5px;height:5px;"></div></div>
-                <div class="size-btn" onclick="setSize(15,this)"><div class="dot" style="width:12px;height:12px;"></div></div>
-                <div class="size-btn" onclick="setSize(30,this)"><div class="dot" style="width:20px;height:20px;"></div></div>
-                <button class="tool-btn" onclick="clearCan()">🗑️</button>
+                <div class="color-swatch active" style="background:black" onclick="setColor('black', this)"></div>
+                <div class="color-swatch" style="background:#F44336" onclick="setColor('#F44336', this)"></div> <div class="color-swatch" style="background:#2196F3" onclick="setColor('#2196F3', this)"></div> <div class="color-swatch" style="background:#4CAF50" onclick="setColor('#4CAF50', this)"></div> <div class="color-swatch" style="background:#FFEB3B" onclick="setColor('#FFEB3B', this)"></div> <div class="color-swatch" style="background:#9C27B0" onclick="setColor('#9C27B0', this)"></div> <div class="control-divider"></div>
+                
+                <div class="size-btn active" onclick="setBrushSize(5, this)"><div class="dot dot-s"></div></div>
+                <div class="size-btn" onclick="setBrushSize(15, this)"><div class="dot dot-m"></div></div>
+                <div class="size-btn" onclick="setBrushSize(30, this)"><div class="dot dot-l"></div></div>
+
+                <div class="control-divider"></div>
+
+                <button class="tool-btn" onclick="clearCanvas()">🗑️</button>
             </div>
             <canvas id="drawCanvas"></canvas>
         </div>
     `;
-    setTimeout(initCan, 100);
+    
+    const canvas = document.getElementById('drawCanvas');
+    const container = document.querySelector('.drawing-container');
+    
+    // Canvas grootte instellen
+    canvas.width = container.clientWidth * 0.95; 
+    canvas.height = container.clientHeight * 0.85;
+    
+    ctx = canvas.getContext('2d'); 
+    ctx.lineCap = 'round'; 
+    ctx.lineJoin = 'round';
+    
+    // Event Listeners (Touch & Muis)
+    canvas.addEventListener('mousedown', startDraw); 
+    canvas.addEventListener('touchstart', startDraw, {passive: false});
+    canvas.addEventListener('mousemove', draw); 
+    canvas.addEventListener('touchmove', draw, {passive: false});
+    canvas.addEventListener('mouseup', stopDraw); 
+    canvas.addEventListener('touchend', stopDraw);
 }
 
-function initCan() {
-    const c = document.getElementById('drawCanvas'); 
-    const con = document.querySelector('.drawing-container');
-    if(!c || !con) return;
-    c.width = con.clientWidth * 0.95; c.height = con.clientHeight * 0.70;
-    ctx=c.getContext('2d'); ctx.lineCap='round'; ctx.lineJoin='round';
-    c.addEventListener('mousedown', sD); c.addEventListener('touchstart', sD, {passive:false});
-    c.addEventListener('mousemove', d); c.addEventListener('touchmove', d, {passive:false});
-    c.addEventListener('mouseup', eD); c.addEventListener('touchend', eD);
-}
-function sD(e){isDrawing=true; d(e);} function eD(){isDrawing=false; ctx.beginPath();}
-function d(e){if(!isDrawing)return; e.preventDefault(); const c=document.getElementById('drawCanvas'); const r=c.getBoundingClientRect(); const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left; const y=(e.touches?e.touches[0].clientY:e.clientY)-r.top; ctx.lineWidth=drawSize; ctx.strokeStyle=drawColor; ctx.lineTo(x,y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x,y);}
-function setCol(c,b){playSound('click'); drawColor=c; document.querySelectorAll('.color-swatch').forEach(x=>x.classList.remove('active')); b.classList.add('active');}
-function setSize(s,b){playSound('click'); drawSize=s; document.querySelectorAll('.size-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active');}
-function clearCan(){playSound('pop'); const c=document.getElementById('drawCanvas'); ctx.clearRect(0,0,c.width,c.height);}
+function startDraw(e) { isDrawing = true; draw(e); }
+function stopDraw() { isDrawing = false; ctx.beginPath(); }
 
-function saveDraw(){
-    const img = document.getElementById('drawCanvas').toDataURL("image/png");
-    let a = JSON.parse(localStorage.getItem('myDrawings')||'[]'); 
-    a.unshift(img); if(a.length>20)a.pop();
-    localStorage.setItem('myDrawings', JSON.stringify(a)); 
-    playSound('win'); alert("Tekening opgeslagen!");
+function draw(e) { 
+    if (!isDrawing) return; 
+    e.preventDefault(); 
+    
+    const canvas = document.getElementById('drawCanvas');
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left; 
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top; 
+    
+    ctx.lineWidth = drawSize; // Hier gebruiken we de gekozen dikte
+    ctx.strokeStyle = drawColor; 
+    
+    ctx.lineTo(x, y); 
+    ctx.stroke(); 
+    ctx.beginPath(); 
+    ctx.moveTo(x, y); 
 }
-function openAlbum(){
-    const board = document.getElementById('game-board'); const a = JSON.parse(localStorage.getItem('myDrawings')||'[]');
-    let h = `<div style="text-align:center; font-family:'Fredoka One'; color:#0277BD; margin-bottom:10px;">Mijn Album 🎨</div>
-             <button class="tool-btn" onclick="startDrawing()" style="margin-bottom:10px;">⬅ Terug</button>
-             <div class="sticker-container">`;
-    if(a.length===0) h+='<div style="text-align:center; width:100%; color:#888;">Nog geen tekeningen.</div>';
-    a.forEach((src,i)=> h+=`<div class="sticker-slot unlocked" style="background:white" onclick="zoomImage('${src}',true,${i})"><img src="${src}" class="sticker-img"></div>`);
-    board.innerHTML=h+'</div>';
-}
-function delDraw(i){
-    let a=JSON.parse(localStorage.getItem('myDrawings')||'[]'); a.splice(i,1);
-    localStorage.setItem('myDrawings', JSON.stringify(a)); closeZoom(); openAlbum(); playSound('pop');
-}
-function zoomImage(src,isDraw,idx){
-    const o=document.getElementById('zoom-overlay'); const i=document.getElementById('zoomed-image'); const d=document.getElementById('delete-drawing-btn');
-    i.src=src; o.classList.remove('hidden');
-    if(isDraw){ d.classList.remove('hidden'); d.onclick=(e)=>{e.stopPropagation(); if(confirm("Weggooien?"))delDraw(idx);};} else d.classList.add('hidden');
-}
-function closeZoom(){document.getElementById('zoom-overlay').classList.add('hidden');}
 
+function setColor(color, btn) { 
+    if(typeof playSound === 'function') playSound('click');
+    drawColor = color; 
+    document.querySelectorAll('.color-swatch').forEach(b => b.classList.remove('active')); 
+    btn.classList.add('active'); 
+}
 
-// --- VANG ZE (Met Niveaus) ---
-let wS = {p:null,s:0,t:30,act:false,sz:9,sp:900,mt:null,gt:null};
+function setBrushSize(size, btn) {
+    if(typeof playSound === 'function') playSound('click');
+    drawSize = size;
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
 
-function startWhackGame(){
-    const b=document.getElementById('game-board'); 
-    b.innerHTML=`<div class="memory-setup-container" style="text-align:center; padding:20px;">
-        <h3>Wie speelt?</h3>
-        <div style="display:flex; justify-content:center; gap:10px; margin-bottom:20px;">
-             <button class="icon-btn" onclick="setWPl('Lou',this)">👦🏼 Lou</button>
-             <button class="icon-btn" onclick="setWPl('Noé',this)">👶🏼 Noé</button>
-        </div>
-        <h3>Niveau</h3>
-        <div style="display:flex; justify-content:center; gap:10px; margin-bottom:20px;">
-            <button class="size-btn" onclick="setWD('easy',this)">Makkelijk</button>
-            <button class="size-btn selected" onclick="setWD('medium',this)">Normaal</button>
-            <button class="size-btn" onclick="setWD('hard',this)">Snel!</button>
-        </div>
-        <button id="swb" class="game-btn btn-purple" onclick="runWhack()" disabled style="width:100%">START</button>
-    </div>`; 
-    wS.p=null; wS.sz=9; wS.sp=900;
+function clearCanvas() { 
+    if(typeof playSound === 'function') playSound('pop');
+    const canvas = document.getElementById('drawCanvas'); 
+    ctx.clearRect(0, 0, canvas.width, canvas.height); 
 }
-function setWPl(n,b){playSound('click'); wS.p=n; document.querySelectorAll('.icon-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); document.getElementById('swb').disabled=false;}
-function setWD(d,b){playSound('click'); document.querySelectorAll('.size-btn').forEach(x=>x.classList.remove('selected')); b.classList.add('selected'); wS.sz=d==='easy'?4:(d==='hard'?16:9); wS.sp=d==='easy'?1500:(d==='hard'?550:900);}
-function runWhack(){
-    playSound('win'); const b=document.getElementById('game-board'); wS.s=0; wS.t=30; wS.act=true;
-    let gc=wS.sz===4?'grid-2':(wS.sz===16?'grid-4':'grid-3'); 
-    let h=''; for(let i=0;i<wS.sz;i++) h+=`<div class="whack-hole" id="hole-${i}" onmousedown="whack(this)" ontouchstart="whack(this)"><div class="whack-character"></div></div>`;
-    b.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;height:100%;"><div style="font-family:'Fredoka One'; font-size:1.5rem; margin-bottom:10px;">${wS.p} - Tijd: <span id="wt">30</span> - Score: <span id="ws">0</span></div><div class="whack-grid ${gc}" style="display:grid; gap:10px; width:100%; max-width:500px; aspect-ratio:1/1;">${h}</div></div>`;
-    wS.gt=setInterval(()=>{if(!wS.act)return; wS.t--; document.getElementById('wt').innerText=wS.t; if(wS.t<=0)endWhack();},1000); popMole();
-}
-function popMole(){
-    if(!wS.act)return; const holes=document.querySelectorAll('.whack-hole'); const hole=holes[Math.floor(Math.random()*holes.length)];
-    hole.querySelector('.whack-character').style.backgroundImage=`url('assets/images/memory/mario/${Math.floor(Math.random()*10)+1}.png')`;
-    hole.classList.add('up'); wS.mt=setTimeout(()=>{hole.classList.remove('up'); if(wS.act)setTimeout(popMole,Math.random()*300);},wS.sp);
-}
-function whack(h){if(!wS.act||!h.classList.contains('up')||h.classList.contains('whacked'))return; playSound('pop'); h.classList.remove('up'); h.classList.add('whacked'); setTimeout(()=>h.classList.remove('whacked'),200); wS.s++; document.getElementById('ws').innerText=wS.s;}
-function endWhack(){wS.act=false; clearInterval(wS.gt); clearTimeout(wS.mt); showWinnerModal(wS.p,[{name:wS.p,score:wS.s}]);}
-function stopWhackGame(){wS.act=false; clearInterval(wS.gt); clearTimeout(wS.mt);}
-
-
-// --- SIMON (Met Thema's) ---
-let sSeq=[], pSeq=[], sLvl=0, sAct=false, sThm='mario';
-const sThms={'mario':{p:'assets/images/memory/mario/',e:'png'},'pokemon':{p:'assets/images/memory/pokemon/',e:'png'}};
-
-function startSimonGame(){
-    const b=document.getElementById('game-board'); 
-    b.innerHTML=`<div class="memory-setup-container" style="text-align:center;">
-        <h3>Kies je vriendjes</h3>
-        <div style="display:flex; justify-content:center; gap:15px; margin-bottom:20px;">
-            <button class="theme-btn" onclick="setST('mario',this)"><img src="assets/images/memory/mario/cover.png" style="width:60px;height:40px;object-fit:cover;"><span>Mario</span></button>
-            <button class="theme-btn" onclick="setST('pokemon',this)"><img src="assets/images/memory/pokemon/cover.png" style="width:60px;height:40px;object-fit:cover;"><span>Pokémon</span></button>
-        </div>
-        <button id="ssb" class="game-btn btn-yellow" onclick="initSim()" disabled style="width:100%">START</button>
-    </div>`;
-}
-function setST(t,b){playSound('click');sThm=t; document.querySelectorAll('.theme-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); document.getElementById('ssb').disabled=false;}
-function initSim(){
-    const b=document.getElementById('game-board'); const t=sThms[sThm]||sThms['mario'];
-    let h=''; for(let i=0;i<4;i++) h+=`<button class="simon-btn" id="sb-${i}" style="background-image:url('${t.p}${i+1}.${t.e}');background-size:cover; border:3px solid white; border-radius:50%; box-shadow:0 5px 10px rgba(0,0,0,0.2);" onclick="hSim(${i})"></button>`;
-    b.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;height:100%;"><div style="background:white;padding:10px 20px;border-radius:20px;margin-bottom:10px;font-family:'Fredoka One';color:#FBC02D;"><span id="smsg">Let op...</span></div><div class="simon-board" style="display:grid; grid-template-columns:1fr 1fr; gap:15px; width:300px; height:300px;">${h}</div><button class="modal-btn" onclick="nxtSim()" style="margin-top:10px;">Start</button></div>`; sSeq=[]; sLvl=0;
-}
-function nxtSim(){sLvl++; pSeq=[]; sSeq.push(Math.floor(Math.random()*4)); runSim();}
-function runSim(){sAct=false; let i=0; const int=setInterval(()=>{actSim(sSeq[i]); i++; if(i>=sSeq.length){clearInterval(int); sAct=true; document.getElementById('smsg').innerText="Jij!";}},800);}
-function actSim(i){const b=document.getElementById(`sb-${i}`); b.style.transform='scale(1.15)'; b.style.borderColor='#FFEB3B'; playSound('pop'); setTimeout(()=>{b.style.transform='scale(1)'; b.style.borderColor='white';},400);}
-function hSim(i){
-    if(!sAct)return; actSim(i); pSeq.push(i);
-    if(pSeq[pSeq.length-1]!==sSeq[pSeq.length-1]){playSound('lose'); document.getElementById('smsg').innerText="Fout!"; sAct=false; setTimeout(()=>showWinnerModal("Simon",[{name:"Jij",score:sLvl-1}]),1000); return;}
-    if(pSeq.length===sSeq.length){sAct=false; document.getElementById('smsg').innerText="Goed!"; setTimeout(nxtSim,1000);}
-}
-function stopSimonGame(){sAct=false;}

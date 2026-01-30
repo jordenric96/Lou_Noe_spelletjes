@@ -1,12 +1,10 @@
-// MAIN.JS - GEREPAREERDE VERSIE
-
 const mainMenu = document.getElementById('main-menu');
 const gameContainer = document.getElementById('game-container');
 const gameTitle = document.getElementById('game-title');
 const gameBoard = document.getElementById('game-board');
 let currentGame = null; 
 
-// --- AUDIO ---
+// --- AUDIO SYSTEEM ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playSound(type) {
     if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -17,15 +15,19 @@ function playSound(type) {
     const now = audioCtx.currentTime;
     
     if (type === 'click') {
-        osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+        osc.type = 'sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
         gainNode.gain.setValueAtTime(0.3, now); gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
         osc.start(now); osc.stop(now + 0.1);
     } else if (type === 'win') {
         osc.type = 'triangle'; osc.frequency.setValueAtTime(400, now); osc.frequency.setValueAtTime(600, now + 0.1); osc.frequency.setValueAtTime(1000, now + 0.2);
         gainNode.gain.setValueAtTime(0.3, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.5);
         osc.start(now); osc.stop(now + 0.5);
+    } else if (type === 'lose') {
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, now); osc.frequency.linearRampToValueAtTime(100, now + 0.3);
+        gainNode.gain.setValueAtTime(0.3, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.3);
+        osc.start(now); osc.stop(now + 0.3);
     } else if (type === 'pop') {
-        osc.frequency.setValueAtTime(800, now);
+        osc.type = 'sine'; osc.frequency.setValueAtTime(800, now);
         gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
         osc.start(now); osc.stop(now + 0.1);
     }
@@ -37,6 +39,7 @@ function selectGame(gameName) {
     mainMenu.classList.remove('active'); mainMenu.classList.add('hidden');
     gameContainer.classList.remove('hidden'); gameContainer.classList.add('active');
     currentGame = gameName; 
+
     gameBoard.innerHTML = '';
 
     if (gameName === 'memory') { gameTitle.innerText = "Memory"; if (typeof startMemorySetup === "function") startMemorySetup(); }
@@ -60,55 +63,79 @@ function goHome() {
     currentGame = null;
 }
 
-// --- WINNAAR POP-UP ---
+// --- WINNAAR & STICKERS (BELANGRIJK) ---
 function showWinnerModal(winnerName, leaderboardData) {
     playSound('win');
     const modal = document.getElementById('winner-modal');
     const title = document.getElementById('winner-title');
     const list = document.getElementById('winner-leaderboard');
-    const stickerDisplay = document.getElementById('new-sticker-display'); 
+    const stickerDisplay = document.getElementById('new-sticker-display'); // NIEUW ELEMENT
     
     title.innerText = winnerName ? `${winnerName} wint!` : "Gewonnen!";
     list.innerHTML = '';
     
-    // Check of we een sticker kunnen winnen
+    // Probeer sticker te winnen
     let wonSticker = null;
     if(typeof unlockRandomSticker === 'function') {
         wonSticker = unlockRandomSticker(); 
     }
 
-    if(wonSticker && stickerDisplay) {
+    // UPDATE: Toon de sticker VISUEEL
+    if(wonSticker) {
         stickerDisplay.innerHTML = `
             <div class="sticker-reward-anim">
                 <div class="reward-text">✨ NIEUWE STICKER! ✨</div>
-                <img src="${wonSticker.src}" class="reward-img" style="max-width:100px; display:block; margin:10px auto;">
+                <img src="${wonSticker.src}" class="reward-img">
             </div>
         `;
-    } else if (stickerDisplay) {
-        stickerDisplay.innerHTML = ''; 
+        playSound('win');
+    } else {
+        stickerDisplay.innerHTML = ''; // Geen sticker gewonnen
     }
     
     if (leaderboardData && leaderboardData.length > 0) {
         leaderboardData.forEach((player, index) => {
             const item = document.createElement('div');
             item.className = 'leaderboard-item';
-            if(index===0) item.style.fontWeight = 'bold';
+            if (index === 0) item.classList.add('winner');
+            if (player.color) {
+                item.style.color = player.color;
+                if(index === 0) item.style.borderColor = player.color;
+                else { item.style.background = player.color; item.style.color = 'white'; }
+            }
             item.innerHTML = `<span>${index + 1}. ${player.name}</span><span>${player.score}</span>`;
             list.appendChild(item);
         });
     }
     modal.classList.remove('hidden');
+    setTimeout(() => modal.classList.add('show'), 10);
+    startConfetti();
 }
 
 function closeWinnerModal() {
     playSound('click');
     const modal = document.getElementById('winner-modal');
-    modal.classList.add('hidden');
+    modal.classList.remove('show');
+    setTimeout(() => modal.classList.add('hidden'), 300);
     
-    // Herstart het huidige spel
     if (currentGame === 'memory') startMemorySetup();
-    else if (currentGame === 'doolhof') startDoolhofSetup();
-    else if (currentGame === 'blokken') startBlokkenGame(); 
-    else if (currentGame === 'simon') startSimonGame();
-    else if (currentGame === 'vang') startWhackGame();
+    if (currentGame === 'doolhof') startDoolhofSetup();
+    if (currentGame === 'blokken') startBlokkenGame(); 
+    if (currentGame === 'simon') startSimonGame();
+    if (currentGame === 'vang') startWhackGame();
+}
+
+function startConfetti() {
+    const container = document.getElementById('confetti-container');
+    container.innerHTML = ''; 
+    const colors = ['#f00', '#0f0', '#00f', '#ff0', '#0ff', '#f0f', '#fff'];
+    for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDuration = (Math.random() * 2 + 2) + 's'; 
+        confetti.style.opacity = Math.random();
+        container.appendChild(confetti);
+    }
 }

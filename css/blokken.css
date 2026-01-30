@@ -1,60 +1,108 @@
-#blokken-container { 
-    display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; 
-    background: #111; padding-top: 10px; 
-}
-#status-bar { 
-    width: 90%; max-width: 500px; background: #222; padding: 10px; 
-    border-radius: 15px; border-left: 5px solid white; display: flex; flex-direction: column; 
-    color: white; box-shadow: 0 0 10px rgba(255,255,255,0.1); 
-}
-.timer-container { display: flex; align-items: center; gap: 10px; margin-top: 5px; }
-#timer-bar-bg { flex: 1; height: 10px; background: #444; border-radius: 5px; }
-#timer-bar { height: 100%; background: linear-gradient(90deg, var(--neon-yellow), var(--neon-pink)); width: 100%; }
+/* BLOKKEN PUZZEL STIJLEN - BOM EDITIE */
 
-#game-area { 
-    width: 90vw; height: 90vw; max-width: 450px; max-height: 450px; 
-    background: #222; border: 4px solid #555; border-radius: 10px; 
-    position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.5); margin-top: 10px; 
-}
-#exit-marker { 
-    position: absolute; right: -12px; top: 33.33%; width: 12px; height: 16.66%; 
-    background: repeating-linear-gradient(45deg, var(--neon-yellow), var(--neon-yellow) 5px, #000 5px, #000 10px); 
-    border: 1px solid white; 
+#blokken-container {
+    display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%;
+    background: #FFECB3; position: relative; overflow: hidden; padding-top: 10px;
 }
 
-.block { 
-    position: absolute; border-radius: 5px; border: 2px solid rgba(0,0,0,0.5); 
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.5); 
+/* STATUS BALK (Timer + Naam) */
+#status-bar {
+    width: 90%; max-width: 500px; background: white; padding: 10px 15px;
+    border-radius: 15px; margin-bottom: 15px; box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+    border-left: 10px solid #333; display: flex; flex-direction: column; gap: 5px;
 }
-.block.hero { background: none !important; border: none; background-size: contain; background-repeat: no-repeat; z-index: 50; filter: drop-shadow(0 0 5px red); }
-.block:not(.hero) { background: var(--neon-blue); border-color: #008ba3; }
-.block:nth-child(2n) { background: var(--neon-green); border-color: #00a300; }
-.block:nth-child(3n) { background: var(--neon-purple); border-color: #7b00a3; }
-.block.truck { background: var(--neon-yellow) !important; border-color: #a3a300; }
 
-.explosion-overlay { 
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-    background: rgba(0,0,0,0.8); z-index: 200; display: flex; 
-    flex-direction: column; justify-content: center; align-items: center; 
+.player-info {
+    display: flex; justify-content: space-between; font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
 }
-.boom-text { font-size: 5rem; color: var(--neon-pink); font-family: 'Fredoka One'; text-shadow: 0 0 20px var(--neon-pink); animation: boomScale 0.5s; }
-.boom-emoji { font-size: 6rem; }
-@keyframes boomScale { 0% { transform: scale(0); } 80% { transform: scale(1.2); } 100% { transform: scale(1); } }
-.shaking { animation: shake 0.5s; }
-@keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -2px); } 100% { transform: translate(1px, -1px); } }
 
+/* DE BOM TIMER */
+.timer-container {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+}
+.bomb-icon { font-size: 1.5rem; animation: tickTock 0.5s infinite alternate; }
+@keyframes tickTock { from { transform: scale(1); } to { transform: scale(1.1) rotate(10deg); } }
+
+#timer-bar-bg {
+    flex: 1; height: 12px; background: #EEE; border-radius: 6px; overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+#timer-bar {
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, #FF9800, #F44336); /* Oranje naar Rood (Lont) */
+    transition: width 0.1s linear;
+}
+
+/* SPELBORD */
+#game-area {
+    width: 90vw; height: 90vw; max-width: 450px; max-height: 450px;
+    background: #8D6E63; border: 8px solid #5D4037; border-radius: 10px;
+    position: relative; box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    background-image: linear-gradient(#795548 2px, transparent 2px), linear-gradient(90deg, #795548 2px, transparent 2px);
+    background-size: 16.66% 16.66%; box-sizing: content-box;
+    transition: transform 0.1s; /* Voor het schudden */
+}
+
+/* UITGANG */
+#exit-marker {
+    position: absolute; right: -12px; top: 33.33%; width: 12px; height: 16.66%;
+    background: repeating-linear-gradient(45deg, #FFEB3B, #FFEB3B 5px, #000 5px, #000 10px);
+    border-top-right-radius: 5px; border-bottom-right-radius: 5px; z-index: 1;
+}
+
+/* BLOKKEN */
+.block {
+    position: absolute; box-sizing: border-box; border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.3); box-shadow: inset 0 2px 5px rgba(255,255,255,0.4), 0 3px 5px rgba(0,0,0,0.3);
+    cursor: grab; touch-action: none; display: flex; justify-content: center; align-items: center;
+    transition: transform 0.1s;
+}
+.block:active { cursor: grabbing; transform: scale(0.96); z-index: 100; }
 .block.hero {
-    background-color: transparent !important;
-    background-image: url('../assets/images/memory/mario/cars.png'); /* Pas pad aan als je een Cars plaatje hebt */
-    /* Of als je geen plaatje hebt, maak hem Cars-Rood met een bliksem */
-    background: red !important;
-    border: 2px solid darkred;
+    background-color: transparent; border: none; background-size: contain;
+    background-repeat: no-repeat; background-position: center; z-index: 50;
 }
-.block.hero::after {
-    content: '⚡';
-    color: yellow;
-    font-size: 1.5rem;
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
+.block.hero::after { content: ''; }
+.block:not(.hero) { background-color: #2196F3; }
+.block:nth-child(2n) { background-color: #4CAF50; }
+.block:nth-child(3n) { background-color: #FF9800; }
+.block:nth-child(4n) { background-color: #9C27B0; }
+
+/* EXPLOSIE OVERLAY */
+.explosion-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8); z-index: 200;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    animation: flash 0.2s;
 }
+.boom-text {
+    font-size: 5rem; color: #FF5252; font-family: 'Fredoka One', cursive;
+    text-shadow: 4px 4px 0 #000; animation: boomScale 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.boom-emoji { font-size: 6rem; margin-bottom: 20px; }
+
+@keyframes flash { 0% { background: white; } 100% { background: rgba(0,0,0,0.8); } }
+@keyframes boomScale { 0% { transform: scale(0); } 80% { transform: scale(1.2); } 100% { transform: scale(1); } }
+@keyframes shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: translate(-3px, 0px) rotate(1deg); }
+    30% { transform: translate(3px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: translate(-3px, 1px) rotate(0deg); }
+    70% { transform: translate(3px, 1px) rotate(-1deg); }
+    80% { transform: translate(-1px, -1px) rotate(1deg); }
+    90% { transform: translate(1px, 2px) rotate(0deg); }
+    100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+.shaking { animation: shake 0.5s; }
+
+.reset-btn {
+    margin-top: 20px; background: #FF7043; border: none; color: white;
+    padding: 10px 20px; border-radius: 15px; font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem; box-shadow: 0 4px 0 #D84315; cursor: pointer;
+}
+.reset-btn:active { transform: translateY(4px); box-shadow: none; }
