@@ -5,7 +5,7 @@ console.log("Memory.js geladen...");
 let memoryState = { 
     theme: 'boerderij', 
     gridSize: 12, 
-    playerNames: [], // Lijst van actieve spelers
+    playerNames: [], 
     currentPlayerIndex: 0, 
     scores: {}, 
     cards: [], 
@@ -13,11 +13,10 @@ let memoryState = {
     lockBoard: false, 
     useImages: true, 
     matchedPairs: 0, 
-    // We houden bij wie we aan het toevoegen zijn
     pendingPlayer: null 
 };
 
-// KLEUREN PALET (Nu met GEEL!)
+// KLEUREN PALET
 const palette = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#4CAF50', '#FFEB3B', '#FF9800'];
 
 const predefinedPlayers = [
@@ -28,7 +27,8 @@ const predefinedPlayers = [
 ];
 
 const themes = {
-    'boerderij': { locked: false, extension: 'jpg', path: 'assets/images/memory/boerderij/' },
+    // HIER ZIT DE AANPASSING: extension staat nu op 'png'
+    'boerderij': { locked: false, extension: 'png', path: 'assets/images/memory/boerderij/' },
     'mario': { locked: false, extension: 'png', path: 'assets/images/memory/mario/' },
     'pokemon': { locked: false, extension: 'png', path: 'assets/images/memory/pokemon/' },
     'dino': { locked: true, extension: 'jpg', path: 'assets/images/memory/dino/' },
@@ -42,14 +42,13 @@ const themes = {
 function startMemorySetup() {
     const board = document.getElementById('game-board');
     
-    // Thema knoppen met COVER.PNG
+    // Thema knoppen
     let themeButtonsHTML = Object.keys(themes).map(key => {
         const t = themes[key];
         const isLocked = t.locked ? 'locked' : '';
         const lockIcon = t.locked ? '<div class="lock-overlay">🔒</div>' : '';
         const label = key.charAt(0).toUpperCase() + key.slice(1);
         
-        // Hier gebruiken we de cover.png als achtergrond
         return `
             <button class="theme-card-btn ${isLocked}" onclick="setTheme('${key}', this)">
                 <div class="theme-img-container">
@@ -73,20 +72,14 @@ function startMemorySetup() {
                 
                 <div class="setup-group group-players">
                     <h3>1. Wie speelt er?</h3>
-                    
                     <div class="option-grid" id="player-selection">${playerButtonsHTML}</div>
-                    
                     <div class="player-input-container">
                         <input type="text" id="custom-player-name" placeholder="Eigen naam...">
                         <button class="add-btn" onclick="addCustomPerson()">OK</button>
                     </div>
-
                     <div class="divider-line"></div>
-                    
                     <h3>2. Kies een kleur</h3>
-                    <div class="color-row" id="color-palette">
-                        </div>
-
+                    <div class="color-row" id="color-palette"></div>
                     <div id="active-players-list"></div>
                 </div>
 
@@ -107,14 +100,11 @@ function startMemorySetup() {
             <button id="start-btn" class="start-btn" onclick="startMemoryGame()" disabled>Kies eerst een speler...</button>
         </div>`;
     
-    // Reset state
     memoryState.playerNames = [];
     memoryState.theme = 'boerderij'; 
-    memoryState.pendingPlayer = null; // Wie is er nu geselecteerd maar heeft nog geen kleur?
-
-    renderPalette(); // Kleuren tekenen
+    memoryState.pendingPlayer = null; 
+    renderPalette(); 
     
-    // Selecteer standaard thema
     setTimeout(() => {
         const defaultThemeBtn = document.querySelector(`.theme-card-btn[onclick="setTheme('boerderij', this)"]`);
         if(defaultThemeBtn) defaultThemeBtn.classList.add('selected');
@@ -124,9 +114,7 @@ function startMemorySetup() {
 // KLEUR EN SPELER LOGICA
 function renderPalette() {
     const container = document.getElementById('color-palette');
-    // Haal kleuren op die al in gebruik zijn
     const usedColors = memoryState.playerNames.map(p => p.color);
-    
     container.innerHTML = palette.map(color => {
         const isTaken = usedColors.includes(color);
         const style = isTaken ? 'opacity: 0.2; cursor: not-allowed;' : '';
@@ -136,53 +124,35 @@ function renderPalette() {
 }
 
 function selectPerson(name, btn) {
-    // 1. Markeer de persoon knop als actief
     document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending'));
     btn.classList.add('selected-pending');
-    
-    // 2. Sla op wie we willen toevoegen
     memoryState.pendingPlayer = name;
-    
-    // 3. Geef visuele feedback: "Kies nu een kleur"
-    // (Optioneel: kan met CSS animatie op de bollen)
 }
 
 function addCustomPerson() {
     const input = document.getElementById('custom-player-name');
     const name = input.value.trim();
     if(name) {
-        // Maak tijdelijke knop aan of selecteer direct
         memoryState.pendingPlayer = name;
-        // Visuele feedback dat naam is geaccepteerd? Voor nu simpel:
         input.style.borderColor = "#4CAF50";
     }
 }
 
 function selectColor(color) {
-    // We kunnen alleen een kleur kiezen als er eerst een persoon is aangeklikt
     if(!memoryState.pendingPlayer) {
         alert("Klik eerst op een naam (Lou, Noé...), kies daarna een kleur!");
         return;
     }
-
     const name = memoryState.pendingPlayer;
-
-    // Check of speler al bestaat, zo ja, verwijder eerst (update kleur)
     const existingIdx = memoryState.playerNames.findIndex(p => p.name === name);
-    if(existingIdx > -1) {
-        memoryState.playerNames.splice(existingIdx, 1);
-    }
+    if(existingIdx > -1) memoryState.playerNames.splice(existingIdx, 1);
 
-    // Voeg speler toe met deze kleur
     memoryState.playerNames.push({ name: name, color: color });
-    
-    // Reset selectie
     memoryState.pendingPlayer = null;
     document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending'));
     document.getElementById('custom-player-name').value = '';
     document.getElementById('custom-player-name').style.borderColor = '#B3E5FC';
 
-    // Update UI
     renderPalette();
     renderActivePlayers();
     checkStartButton();
@@ -217,11 +187,9 @@ function checkStartButton() {
     }
 }
 
-// SETUP HULPFUNCTIES
 function setTheme(name, btn) { 
     if(themes[name].locked) return; 
     memoryState.theme = name; 
-    // Visuele selectie update
     document.querySelectorAll('.theme-card-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
 }
@@ -231,7 +199,7 @@ function setSize(size, btn) {
     btn.classList.add('selected'); 
 }
 
-// 2. SPEL LOGICA (MATCHING & KLEUREN)
+// 2. SPEL LOGICA
 function calculateCardSize(cols, rows) {
     const containerW = document.getElementById('game-board').offsetWidth;
     const containerH = document.getElementById('game-board').offsetHeight - 80;
@@ -305,7 +273,8 @@ function generateCards(sizePx) {
     const grid = document.getElementById('memory-grid');
     const themeData = themes[memoryState.theme];
     const pairsNeeded = memoryState.gridSize / 2;
-    const ext = themeData.extension || 'jpg';
+    // Gebruik hier de extensie uit de config
+    const ext = themeData.extension; 
     
     let items = [];
     if (memoryState.useImages) { for (let i = 1; i <= pairsNeeded; i++) items.push(i); }
@@ -319,6 +288,7 @@ function generateCards(sizePx) {
         card.dataset.value = item;
         if(sizePx) { card.style.width = `${sizePx}px`; card.style.height = `${sizePx}px`; }
 
+        // Let op: Hier gebruiken we .${ext} voor de kaartjes!
         let content = `<img src="${themeData.path}${item}.${ext}" class="card-img" draggable="false">`;
         let cover = `<img src="${themeData.path}cover.png" class="card-cover-img" draggable="false">`;
         
@@ -354,13 +324,10 @@ function checkForMatch() {
 function disableCards() {
     let currentP = memoryState.playerNames[memoryState.currentPlayerIndex];
     
-    // MATCH LOGICA MET KLEUREN
     memoryState.flippedCards.forEach(card => {
         card.classList.add('matched');
-        // Hier passen we de kleur van de speler toe op de kaart
         card.querySelector('.card-back').style.borderColor = currentP.color;
         card.querySelector('.card-back').style.boxShadow = `0 0 15px ${currentP.color}`;
-        // Optioneel: kleur het vinkje ook
         card.querySelector('.checkmark').style.color = currentP.color;
     });
 
