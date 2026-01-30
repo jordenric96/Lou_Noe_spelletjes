@@ -1,10 +1,10 @@
-// MEMORY SPEL LOGICA - BACK TO BASICS (FIXED LEVELS)
+// MEMORY SPEL LOGICA - DOM BASED FIX
 
-console.log("Memory.js geladen (Levels Fixed)...");
+console.log("Memory.js geladen (DOM Fix)...");
 
 let memoryState = { 
     theme: 'boerderij', 
-    gridSize: 12, // Standaard beginwaarde
+    gridSize: 12, 
     playerNames: [], 
     currentPlayerIndex: 0, 
     scores: {}, 
@@ -87,31 +87,29 @@ function startMemorySetup() {
                 <div class="setup-group group-size">
                     <h3>4. Aantal Kaartjes</h3>
                     <div class="option-grid" id="size-options">
-                        <button class="option-btn size-selector selected" onclick="setSize(12, this)"><span>⭐</span><span class="btn-label">12</span></button>
-                        <button class="option-btn size-selector" onclick="setSize(16, this)"><span>⭐⭐</span><span class="btn-label">16</span></button>
-                        <button class="option-btn size-selector" onclick="setSize(30, this)"><span>⭐⭐⭐</span><span class="btn-label">30</span></button>
+                        <button class="option-btn size-selector selected" data-val="12" onclick="setSize(12, this)"><span>⭐</span><span class="btn-label">12</span></button>
+                        <button class="option-btn size-selector" data-val="16" onclick="setSize(16, this)"><span>⭐⭐</span><span class="btn-label">16</span></button>
+                        <button class="option-btn size-selector" data-val="30" onclick="setSize(30, this)"><span>⭐⭐⭐</span><span class="btn-label">30</span></button>
                     </div>
                 </div>
             </div>
             <button id="start-btn" class="start-btn" onclick="startMemoryGame()" disabled>Kies eerst een speler...</button>
         </div>`;
     
-    // Reset basiswaarden
     memoryState.playerNames = [];
     memoryState.theme = 'boerderij'; 
     memoryState.pendingPlayer = null; 
-    memoryState.gridSize = 12; // Reset naar 12 bij openen menu
     
     renderPalette(); 
     
-    // Selecteer standaard thema visueel
+    // Selecteer standaard thema
     setTimeout(() => {
         const defaultThemeBtn = document.querySelector(`.theme-card-btn[onclick="setTheme('boerderij', this)"]`);
         if(defaultThemeBtn) defaultThemeBtn.classList.add('selected');
     }, 10);
 }
 
-// KLEUR EN SPELER LOGICA
+// HULPFUNCTIES
 function renderPalette() {
     const container = document.getElementById('color-palette');
     const usedColors = memoryState.playerNames.map(p => p.color);
@@ -195,26 +193,23 @@ function setTheme(name, btn) {
     btn.classList.add('selected');
 }
 
-// SIMPELE VERSIE: GEWOON HET GETAL OPSLAAN
+// ALLEEN VISUELE UPDATE, STARTGAME DOET DE REST
 function setSize(size, btn) { 
     if(typeof playSound === 'function') playSound('click');
-    
-    // Sla het op (forceer dat het een getal is, geen tekst)
-    memoryState.gridSize = parseInt(size); 
-    
     // Visuele update
     document.querySelectorAll('.size-selector').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected'); 
 }
 
 
-// --- 2. GAME LOGICA ---
+// --- 2. GAME LOGICA (MET DOM FIX) ---
 
 function calculateCardSize(cols, rows) {
-    // Bereken ruimte
     const headerHeight = 70; 
     const scoreHeight = 70; 
-    const padding = 20; 
+    const padding = 10; 
+    
+    // Gebruik window breedte
     const availableWidth = window.innerWidth - padding; 
     const availableHeight = window.innerHeight - headerHeight - scoreHeight - padding;
 
@@ -231,15 +226,27 @@ function calculateCardSize(cols, rows) {
 function startMemoryGame() {
     if(typeof playSound === 'function') playSound('win');
     if (memoryState.playerNames.length === 0) return;
+    
+    // --- DE GROTE FIX: LEES HET AF VAN DE KNOPPEN ---
+    // We kijken welke knop de class 'selected' heeft en pakken zijn data-val waarde.
+    // Dit werkt altijd, ongeacht variabelen.
+    const selectedBtn = document.querySelector('#size-options .selected');
+    let size = 12; // fallback
+    
+    if (selectedBtn) {
+        // Lees de data-val of de tekst, forceer naar nummer
+        const val = selectedBtn.getAttribute('data-val');
+        size = parseInt(val);
+        console.log("Gevonden via knop:", size);
+    } else {
+        console.log("Geen knop gevonden, fallback naar 12");
+    }
+    
+    // Update de state voor de rest van het spel
+    memoryState.gridSize = size;
+
     const board = document.getElementById('game-board');
     
-    // GEEN COMPLEXE CONTROLES MEER. GEWOON GEBRUIKEN WAT INGESTELD IS.
-    let size = memoryState.gridSize;
-    
-    // Alleen als er echt iets mis is (bv 0), dan pas 12
-    if(!size || size < 4) size = 12;
-
-    // Scorebord
     let scoreHTML = '<div class="score-board">';
     memoryState.playerNames.forEach((player, index) => {
         let playerIcon = "👤";
@@ -270,7 +277,7 @@ function startMemoryGame() {
         cols = isLandscape ? 6 : 5;
         rows = isLandscape ? 5 : 6;
     } else {
-        // Fallback voor gekke getallen
+        // Fallback
         cols = 4; rows = Math.ceil(size / 4);
     }
 
@@ -315,22 +322,14 @@ function updateActiveBadgeColor() {
 function generateCards(sizePx) {
     const grid = document.getElementById('memory-grid');
     const themeData = themes[memoryState.theme];
-    
-    // HIER GEBRUIKEN WE OOK DE VARIABELE 'SIZE'
     const pairsNeeded = memoryState.gridSize / 2;
     const ext = themeData.extension; 
     
     let items = [];
     if (memoryState.useImages) { 
-        // Zorg dat we niet meer vragen dan er plaatjes zijn (max 15 bijv)
-        // Als je meer dan 15 paren (30 kaarten) wilt, moet je de plaatjesmap uitbreiden
-        // Voor nu herhalen we plaatjes als het moet
         for (let i = 1; i <= pairsNeeded; i++) {
-            // Als i groter is dan 15 (aantal plaatjes), begin weer bij 1
-            // Dit voorkomt lege kaartjes bij 30 stuks als je maar 15 plaatjes hebt
             let imgIndex = i;
-            if(i > 15) imgIndex = i - 15; 
-            
+            if(i > 15) imgIndex = i - 15; // Loop terug als plaatjes op zijn
             items.push(imgIndex); 
         } 
     }
@@ -362,7 +361,7 @@ function generateCards(sizePx) {
 function flipCard() {
     if (memoryState.lockBoard) return;
     if (this === memoryState.flippedCards[0]) return;
-    if (this.classList.contains('matched')) return; // Fix voor dubbelklikken op gevonden kaart
+    if (this.classList.contains('matched')) return;
     
     if(typeof playSound === 'function') playSound('pop');
     
