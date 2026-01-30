@@ -1,225 +1,149 @@
 /* --- MEMORY & SETUP STIJLEN --- */
 
-/* 1. SETUP DASHBOARD (Kiezen van spelers/thema) */
+/* SETUP DASHBOARD */
 .memory-setup {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-    
-    /* Ruimte rondom + extra ruimte onderaan voor iPad swipe-balk */
-    padding: 10px;
-    padding-bottom: max(10px, env(safe-area-inset-bottom));
-    
-    background: rgba(255, 255, 255, 0.6); /* Transparant wit */
-    box-sizing: border-box;
-    overflow: hidden; /* Voorkomt dubbele scrollbalken */
+    display: flex; flex-direction: column; width: 100%; height: 100%;
+    padding: 10px; padding-bottom: max(10px, env(safe-area-inset-bottom));
+    background: rgba(255, 255, 255, 0.6); box-sizing: border-box; overflow: hidden;
 }
 
-/* De container voor de 3 kolommen (Wie, Wat, Grootte) */
 .setup-columns {
-    display: flex;
-    flex-direction: row;
-    gap: 15px;
-    
-    /* CRUCIAAL VOOR TABLET: */
-    flex: 1;          /* Neem alle ruimte in die er is... */
-    min-height: 0;    /* ...maar forceer de hoogte niet (zodat scroll werkt) */
-    
-    margin-bottom: 10px;
-    overflow-y: auto; /* Scrollen als de lijst te lang is */
-    -webkit-overflow-scrolling: touch; /* Soepel scrollen op iPad */
+    display: flex; flex-direction: row; gap: 15px; flex: 1; min-height: 0;
+    margin-bottom: 10px; overflow-y: auto; -webkit-overflow-scrolling: touch;
 }
 
-/* De individuele blokken */
 .setup-group {
-    background: #FFF;
-    border-radius: 20px;
-    padding: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-    border: 3px solid #E0F7FA;
-    
-    flex: 1; /* Alle blokken even breed */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    
-    min-width: 160px; /* Zorg dat het niet te smal wordt */
+    background: #FFF; border-radius: 20px; padding: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 3px solid #E0F7FA;
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    min-width: 160px;
 }
-
-/* Kleuraccenten per groep */
 .group-players { border-color: #B3E5FC; }
 .group-theme { border-color: #C8E6C9; }
 .group-size { border-color: #FFF9C4; }
 
 .setup-group h3 {
-    color: #0277BD;
-    margin: 5px 0 10px 0;
-    font-size: 1.1rem;
-    font-family: 'Fredoka One', cursive;
-    text-transform: uppercase;
-    text-align: center;
+    color: #0277BD; margin: 5px 0 10px 0; font-size: 1.1rem;
+    font-family: 'Fredoka One', cursive; text-transform: uppercase; text-align: center;
     flex-shrink: 0;
 }
 
-/* --- OPTIES & KNOPPEN --- */
-.color-picker-title { font-size: 0.8rem; color: #888; margin-bottom: 5px; font-family: 'Nunito', sans-serif; text-align: center; }
+/* DE NIEUWE THEMA KNOPPEN (MET COVER.PNG) */
+.theme-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px; width: 100%;
+}
+.theme-card-btn {
+    background: white; border: 3px solid #EEE; border-radius: 15px;
+    padding: 0; cursor: pointer; display: flex; flex-direction: column;
+    align-items: center; overflow: hidden; position: relative;
+    transition: all 0.2s; box-shadow: 0 4px 0 #EEE;
+}
+.theme-card-btn:active { transform: translateY(4px); box-shadow: none; }
+.theme-card-btn.selected { border-color: #4CAF50; box-shadow: 0 4px 0 #2E7D32; }
 
+.theme-img-container {
+    width: 100%; aspect-ratio: 16/9; /* Mooie breedbeeld verhouding */
+    background: #f0f0f0; overflow: hidden; position: relative;
+    border-bottom: 2px solid #EEE;
+}
+.theme-img-container img {
+    width: 100%; height: 100%; object-fit: cover; /* Zorgt dat plaatje mooi vult */
+}
+.theme-card-btn .btn-label {
+    font-family: 'Fredoka One', cursive; font-size: 0.9rem; color: #555;
+    padding: 8px 5px;
+}
+.lock-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center;
+    font-size: 2rem;
+}
+
+/* KLEUREN & SPELERS */
+.divider-line { width: 80%; height: 2px; background: #EEE; margin: 15px 0; }
+.color-picker-title { font-size: 0.8rem; color: #888; margin-bottom: 5px; font-family: 'Nunito', sans-serif; }
+
+/* Grotere bollen */
 .color-row { 
-    display: flex; justify-content: center; gap: 8px; 
-    margin-bottom: 10px; padding: 5px; 
-    background: #F1F1F1; border-radius: 50px; width: 100%; 
-    flex-shrink: 0;
+    display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
+    margin-bottom: 15px; padding: 5px; width: 100%; flex-shrink: 0;
 }
-
 .color-dot { 
-    width: 30px; height: 30px; border-radius: 50%; 
-    border: 3px solid white; cursor: pointer; 
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-    transition: transform 0.2s; 
+    width: 45px; height: 45px; /* GROTER GEMAAKT */
+    border-radius: 50%; border: 4px solid white; cursor: pointer; 
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15); transition: transform 0.2s; 
 }
-.color-dot.active { transform: scale(1.3); border-color: #333; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 2; }
+.color-dot:active { transform: scale(0.9); }
 
-.option-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    padding-bottom: 5px;
+/* Speler selectie */
+.option-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; }
+.player-btn { 
+    background: white; border: 3px solid #EEE; box-shadow: 0 4px 0 #EEE;
+    border-radius: 15px; padding: 10px; min-width: 70px; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; font-size: 1.8rem;
 }
+.player-btn .btn-label { font-size: 0.8rem; font-family: 'Fredoka One', cursive; color: #555; margin-top: 5px; }
 
-.option-btn {
-    background: #E1F5FE;
-    color: #0288D1;
-    border: none;
-    padding: 8px;
-    border-radius: 15px;
-    font-size: 1.6rem;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 60px;
-    box-shadow: 0 3px 0 #B3E5FC;
-    transition: all 0.2s;
-    position: relative;
+/* Als je op een naam klikt maar nog geen kleur hebt: */
+.player-btn.selected-pending {
+    border-color: #333; animation: pulse 1s infinite;
 }
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-.option-btn .btn-label { font-size: 0.75rem; margin-top: 2px; font-family: 'Fredoka One', cursive; color: #555; white-space: nowrap; }
-.option-btn.selected { transform: translateY(-2px); color: white; }
-.option-btn.selected .btn-label { color: white; }
-.group-theme .option-btn.selected { background: #4CAF50; box-shadow: 0 4px 0 #2E7D32; }
-.group-size .option-btn.selected { background: #FFC107; box-shadow: 0 4px 0 #FFA000; }
-.player-btn { background: white; border: 3px solid #EEE; box-shadow: 0 4px 0 #EEE; }
-.option-btn.locked { filter: grayscale(100%); opacity: 0.5; cursor: not-allowed; background: #EEE; box-shadow: none; }
-.star { color: #FFD700; text-shadow: 1px 1px 0 #FFA000; } 
-.star.dim { color: #CFD8DC; text-shadow: none; opacity: 0.5; }
-
-/* Input veld voor eigen naam */
-.player-input-container {
-    display: flex;
-    gap: 5px;
-    margin-top: auto; 
-    padding-top: 10px;
-    width: 100%;
-    border-top: 2px dashed #EEE;
-    flex-shrink: 0;
+/* Lijst onderaan van actieve spelers */
+#active-players-list {
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%;
+    margin-top: 10px;
 }
-#custom-player-name { flex: 1; padding: 8px; border-radius: 15px; border: 2px solid #B3E5FC; font-family: 'Nunito', sans-serif; }
-.add-btn { background: #FFC107; border: none; border-radius: 12px; width: 40px; color: white; font-size: 1.5rem; cursor: pointer; }
+.active-player-tag {
+    color: white; padding: 8px 15px; border-radius: 20px; 
+    font-family: 'Fredoka One', cursive; font-size: 1rem;
+    display: flex; align-items: center; gap: 8px; cursor: pointer;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2); animation: popIn 0.3s;
+}
+@keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+.remove-x { font-weight: bold; background: rgba(0,0,0,0.2); border-radius: 50%; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; }
 
-/* --- DE START KNOP (FIXED BOTTOM) --- */
+/* Input veld */
+.player-input-container { display: flex; gap: 5px; margin-top: 10px; width: 100%; }
+#custom-player-name { flex: 1; padding: 8px; border-radius: 12px; border: 2px solid #B3E5FC; font-family: 'Nunito', sans-serif; }
+.add-btn { background: #FFC107; border: none; border-radius: 12px; padding: 0 15px; color: white; font-weight: bold; cursor: pointer; }
+
+/* START KNOP */
 .start-btn {
-    background: linear-gradient(to bottom, #66BB6A, #43A047);
-    color: white;
-    border: none;
-    padding: 15px;
-    font-size: 1.5rem;
-    border-radius: 20px;
-    width: 100%;
-    cursor: pointer;
-    box-shadow: 0 4px 0 #2E7D32;
-    font-family: 'Fredoka One', cursive;
-    
-    /* BELANGRIJK: Zorg dat hij niet geplet wordt */
-    flex-shrink: 0; 
-    z-index: 10;
+    background: linear-gradient(to bottom, #66BB6A, #43A047); color: white; border: none;
+    padding: 15px; font-size: 1.5rem; border-radius: 20px; width: 100%; cursor: pointer;
+    box-shadow: 0 4px 0 #2E7D32; font-family: 'Fredoka One', cursive; flex-shrink: 0; z-index: 10;
 }
 .start-btn:disabled { background: #CFD8DC; color: #90A4AE; box-shadow: none; cursor: not-allowed; }
 
-
-/* 2. GAME BOARD (HET SPEL ZELF) */
-.memory-game-container { 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    width: 100%; 
-    height: 100%; 
-    overflow: hidden; /* Geen scrollbars tijdens spelen */
-}
-
-/* Scorebord bovenaan */
-.score-board { 
-    display: flex; 
-    gap: 10px; 
-    padding: 5px 10px; 
-    background: rgba(255,255,255,0.7); 
-    border-radius: 50px; 
-    margin-bottom: 5px; 
-    flex-wrap: wrap; 
-    justify-content: center;
-    flex-shrink: 0; 
-}
-
+/* SPELBORD */
+.memory-game-container { display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; overflow: hidden; }
+.score-board { display: flex; gap: 10px; padding: 5px 10px; background: rgba(255,255,255,0.7); border-radius: 50px; margin-bottom: 5px; flex-shrink: 0; }
 .player-badge { background: white; padding: 5px 15px; border-radius: 30px; display: flex; align-items: center; gap: 8px; border: 3px solid #EEE; font-family: 'Fredoka One', cursive; color: #777; opacity: 0.6; transition: all 0.3s; }
 .player-badge.active { opacity: 1; transform: scale(1.1); box-shadow: 0 4px 12px rgba(0,0,0,0.15); background: #FFF; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
 
-/* Grid */
-.memory-grid { 
-    display: grid; 
-    gap: 10px; 
-    /* Grootte wordt door JS berekend om te passen */
-    margin: 0 auto;
-    justify-content: center;
-    align-content: center;
-}
-
-/* Kaarten */
-.memory-card { 
-    position: relative; 
-    user-select: none; 
-}
-.memory-card-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 12px; box-shadow: 0 3px 6px rgba(0,0,0,0.15); }
+/* GRID & KAARTEN */
+.memory-grid { display: grid; gap: 10px; margin: 0 auto; justify-content: center; align-content: center; }
+.memory-card { position: relative; user-select: none; }
+.memory-card-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.5s; border-radius: 12px; box-shadow: 0 3px 6px rgba(0,0,0,0.15); }
 .memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
-
 .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-
-/* Achterkant (Deksel) */
 .card-front { background: linear-gradient(135deg, #4FC3F7, #0288D1); border: 3px solid white; z-index: 2; }
-.card-cover-emoji { font-size: 3rem; text-shadow: 0 2px 0 rgba(0,0,0,0.2); }
-.card-cover-img { width: 100%; height: 100%; object-fit: cover; }
+.card-back { background: white; transform: rotateY(180deg); border: 3px solid #FFC107; }
+.card-img, .card-cover-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.card-img { width: 85%; height: 85%; object-fit: contain; }
 
-/* Voorkant (Plaatje) */
-.card-back { background: white; transform: rotateY(180deg); border: 3px solid #FFC107; position: relative; }
-
-/* Plaatje passend maken */
-.card-img { 
-    width: 85%; 
-    height: 85%; 
-    object-fit: contain; /* Zorgt dat de hele foto zichtbaar is */
-    display: block; 
-}
-.card-emoji { font-size: 4rem; }
-
-/* Groen vinkje bij match */
-.match-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.6); display: flex; justify-content: center; align-items: center; border-radius: 10px; opacity: 0; transform: scale(0.5); transition: all 0.3s; pointer-events: none; z-index: 10; }
+/* MATCH */
+.match-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.6); display: flex; justify-content: center; align-items: center; opacity: 0; transform: scale(0.5); transition: all 0.3s; pointer-events: none; z-index: 10; }
 .checkmark { font-size: 4rem; color: #4CAF50; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 .memory-card.matched .match-overlay { opacity: 1; transform: scale(1); }
-.memory-card.matched .card-back { border-color: #4CAF50; box-shadow: 0 0 15px #4CAF50; }
+/* Border kleur wordt via JS gezet */
 
-/* Mobiel: Kolommen onder elkaar zetten */
-@media (max-width: 650px) {
-    .setup-columns { flex-direction: column; }
-    .card-img { width: 90%; height: 90%; }
-}
+@media (max-width: 650px) { .setup-columns { flex-direction: column; } .card-img { width: 90%; height: 90%; } }
+/* GROOTTE KNOPPEN */
+.option-btn { background: #E1F5FE; color: #0288D1; border: none; padding: 8px; border-radius: 15px; font-size: 1.6rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; min-width: 60px; box-shadow: 0 3px 0 #B3E5FC; transition: all 0.2s; }
+.option-btn .btn-label { font-size: 0.75rem; margin-top: 2px; font-family: 'Fredoka One', cursive; color: #555; }
+.option-btn.selected { transform: translateY(-2px); color: white; }
+.option-btn.selected .btn-label { color: white; }
