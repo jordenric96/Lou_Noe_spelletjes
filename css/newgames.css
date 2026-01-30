@@ -62,8 +62,46 @@
 
 /* --- TEKENBORD --- */
 .drawing-container { display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; position: relative; }
-canvas { background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); touch-action: none; cursor: crosshair; }
-.drawing-controls { display: flex; gap: 10px; margin-top: 10px; align-items: center; background: rgba(255,255,255,0.8); padding: 5px; border-radius: 30px; }
-.color-swatch { width: 30px; height: 30px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer; }
-.color-swatch.active { transform: scale(1.2); border-color: #333; }
-.tool-btn { background: #EEE; border: none; padding: 8px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; }
+
+canvas { 
+    background: white; border-radius: 15px; 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+    touch-action: none; cursor: crosshair; 
+}
+
+.drawing-controls { 
+    display: flex; gap: 8px; margin-top: 10px; align-items: center; 
+    background: rgba(255,255,255,0.9); padding: 8px 15px; border-radius: 50px; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* Kleuren */
+.color-swatch { 
+    width: 32px; height: 32px; border-radius: 50%; border: 3px solid white; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer; transition: transform 0.2s;
+}
+.color-swatch.active { transform: scale(1.2); border-color: #333; z-index: 2; }
+
+/* Scheidingslijntje */
+.control-divider { width: 2px; height: 30px; background: #DDD; margin: 0 5px; }
+
+/* Dikte knoppen */
+.size-btn {
+    width: 35px; height: 35px; background: #F0F0F0; border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    cursor: pointer; border: 2px solid transparent; transition: all 0.2s;
+}
+.size-btn.active { border-color: #333; background: #E0E0E0; transform: scale(1.1); }
+
+/* De stippen in de knop */
+.dot { background: #333; border-radius: 50%; }
+.dot-s { width: 6px; height: 6px; }
+.dot-m { width: 12px; height: 12px; }
+.dot-l { width: 20px; height: 20px; }
+
+/* Gum knop */
+.tool-btn { 
+    background: #FFEB3B; border: none; padding: 8px; border-radius: 50%; 
+    cursor: pointer; font-size: 1.2rem; box-shadow: 0 2px 0 #FBC02D; margin-left: 5px;
+}
+.tool-btn:active { transform: translateY(2px); box-shadow: none; }
