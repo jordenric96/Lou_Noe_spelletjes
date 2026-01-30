@@ -7,15 +7,20 @@
 .sticker-lock-icon { font-size: 2rem; opacity: 0.3; }
 .sticker-slot.locked { background: #EEE; }
 .empty-msg { grid-column: 1 / -1; text-align: center; color: #777; margin-top: 50px; font-style: italic; }
-#sticker-reward-msg { background: #FFD700; color: #333; padding: 5px 10px; border-radius: 10px; font-weight: bold; margin-bottom: 10px; animation: pulse 1s infinite; }
+
+/* BELONING IN POPUP */
+.sticker-reward-anim { text-align: center; margin-bottom: 15px; animation: bounceIn 0.8s cubic-bezier(0.215, 0.610, 0.355, 1.000); }
+.reward-text { background: #FFD700; color: #333; padding: 5px 15px; border-radius: 20px; font-weight: bold; margin-bottom: 10px; display: inline-block; box-shadow: 0 3px 0 #FBC02D; font-family: 'Fredoka One', cursive; }
+.reward-img { width: 100px; height: 100px; object-fit: contain; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2)); animation: spinSlow 3s infinite linear; }
+
+@keyframes bounceIn { 0% { opacity: 0; transform: scale(0.3); } 20% { transform: scale(1.1); } 40% { transform: scale(0.9); } 60% { opacity: 1; transform: scale(1.03); } 80% { transform: scale(0.97); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes spinSlow { 0% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } 100% { transform: rotate(-5deg); } }
 
 /* --- VANG DE ... (WHACK A MOLE) --- */
 .whack-container { display: flex; flex-direction: column; align-items: center; height: 100%; width: 100%; }
 .whack-score-board { display: flex; justify-content: space-between; width: 95%; max-width: 500px; background: white; padding: 10px 15px; border-radius: 15px; margin-bottom: 10px; font-family: 'Fredoka One', cursive; box-shadow: 0 4px 0 #EEE; }
 
-/* HET ROOSTER */
 .whack-grid { display: grid; gap: 10px; width: 95%; max-width: 500px; aspect-ratio: 1/1; margin: 0 auto; }
-/* Variabele roosters op basis van moeilijkheid */
 .whack-grid.grid-2 { grid-template-columns: repeat(2, 1fr); }
 .whack-grid.grid-3 { grid-template-columns: repeat(3, 1fr); }
 .whack-grid.grid-4 { grid-template-columns: repeat(4, 1fr); }
@@ -24,33 +29,36 @@
     background: #8D6E63; border-radius: 50%; border: 4px solid #5D4037; 
     position: relative; overflow: hidden; 
     box-shadow: inset 0 10px 10px rgba(0,0,0,0.3); 
-    cursor: pointer; 
-    /* Voorkom selectie tijdens tikken */
-    user-select: none; -webkit-tap-highlight-color: transparent;
+    cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
 }
-
 .whack-character { 
     position: absolute; bottom: -100%; left: 10%; width: 80%; height: 80%; 
     transition: bottom 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
     background-size: contain; background-repeat: no-repeat; background-position: bottom center; 
     pointer-events: none; 
 }
-
 .whack-hole.up .whack-character { bottom: 0; }
-/* Effect bij tikken */
 .whack-hole.whacked .whack-character { filter: brightness(1.5) sepia(1); transform: scale(0.9); }
 
 /* --- SIMON SAYS --- */
-.simon-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 20px; }
-.simon-board { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 300px; height: 300px; position: relative; }
-.simon-btn { border-radius: 20px; border: none; cursor: pointer; opacity: 0.6; transition: all 0.1s; box-shadow: 0 5px 0 rgba(0,0,0,0.2); }
-.simon-btn:active, .simon-btn.lit { opacity: 1; transform: scale(0.95); box-shadow: 0 2px 0 rgba(0,0,0,0.2); filter: brightness(1.5); }
-.simon-green { background: #4CAF50; } .simon-red { background: #F44336; }
-.simon-yellow { background: #FFEB3B; } .simon-blue { background: #2196F3; }
-.simon-info { background: white; padding: 10px 20px; border-radius: 20px; text-align: center; box-shadow: 0 4px 0 #EEE; }
-.simon-score { font-size: 1.5rem; font-family: 'Fredoka One', cursive; color: #333; }
-.simon-highscore { font-size: 0.9rem; color: #888; }
-.simon-message { margin-top: 10px; font-weight: bold; color: #0288D1; height: 1.2em; }
+.simon-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 15px; }
+.simon-board { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 320px; height: 320px; padding: 10px; }
+.simon-btn { 
+    border-radius: 50%; border: 4px solid white; cursor: pointer; opacity: 0.8; 
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2); background-color: #EEE; 
+}
+.simon-btn:active, .simon-btn.lit { 
+    opacity: 1; transform: scale(1.15); box-shadow: 0 0 25px rgba(255,255,255, 0.8), 0 10px 20px rgba(0,0,0,0.3); 
+    border-color: #FFEB3B; z-index: 10; 
+}
+.simon-info { 
+    background: white; padding: 10px 25px; border-radius: 20px; text-align: center; box-shadow: 0 4px 0 #B3E5FC; 
+    border: 2px solid #E1F5FE; width: 80%; max-width: 300px;
+}
+.simon-score { font-size: 1.5rem; font-family: 'Fredoka One', cursive; color: #0277BD; }
+.simon-highscore { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+.simon-message { margin-top: 5px; font-weight: bold; color: #F57C00; height: 1.2em; font-size: 1.1rem; }
 
 /* --- TEKENBORD --- */
 .drawing-container { display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; position: relative; }
