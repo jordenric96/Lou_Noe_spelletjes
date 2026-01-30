@@ -1,6 +1,6 @@
-// MEMORY SPEL LOGICA - ZONDER VINKJE
+// MEMORY SPEL LOGICA - MET GELUID & STICKERS
 
-console.log("Memory.js geladen (No Checkmark version)...");
+console.log("Memory.js geladen...");
 
 let memoryState = { 
     theme: 'boerderij', 
@@ -27,23 +27,25 @@ const predefinedPlayers = [
 
 const themes = {
     'boerderij': { locked: false, extension: 'png', path: 'assets/images/memory/boerderij/' },
-    'mario': { locked: false, extension: 'png', path: 'assets/images/memory/mario/' },
-    'pokemon': { locked: false, extension: 'png', path: 'assets/images/memory/pokemon/' },
-    'dino': { locked: true, extension: 'jpg', path: 'assets/images/memory/dino/' },
+    'mario':     { locked: false, extension: 'png', path: 'assets/images/memory/mario/' },
+    'pokemon':   { locked: false, extension: 'png', path: 'assets/images/memory/pokemon/' },
     'studio100': { locked: false, extension: 'png', path: 'assets/images/memory/studio100/' },
-    'marvel': { locked: true, extension: 'jpg', path: 'assets/images/memory/marvel/' },
-    'natuur': { locked: true, extension: 'jpg', path: 'assets/images/memory/natuur/' },
-    'beroepen': { locked: true, extension: 'jpg', path: 'assets/images/memory/beroepen/' }
+    'dino':      { locked: true, extension: 'jpg', path: 'assets/images/memory/dino/' },
+    'marvel':    { locked: true, extension: 'jpg', path: 'assets/images/memory/marvel/' },
+    'natuur':    { locked: true, extension: 'jpg', path: 'assets/images/memory/natuur/' },
+    'beroepen':  { locked: true, extension: 'jpg', path: 'assets/images/memory/beroepen/' }
 };
 
-// 1. SETUP SCHERM (Ongewijzigd)
+// 1. SETUP SCHERM
 function startMemorySetup() {
     const board = document.getElementById('game-board');
+    
     let themeButtonsHTML = Object.keys(themes).map(key => {
         const t = themes[key];
         const isLocked = t.locked ? 'locked' : '';
         const lockIcon = t.locked ? '<div class="lock-overlay">🔒</div>' : '';
         const label = key.charAt(0).toUpperCase() + key.slice(1);
+        
         return `
             <button class="theme-card-btn ${isLocked}" onclick="setTheme('${key}', this)">
                 <div class="theme-img-container">
@@ -113,6 +115,7 @@ function renderPalette() {
 }
 
 function selectPerson(name, btn) {
+    playSound('click');
     document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending'));
     btn.classList.add('selected-pending');
     memoryState.pendingPlayer = name;
@@ -122,6 +125,7 @@ function addCustomPerson() {
     const input = document.getElementById('custom-player-name');
     const name = input.value.trim();
     if(name) {
+        playSound('click');
         memoryState.pendingPlayer = name;
         input.style.borderColor = "#4CAF50";
     }
@@ -132,6 +136,7 @@ function selectColor(color) {
         alert("Klik eerst op een naam (Lou, Noé...), kies daarna een kleur!");
         return;
     }
+    playSound('pop');
     const name = memoryState.pendingPlayer;
     const existingIdx = memoryState.playerNames.findIndex(p => p.name === name);
     if(existingIdx > -1) memoryState.playerNames.splice(existingIdx, 1);
@@ -158,6 +163,7 @@ function renderActivePlayers() {
 }
 
 function removePlayer(name) {
+    playSound('click');
     memoryState.playerNames = memoryState.playerNames.filter(p => p.name !== name);
     renderPalette();
     renderActivePlayers();
@@ -178,11 +184,13 @@ function checkStartButton() {
 
 function setTheme(name, btn) { 
     if(themes[name].locked) return; 
+    playSound('click');
     memoryState.theme = name; 
     document.querySelectorAll('.theme-card-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
 }
 function setSize(size, btn) { 
+    playSound('click');
     memoryState.gridSize = size; 
     Array.from(btn.parentElement.children).forEach(c => c.classList.remove('selected')); 
     btn.classList.add('selected'); 
@@ -198,6 +206,7 @@ function calculateCardSize(cols, rows) {
 }
 
 function startMemoryGame() {
+    playSound('win'); // Startgeluidje
     if (memoryState.playerNames.length === 0) return;
     const board = document.getElementById('game-board');
     
@@ -279,13 +288,10 @@ function generateCards(sizePx) {
         let content = `<img src="${themeData.path}${item}.${ext}" class="card-img" draggable="false">`;
         let cover = `<img src="${themeData.path}cover.png" class="card-cover-img" draggable="false">`;
         
-        // AANGEPAST: VINKJE HTML VERWIJDERD
         card.innerHTML = `
             <div class="memory-card-inner">
                 <div class="card-front">${cover}</div>
-                <div class="card-back">
-                    ${content}
-                    </div>
+                <div class="card-back">${content}</div>
             </div>`;
         card.addEventListener('click', flipCard);
         grid.appendChild(card);
@@ -295,6 +301,7 @@ function generateCards(sizePx) {
 function flipCard() {
     if (memoryState.lockBoard) return;
     if (this === memoryState.flippedCards[0]) return;
+    playSound('pop');
     this.classList.add('flipped');
     memoryState.flippedCards.push(this);
     if (memoryState.flippedCards.length === 2) checkForMatch();
@@ -308,13 +315,12 @@ function checkForMatch() {
 
 function disableCards() {
     let currentP = memoryState.playerNames[memoryState.currentPlayerIndex];
+    playSound('win'); // Match geluid
     
     memoryState.flippedCards.forEach(card => {
         card.classList.add('matched');
-        // Kleur de rand en gloed van de kaart
         card.querySelector('.card-back').style.borderColor = currentP.color;
         card.querySelector('.card-back').style.boxShadow = `0 0 15px ${currentP.color}`;
-        // AANGEPAST: Code voor het vinkje kleuren is verwijderd
     });
 
     memoryState.matchedPairs++;
