@@ -1,4 +1,4 @@
-// DOOLHOF SPEL LOGICA
+// DOOLHOF SPEL LOGICA - MET GELUID & SPELERS
 
 let mazeState = {
     theme: 'mario',
@@ -7,11 +7,17 @@ let mazeState = {
     mazeGrid: [],
     playerPosition: { x: 1, y: 1 },
     goalPosition: { x: 0, y: 0 },
-    isGameActive: false
+    isGameActive: false,
+    playerNames: [], // Nu ook spelers voor doolhof
+    currentPlayerIndex: 0,
+    activeColor: '#F44336',
+    pendingPlayer: null
 };
 
-// --- HIER ZIT DE UPDATE ---
-// Zorg dat deze lijst Mario EN Pokemon bevat
+// HERGEBRUIK DEZELFDE SPELERS & KLEUREN LOGICA ALS MEMORY
+const doolhofPalette = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#4CAF50', '#FFEB3B', '#FF9800'];
+const doolhofPlayers = [ { name: "Lou", icon: "👦🏼" }, { name: "Noé", icon: "👶🏼" }, { name: "Mama", icon: "👩🏻" }, { name: "Papa", icon: "👨🏻" } ];
+
 const mazeThemes = {
     'mario': { locked: false, icon: '🍄', path: 'assets/images/doolhof/mario/' },
     'pokemon': { locked: false, icon: '⚡', path: 'assets/images/doolhof/pokemon/' }, 
@@ -20,19 +26,34 @@ const mazeThemes = {
 function startDoolhofSetup() {
     const board = document.getElementById('game-board');
     
-    // Deze code maakt automatisch knoppen voor alles wat in 'mazeThemes' staat
+    // Thema knoppen
     let themeButtons = Object.keys(mazeThemes).map(key => {
         const t = mazeThemes[key];
         const isLocked = t.locked ? 'locked' : '';
         const label = key.charAt(0).toUpperCase() + key.slice(1);
-        
         return `<button class="option-btn ${isLocked}" onclick="setMazeTheme('${key}', this)">
             <span>${t.icon}</span><span class="btn-label">${label}</span></button>`;
     }).join('');
 
+    // Speler knoppen
+    let playerButtons = doolhofPlayers.map(p => 
+        `<button class="option-btn player-btn" onclick="selectMazePerson('${p.name}', this)">
+            <span>${p.icon}</span><span class="btn-label">${p.name}</span>
+        </button>`
+    ).join('');
+
     board.innerHTML = `
         <div class="memory-setup">
             <div class="setup-columns">
+                <div class="setup-group group-players">
+                    <h3>Wie speelt er?</h3>
+                    <div class="option-grid" id="maze-player-selection">${playerButtons}</div>
+                    <div class="divider-line"></div>
+                    <h3>Kies een kleur</h3>
+                    <div class="color-row" id="maze-color-palette"></div>
+                    <div id="maze-active-players"></div>
+                </div>
+
                 <div class="setup-group group-theme">
                     <h3>Thema</h3>
                     <div class="option-grid">${themeButtons}</div>
@@ -46,26 +67,87 @@ function startDoolhofSetup() {
                     </div>
                 </div>
             </div>
-            <button class="start-btn" onclick="startDoolhofGame()">Start Doolhof ▶️</button>
+            <button id="start-maze-btn" class="start-btn" onclick="startDoolhofGame()" disabled>Kies een speler...</button>
         </div>
     `;
 
-    // Selecteer standaard de eerste
+    mazeState.playerNames = [];
+    mazeState.theme = 'mario';
+    mazeState.difficulty = 'medium';
+    mazeState.gridSize = 15;
+    
+    renderMazePalette();
     setTimeout(() => {
         const defaultTheme = document.querySelector(`.option-btn[onclick="setMazeTheme('mario', this)"]`);
         if(defaultTheme) defaultTheme.classList.add('selected');
     }, 10);
-    
-    mazeState.theme = 'mario';
-    mazeState.difficulty = 'medium';
-    mazeState.gridSize = 15;
 }
 
-function setMazeTheme(name, btn) { if(mazeThemes[name].locked) return; mazeState.theme = name; selectSingleBtn(btn); }
-function setMazeDiff(diff, size, btn) { mazeState.difficulty = diff; mazeState.gridSize = size; selectSingleBtn(btn); }
+// SETUP LOGICA
+function renderMazePalette() {
+    const container = document.getElementById('maze-color-palette');
+    const usedColors = mazeState.playerNames.map(p => p.color);
+    container.innerHTML = doolhofPalette.map(color => {
+        const isTaken = usedColors.includes(color);
+        const style = isTaken ? 'opacity: 0.2; cursor: not-allowed;' : '';
+        const action = isTaken ? '' : `selectMazeColor('${color}')`;
+        return `<div class="color-dot" style="background-color: ${color}; ${style}" onclick="${action}"></div>`;
+    }).join('');
+}
+
+function selectMazePerson(name, btn) {
+    playSound('click');
+    document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending'));
+    btn.classList.add('selected-pending');
+    mazeState.pendingPlayer = name;
+}
+
+function selectMazeColor(color) {
+    if(!mazeState.pendingPlayer) { alert("Kies eerst een naam!"); return; }
+    playSound('pop');
+    const name = mazeState.pendingPlayer;
+    const existingIdx = mazeState.playerNames.findIndex(p => p.name === name);
+    if(existingIdx > -1) mazeState.playerNames.splice(existingIdx, 1);
+    
+    // Bij doolhof spelen we meestal alleen of om de beurt, maar we ondersteunen de lijst
+    mazeState.playerNames = [{ name: name, color: color }]; // Nu even beperkt tot 1 speler voor simpelheid, of push() voor meer
+    
+    renderMazePalette();
+    renderMazeActivePlayers();
+    checkMazeStart();
+}
+
+function renderMazeActivePlayers() {
+    document.getElementById('maze-active-players').innerHTML = mazeState.playerNames.map(p => 
+        `<div class="active-player-tag" style="background-color: ${p.color}"><span>${p.name}</span></div>`
+    ).join('');
+}
+
+function checkMazeStart() {
+    const btn = document.getElementById('start-maze-btn');
+    if(mazeState.playerNames.length > 0) {
+        btn.disabled = false;
+        btn.innerText = `START DOOLHOF ▶️`;
+    }
+}
+
+function setMazeTheme(name, btn) { 
+    if(mazeThemes[name].locked) return; 
+    playSound('click');
+    mazeState.theme = name; 
+    selectSingleBtn(btn); 
+}
+function setMazeDiff(diff, size, btn) { 
+    playSound('click');
+    mazeState.difficulty = diff; 
+    mazeState.gridSize = size; 
+    selectSingleBtn(btn); 
+}
 function selectSingleBtn(btn) { Array.from(btn.parentElement.children).forEach(c => c.classList.remove('selected')); btn.classList.add('selected'); }
 
+// GAME LOGICA
 function startDoolhofGame() {
+    playSound('win');
     const board = document.getElementById('game-board');
     board.innerHTML = `
         <div id="maze-container" class="theme-${mazeState.theme}">
@@ -113,7 +195,6 @@ function generateMaze(size) {
 function calculateCellSize() {
     const size = mazeState.gridSize;
     const maxW = window.innerWidth * 0.95; 
-    // Fix voor tablet hoogte (zodat het past met knoppen)
     const maxH = window.innerHeight - 240; 
     const cellW = Math.floor(maxW / size);
     const cellH = Math.floor(maxH / size);
@@ -153,7 +234,6 @@ function placePlayer() {
     const player = document.createElement('div');
     player.id = 'player';
     
-    // Hier pakt hij het juiste plaatje (mario of pokemon)
     const themeData = mazeThemes[mazeState.theme];
     player.style.backgroundImage = `url('${themeData.path}player.png')`;
 
@@ -201,6 +281,7 @@ function movePlayer(dx, dy) {
     else if (dx > 0) playerEl.classList.remove('facing-left');
 
     if (newX >= 0 && newX < mazeState.gridSize && newY >= 0 && newY < mazeState.gridSize && mazeState.mazeGrid[newY][newX] === 0) {
+        playSound('pop');
         mazeState.playerPosition.x = newX;
         mazeState.playerPosition.y = newY;
         updatePlayerPositionVisually();
@@ -211,8 +292,9 @@ function movePlayer(dx, dy) {
 function checkWin() {
     if (mazeState.playerPosition.x === mazeState.goalPosition.x && mazeState.playerPosition.y === mazeState.goalPosition.y) {
         mazeState.isGameActive = false;
+        const winnerName = mazeState.playerNames.length > 0 ? mazeState.playerNames[0].name : "Jij";
         setTimeout(() => {
-            showWinnerModal("Jij", [{name: "Speler", score: "Gefinisht!", color: "#4CAF50"}]);
+            showWinnerModal(winnerName, [{name: winnerName, score: "Gefinisht!", color: "#4CAF50"}]);
         }, 300);
     }
 }
