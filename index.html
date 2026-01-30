@@ -3,10 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Speelkwartier</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Speelkwartier">
+    
+    <title>Lou & Noé Speelkwartier</title>
     
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#00BCD4">
     <link rel="apple-touch-icon" href="assets/images/icon.png">
 
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
@@ -15,35 +18,36 @@
     <link rel="stylesheet" href="css/memory.css">
     <link rel="stylesheet" href="css/doolhof.css">
     <link rel="stylesheet" href="css/blokken.css">
-    <link rel="stylesheet" href="css/newgames.css"> </head>
+    <link rel="stylesheet" href="css/newgames.css">
+</head>
 <body>
 
     <div id="app">
         <div id="main-menu" class="screen active">
-            <h1>Lou & Noé's Speelkwartier 🚀</h1>
+            <h1>Lou & Noé's<br>Speelkwartier 🚀</h1>
             
             <div class="game-grid">
-                <button class="game-btn" onclick="selectGame('memory')">
+                <button class="game-btn btn-blue" onclick="selectGame('memory')">
                     <span class="icon">🎴</span><span class="text">Memory</span>
                 </button>
-                <button class="game-btn" onclick="selectGame('doolhof')">
+                <button class="game-btn btn-pink" onclick="selectGame('doolhof')">
                     <span class="icon">🌀</span><span class="text">Doolhof</span>
                 </button>
-                 <button class="game-btn" onclick="selectGame('blokken')">
+                 <button class="game-btn btn-green" onclick="selectGame('blokken')">
                     <span class="icon">🚗</span><span class="text">De File</span>
                 </button>
 
-                <button class="game-btn" onclick="selectGame('simon')">
+                <button class="game-btn btn-yellow" onclick="selectGame('simon')">
                     <span class="icon">💡</span><span class="text">Simon</span>
                 </button>
-                <button class="game-btn" onclick="selectGame('vang')">
+                <button class="game-btn btn-purple" onclick="selectGame('vang')">
                     <span class="icon">🔨</span><span class="text">Vang ze!</span>
                 </button>
-                <button class="game-btn" onclick="selectGame('tekenen')">
+                <button class="game-btn btn-blue" onclick="selectGame('tekenen')">
                     <span class="icon">🎨</span><span class="text">Tekenen</span>
                 </button>
 
-                <button class="game-btn sticker-btn" onclick="selectGame('stickers')">
+                <button class="game-btn btn-pink" onclick="selectGame('stickers')">
                     <span class="icon">🏆</span><span class="text">Stickers</span>
                 </button>
             </div>
@@ -51,14 +55,14 @@
 
         <div id="game-container" class="screen hidden">
             <header class="game-header">
-                <button id="back-btn" onclick="goHome()">⬅ Terug</button>
+                <button id="back-btn" onclick="goHome()">⬅ MENU</button>
                 <h2 id="game-title">Spelletje</h2>
             </header>
             <div id="game-board"></div>
         </div>
     </div>
 
- <div id="winner-modal" class="modal hidden">
+    <div id="winner-modal" class="modal hidden">
         <div class="modal-content">
             <div id="confetti-container"></div>
             
@@ -74,16 +78,19 @@
         </div>
     </div>
 
+    <div id="zoom-overlay" class="modal hidden" onclick="closeZoom()">
+        <div class="modal-content zoom-content">
+            <span class="close-zoom-btn">×</span>
+            <img id="zoomed-image" src="" alt="Groot plaatje">
+            <button id="delete-drawing-btn" class="modal-btn delete-btn hidden">Weggooien 🗑️</button>
+        </div>
+    </div>
+
     <script src="js/main.js"></script>
     <script src="js/memory.js"></script>
     <script src="js/doolhof.js"></script>
     <script src="js/blokken.js"></script>
-    <script src="js/newgames.js"></script> <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js').catch(err => console.log('SW Fout:', err));
-            });
-        }
-    </script>
+    <script src="js/newgames.js"></script>
+
 </body>
 </html>
