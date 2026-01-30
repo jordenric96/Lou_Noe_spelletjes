@@ -28,7 +28,7 @@
     flex-shrink: 0;
 }
 
-/* DE NIEUWE THEMA KNOPPEN (MET COVER.PNG) */
+/* THEMA KNOPPEN */
 .theme-grid {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     gap: 10px; width: 100%;
@@ -43,12 +43,12 @@
 .theme-card-btn.selected { border-color: #4CAF50; box-shadow: 0 4px 0 #2E7D32; }
 
 .theme-img-container {
-    width: 100%; aspect-ratio: 16/9; /* Mooie breedbeeld verhouding */
+    width: 100%; aspect-ratio: 16/9;
     background: #f0f0f0; overflow: hidden; position: relative;
     border-bottom: 2px solid #EEE;
 }
 .theme-img-container img {
-    width: 100%; height: 100%; object-fit: cover; /* Zorgt dat plaatje mooi vult */
+    width: 100%; height: 100%; object-fit: cover;
 }
 .theme-card-btn .btn-label {
     font-family: 'Fredoka One', cursive; font-size: 0.9rem; color: #555;
@@ -64,19 +64,17 @@
 .divider-line { width: 80%; height: 2px; background: #EEE; margin: 15px 0; }
 .color-picker-title { font-size: 0.8rem; color: #888; margin-bottom: 5px; font-family: 'Nunito', sans-serif; }
 
-/* Grotere bollen */
 .color-row { 
     display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
     margin-bottom: 15px; padding: 5px; width: 100%; flex-shrink: 0;
 }
 .color-dot { 
-    width: 45px; height: 45px; /* GROTER GEMAAKT */
+    width: 45px; height: 45px;
     border-radius: 50%; border: 4px solid white; cursor: pointer; 
     box-shadow: 0 3px 6px rgba(0,0,0,0.15); transition: transform 0.2s; 
 }
 .color-dot:active { transform: scale(0.9); }
 
-/* Speler selectie */
 .option-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; }
 .player-btn { 
     background: white; border: 3px solid #EEE; box-shadow: 0 4px 0 #EEE;
@@ -85,13 +83,11 @@
 }
 .player-btn .btn-label { font-size: 0.8rem; font-family: 'Fredoka One', cursive; color: #555; margin-top: 5px; }
 
-/* Als je op een naam klikt maar nog geen kleur hebt: */
 .player-btn.selected-pending {
     border-color: #333; animation: pulse 1s infinite;
 }
 @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-/* Lijst onderaan van actieve spelers */
 #active-players-list {
     display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%;
     margin-top: 10px;
@@ -105,7 +101,6 @@
 @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
 .remove-x { font-weight: bold; background: rgba(0,0,0,0.2); border-radius: 50%; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; }
 
-/* Input veld */
 .player-input-container { display: flex; gap: 5px; margin-top: 10px; width: 100%; }
 #custom-player-name { flex: 1; padding: 8px; border-radius: 12px; border: 2px solid #B3E5FC; font-family: 'Nunito', sans-serif; }
 .add-btn { background: #FFC107; border: none; border-radius: 12px; padding: 0 15px; color: white; font-weight: bold; cursor: pointer; }
@@ -132,16 +127,18 @@
 .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .card-front { background: linear-gradient(135deg, #4FC3F7, #0288D1); border: 3px solid white; z-index: 2; }
 .card-back { background: white; transform: rotateY(180deg); border: 3px solid #FFC107; }
-.card-img, .card-cover-img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.card-img { width: 85%; height: 85%; object-fit: contain; }
 
-/* MATCH */
-.match-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.6); display: flex; justify-content: center; align-items: center; opacity: 0; transform: scale(0.5); transition: all 0.3s; pointer-events: none; z-index: 10; }
-.checkmark { font-size: 4rem; color: #4CAF50; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-.memory-card.matched .match-overlay { opacity: 1; transform: scale(1); }
-/* Border kleur wordt via JS gezet */
+/* AANGEPAST: AFBEELDINGEN VULLEN NU HET HELE KAARTJE */
+.card-img, .card-cover-img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; /* Zorgt dat het plaatje de hele kaart bedekt zonder vervorming */
+    display: block; 
+}
 
-@media (max-width: 650px) { .setup-columns { flex-direction: column; } .card-img { width: 90%; height: 90%; } }
+/* MATCH CSS IS VERWIJDERD (GEEN VINKJE MEER) */
+
+@media (max-width: 650px) { .setup-columns { flex-direction: column; } }
 /* GROOTTE KNOPPEN */
 .option-btn { background: #E1F5FE; color: #0288D1; border: none; padding: 8px; border-radius: 15px; font-size: 1.6rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; min-width: 60px; box-shadow: 0 3px 0 #B3E5FC; transition: all 0.2s; }
 .option-btn .btn-label { font-size: 0.75rem; margin-top: 2px; font-family: 'Fredoka One', cursive; color: #555; }
