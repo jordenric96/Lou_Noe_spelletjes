@@ -30,7 +30,7 @@ const themes = {
     'mario': { locked: false, extension: 'png', path: 'assets/images/memory/mario/' },
     'pokemon': { locked: false, extension: 'png', path: 'assets/images/memory/pokemon/' },
     'dino': { locked: true, extension: 'jpg', path: 'assets/images/memory/dino/' },
-    'studio100': { locked: false, extension: 'jpg', path: 'assets/images/memory/studio100/' },
+    'studio100': { locked: false, extension: 'png', path: 'assets/images/memory/studio100/' },
     'marvel': { locked: true, extension: 'jpg', path: 'assets/images/memory/marvel/' },
     'natuur': { locked: true, extension: 'jpg', path: 'assets/images/memory/natuur/' },
     'beroepen': { locked: true, extension: 'jpg', path: 'assets/images/memory/beroepen/' }
