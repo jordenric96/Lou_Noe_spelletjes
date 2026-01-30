@@ -1,10 +1,10 @@
-// MEMORY SPEL LOGICA - FULL SCREEN FIX
+// MEMORY SPEL LOGICA - ROBUUSTE VERSIE
 
-console.log("Memory.js geladen (Full Screen Fix)...");
+console.log("Memory.js geladen (Level Fix)...");
 
 let memoryState = { 
     theme: 'boerderij', 
-    gridSize: 12, 
+    gridSize: 12, // Standaard
     playerNames: [], 
     currentPlayerIndex: 0, 
     scores: {}, 
@@ -20,8 +20,10 @@ let memoryState = {
 const palette = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#4CAF50', '#FFEB3B', '#FF9800'];
 
 const predefinedPlayers = [
-    { name: "Lou", icon: "👦🏼" }, { name: "Noé", icon: "👶🏼" }, 
-    { name: "Mama", icon: "👩🏻" }, { name: "Papa", icon: "👨🏻" }
+    { name: "Lou", icon: "👦🏼" }, 
+    { name: "Noé", icon: "👶🏼" }, 
+    { name: "Mama", icon: "👩🏻" }, 
+    { name: "Papa", icon: "👨🏻" }
 ];
 
 const themes = {
@@ -87,9 +89,9 @@ function startMemorySetup() {
                 <div class="setup-group group-size">
                     <h3>4. Aantal Kaartjes</h3>
                     <div class="option-grid" id="size-options">
-                        <button class="option-btn size-selector selected" data-size="12" onclick="setSize(12, this)"><span>⭐</span><span class="btn-label">12</span></button>
-                        <button class="option-btn size-selector" data-size="16" onclick="setSize(16, this)"><span>⭐⭐</span><span class="btn-label">16</span></button>
-                        <button class="option-btn size-selector" data-size="30" onclick="setSize(30, this)"><span>⭐⭐⭐</span><span class="btn-label">30</span></button>
+                        <button class="option-btn size-selector selected" onclick="setSize(12, this)"><span>⭐</span><span class="btn-label">12</span></button>
+                        <button class="option-btn size-selector" onclick="setSize(16, this)"><span>⭐⭐</span><span class="btn-label">16</span></button>
+                        <button class="option-btn size-selector" onclick="setSize(30, this)"><span>⭐⭐⭐</span><span class="btn-label">30</span></button>
                     </div>
                 </div>
             </div>
@@ -99,7 +101,7 @@ function startMemorySetup() {
     memoryState.playerNames = [];
     memoryState.theme = 'boerderij'; 
     memoryState.pendingPlayer = null; 
-    memoryState.gridSize = 12; // Reset naar default
+    memoryState.gridSize = 12; // Altijd resetten naar 12 bij openen
     
     renderPalette(); 
     
@@ -109,7 +111,7 @@ function startMemorySetup() {
     }, 10);
 }
 
-// SETUP HULPFUNCTIES
+// SETUP FUNCTIES
 function renderPalette() {
     const container = document.getElementById('color-palette');
     const usedColors = memoryState.playerNames.map(p => p.color);
@@ -193,39 +195,38 @@ function setTheme(name, btn) {
     btn.classList.add('selected');
 }
 
-// FIX: Deze functie werkte niet goed, nu wel.
+// BELANGRIJKE FIX: Zorg dat size altijd een nummer is en visueel update
 function setSize(size, btn) { 
     if(typeof playSound === 'function') playSound('click');
-    memoryState.gridSize = size; 
     
-    // Verwijder 'selected' class van alle size knoppen
+    // Converteer naar nummer voor de zekerheid
+    memoryState.gridSize = parseInt(size); 
+    
+    console.log("Nieuw aantal kaarten gekozen:", memoryState.gridSize);
+
+    // Visuele update
     document.querySelectorAll('.size-selector').forEach(b => b.classList.remove('selected'));
-    // Voeg toe aan de geklikte knop
     btn.classList.add('selected'); 
 }
 
 
-// --- 2. GAME LOGICA (HERZIEN VOOR VOLLEDIG SCHERM) ---
+// --- 2. GAME LOGICA (HERZIEN VOOR FULL SCREEN & ROOSTER) ---
 
 function calculateCardSize(cols, rows) {
-    // 1. Haal de beschikbare ruimte op
-    const headerHeight = 60; // Hoogte van de zwarte balk bovenaan
-    const scoreHeight = 60; // Hoogte van de scorebalk (ongeveer)
-    const padding = 20; // Beetje ademruimte aan de randen
+    const headerHeight = 70; 
+    const scoreHeight = 70; 
+    const padding = 20; 
     
     const availableWidth = window.innerWidth - padding; 
     const availableHeight = window.innerHeight - headerHeight - scoreHeight - padding;
 
-    // 2. Bereken de tussenruimte (gap)
-    const gap = 8; // De ruimte tussen de kaartjes in pixels
+    const gap = 8; 
     const totalGapWidth = (cols - 1) * gap;
     const totalGapHeight = (rows - 1) * gap;
 
-    // 3. Bereken maximale grootte per kaart
     const maxCardWidth = (availableWidth - totalGapWidth) / cols;
     const maxCardHeight = (availableHeight - totalGapHeight) / rows;
 
-    // 4. Pak de kleinste waarde zodat ze vierkant blijven én passen
     return Math.floor(Math.min(maxCardWidth, maxCardHeight));
 }
 
@@ -234,6 +235,12 @@ function startMemoryGame() {
     if (memoryState.playerNames.length === 0) return;
     const board = document.getElementById('game-board');
     
+    // Zorg dat gridSize een geldig nummer is, anders fallback naar 12
+    let size = parseInt(memoryState.gridSize);
+    if (![12, 16, 30].includes(size)) size = 12;
+    memoryState.gridSize = size;
+
+    // Scorebord
     let scoreHTML = '<div class="score-board">';
     memoryState.playerNames.forEach((player, index) => {
         let playerIcon = "👤";
@@ -251,33 +258,28 @@ function startMemoryGame() {
     });
     scoreHTML += '</div>';
 
-    // Bepaal rooster op basis van schermoriëntatie
+    // Bepaal rooster (Slimme check)
     const isLandscape = window.innerWidth > window.innerHeight;
     let cols, rows;
 
-    // Logica voor rooster
-    if (memoryState.gridSize === 12) {
+    if (size === 12) {
         cols = isLandscape ? 4 : 3;
         rows = isLandscape ? 3 : 4;
-    } else if (memoryState.gridSize === 16) {
-        cols = 4; rows = 4; // Altijd vierkant
-    } else if (memoryState.gridSize === 30) {
+    } else if (size === 16) {
+        cols = 4; rows = 4;
+    } else if (size === 30) {
         cols = isLandscape ? 6 : 5;
         rows = isLandscape ? 5 : 6;
     }
 
     board.innerHTML = `<div class="memory-game-container">${scoreHTML}<div class="memory-grid" id="memory-grid"></div></div>`;
     
-    // Wacht even voor correcte meting
     setTimeout(() => {
         const grid = document.getElementById('memory-grid');
         const cardSize = calculateCardSize(cols, rows);
         
-        // STEL HET GRID IN
         grid.style.gridTemplateColumns = `repeat(${cols}, ${cardSize}px)`;
-        grid.style.gap = '8px'; // Zorg dat dit overeenkomt met de berekening
-        
-        // Zorg dat het grid niet breder is dan de inhoud (zodat het centreert)
+        grid.style.gap = '8px';
         grid.style.width = 'fit-content'; 
         
         memoryState.currentPlayerIndex = 0; 
@@ -294,7 +296,7 @@ function updateActiveBadgeColor() {
     memoryState.playerNames.forEach((p, idx) => { 
         let b = document.getElementById(`badge-${idx}`); 
         if(b) { 
-            b.style.backgroundColor = 'transparent'; // Reset background
+            b.style.backgroundColor = 'transparent'; 
             b.style.color = p.color; 
             b.classList.remove('active'); 
         } 
@@ -324,7 +326,6 @@ function generateCards(sizePx) {
         const card = document.createElement('div');
         card.classList.add('memory-card');
         card.dataset.value = item;
-        // Zet de grootte hard erin
         card.style.width = `${sizePx}px`; 
         card.style.height = `${sizePx}px`;
 
@@ -411,7 +412,6 @@ function switchPlayer() {
 }
 
 window.addEventListener('resize', () => {
-    // Alleen herstarten als het spel bezig is
     if(document.getElementById('memory-grid') && memoryState.playerNames.length > 0 && !document.querySelector('.memory-setup')) {
         startMemoryGame(); 
     }
