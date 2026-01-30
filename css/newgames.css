@@ -1,210 +1,87 @@
-/* --- GLOBAL NEON THEME OVERRIDES --- */
-:root {
-    --neon-bg: #121212;
-    --neon-card: #1E1E1E;
-    --neon-pink: #FF00FF;
-    --neon-blue: #00FFFF;
-    --neon-green: #00FF00;
-    --neon-yellow: #FFFF00;
-    --neon-purple: #BC13FE;
-}
-
-body {
-    background: var(--neon-bg) !important; /* Forceer donkere achtergrond */
-    color: white;
-}
-
-/* Titel met glow */
-.neon-title {
-    font-family: 'Fredoka One', cursive;
-    color: white;
-    text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-pink);
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 2.5rem;
-}
-
-/* Knoppen in het menu */
-.game-btn {
-    background: var(--neon-card);
-    border: 2px solid white;
-    color: white;
-    border-radius: 15px;
-    box-shadow: 0 0 10px rgba(255,255,255,0.2);
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.game-btn:active { transform: scale(0.95); }
-
-/* Kleurtjes per knop */
-.game-btn.neon-blue { border-color: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); }
-.game-btn.neon-pink { border-color: var(--neon-pink); box-shadow: 0 0 10px var(--neon-pink); }
-.game-btn.neon-green { border-color: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
-.game-btn.neon-yellow { border-color: var(--neon-yellow); box-shadow: 0 0 10px var(--neon-yellow); }
-.game-btn.neon-purple { border-color: var(--neon-purple); box-shadow: 0 0 10px var(--neon-purple); }
-.game-btn.neon-cyan { border-color: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); }
-
-.game-header { background: #000; border-bottom: 2px solid var(--neon-blue); }
-#back-btn { background: #333; color: var(--neon-blue); border: 1px solid var(--neon-blue); }
-
-/* --- STICKERBOEK (NEON STIJL) --- */
+/* --- STICKERBOEK (NEON) --- */
 .sticker-header { 
-    font-family: 'Fredoka One', cursive; text-align: center; 
-    color: var(--neon-yellow); margin-bottom: 10px; font-size: 1.5rem;
-    text-shadow: 0 0 5px var(--neon-yellow);
+    font-family: 'Fredoka One'; text-align: center; color: var(--neon-yellow); 
+    margin-bottom: 10px; font-size: 1.4rem; text-shadow: 0 0 5px var(--neon-yellow);
 }
-
 .sticker-container { 
     display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); 
-    gap: 15px; width: 100%; padding: 15px; overflow-y: auto; max-height: 80vh; 
+    gap: 10px; width: 100%; padding: 10px; overflow-y: auto; 
 }
-
 .sticker-slot { 
-    aspect-ratio: 1/1; 
-    background: #222; 
-    border-radius: 10px; 
-    border: 2px solid #444; 
-    display: flex; justify-content: center; align-items: center; position: relative; 
-    transition: all 0.3s;
-    cursor: pointer;
+    aspect-ratio: 1/1; background: #222; border-radius: 10px; border: 2px solid #444; 
+    display: flex; justify-content: center; align-items: center; cursor: pointer;
 }
-
 .sticker-slot.unlocked { 
-    background: #000; 
-    border: 2px solid var(--neon-green); 
-    box-shadow: 0 0 15px var(--neon-green); 
-    animation: popIn 0.5s; 
+    background: #000; border-color: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); animation: popIn 0.5s; 
 }
-
-.sticker-img { width: 90%; height: 90%; object-fit: contain; filter: drop-shadow(0 0 5px rgba(255,255,255,0.5)); }
+.sticker-img { width: 90%; height: 90%; object-fit: contain; }
 .sticker-lock-icon { font-size: 2rem; opacity: 0.5; color: #555; }
-.empty-msg { grid-column: 1 / -1; text-align: center; color: #888; margin-top: 50px; font-style: italic; }
 
-/* BELONING IN POPUP */
+/* --- BELONING POPUP --- */
 .sticker-reward-anim { text-align: center; margin-bottom: 15px; animation: bounceIn 0.8s; }
 .reward-text { 
-    background: var(--neon-yellow); color: #000; padding: 5px 15px; 
-    border-radius: 20px; font-weight: bold; margin-bottom: 10px; 
-    display: inline-block; box-shadow: 0 0 15px var(--neon-yellow); 
-    font-family: 'Fredoka One', cursive; 
+    background: var(--neon-yellow); color: #000; padding: 5px 15px; border-radius: 20px; 
+    font-weight: bold; margin-bottom: 10px; display: inline-block; box-shadow: 0 0 15px var(--neon-yellow); 
 }
-.reward-img { 
-    width: 120px; height: 120px; object-fit: contain; 
-    filter: drop-shadow(0 0 10px white); 
-    animation: spinSlow 3s infinite linear; 
-}
+.reward-img { width: 100px; height: 100px; object-fit: contain; animation: spinSlow 3s infinite linear; }
 
-/* --- WHACK A MOLE (NEON) --- */
-.whack-container { display: flex; flex-direction: column; align-items: center; height: 100%; width: 100%; }
+/* --- WHACK A MOLE --- */
+.whack-container { display: flex; flex-direction: column; align-items: center; width: 100%; }
 .whack-score-board { 
     display: flex; justify-content: space-between; width: 95%; max-width: 500px; 
     background: #222; color: var(--neon-blue); border: 2px solid var(--neon-blue);
-    padding: 10px 15px; border-radius: 15px; margin-bottom: 10px; 
-    font-family: 'Fredoka One', cursive; box-shadow: 0 0 10px var(--neon-blue);
+    padding: 10px; border-radius: 15px; margin-bottom: 10px; 
+    font-family: 'Fredoka One'; box-shadow: 0 0 10px var(--neon-blue);
 }
-
 .whack-grid { display: grid; gap: 10px; width: 95%; max-width: 500px; aspect-ratio: 1/1; margin: 0 auto; }
 .whack-grid.grid-2 { grid-template-columns: repeat(2, 1fr); }
 .whack-grid.grid-3 { grid-template-columns: repeat(3, 1fr); }
 .whack-grid.grid-4 { grid-template-columns: repeat(4, 1fr); }
-
 .whack-hole { 
-    background: #000; border-radius: 50%; border: 3px solid #333; 
-    position: relative; overflow: hidden; 
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.8); 
-    cursor: pointer; user-select: none;
+    background: #000; border-radius: 50%; border: 3px solid #333; position: relative; 
+    overflow: hidden; cursor: pointer; box-shadow: inset 0 0 10px #000;
 }
 .whack-hole.up { border-color: var(--neon-pink); box-shadow: 0 0 15px var(--neon-pink); }
-
-.whack-character { 
-    position: absolute; bottom: -100%; left: 10%; width: 80%; height: 80%; 
-    transition: bottom 0.1s; 
-    background-size: contain; background-repeat: no-repeat; background-position: bottom center; 
-    pointer-events: none; 
-}
+.whack-character { position: absolute; bottom: -100%; left: 10%; width: 80%; height: 80%; transition: bottom 0.1s; background-size: contain; background-repeat: no-repeat; background-position: bottom center; pointer-events: none; }
 .whack-hole.up .whack-character { bottom: 0; }
-.whack-hole.whacked .whack-character { filter: brightness(2) sepia(1) hue-rotate(90deg); transform: scale(0.9); }
+.whack-hole.whacked .whack-character { filter: brightness(2) sepia(1); transform: scale(0.9); }
 
-/* --- SIMON SAYS (NEON) --- */
+/* --- SIMON --- */
 .simon-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 15px; }
 .simon-board { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 320px; height: 320px; padding: 10px; }
-
 .simon-btn { 
     border-radius: 50%; border: 4px solid #333; cursor: pointer; opacity: 0.5; 
-    transition: all 0.1s; background-color: #222; 
-    box-shadow: inset 0 0 10px #000;
+    background-color: #222; box-shadow: inset 0 0 10px #000; transition: all 0.1s;
 }
-.simon-btn:active, .simon-btn.lit { 
-    opacity: 1; transform: scale(1.1); 
-    border-color: white; z-index: 10;
-    box-shadow: 0 0 30px currentColor; /* Glow in eigen kleur */
-}
+.simon-btn.lit { opacity: 1; transform: scale(1.1); border-color: white; box-shadow: 0 0 20px currentColor; }
+.simon-info { background: #222; padding: 10px; border-radius: 20px; border: 2px solid var(--neon-purple); box-shadow: 0 0 10px var(--neon-purple); text-align: center; width: 80%; }
+.simon-score { font-size: 1.5rem; font-family: 'Fredoka One'; color: var(--neon-purple); }
+.simon-message { font-weight: bold; color: var(--neon-yellow); margin-top: 5px; }
 
-/* Specifieke kleuren voor de glow (wordt in JS geregeld met styles, maar hier fallback) */
-.simon-info { 
-    background: #222; color: white; padding: 10px 25px; border-radius: 20px; 
-    text-align: center; border: 2px solid var(--neon-purple); 
-    box-shadow: 0 0 10px var(--neon-purple);
-    width: 80%; max-width: 300px;
-}
-.simon-score { font-size: 1.5rem; font-family: 'Fredoka One', cursive; color: var(--neon-purple); }
-.simon-message { margin-top: 5px; font-weight: bold; color: var(--neon-yellow); font-size: 1.1rem; }
-
-/* --- TEKENBORD (NEON UI) --- */
-.drawing-container { display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; position: relative; }
-canvas { 
-    background: white; border-radius: 15px; 
-    box-shadow: 0 0 20px var(--neon-blue); /* Neon rand om wit canvas */
-    touch-action: none; cursor: crosshair; 
-}
-
+/* --- TEKENEN --- */
+.drawing-container { display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; }
+canvas { background: white; border-radius: 15px; box-shadow: 0 0 20px var(--neon-blue); }
 .drawing-controls { 
     display: flex; gap: 8px; margin-top: 10px; align-items: center; 
-    background: #222; padding: 8px 15px; border-radius: 50px; 
-    border: 1px solid #444; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    background: #222; padding: 8px 15px; border-radius: 50px; border: 1px solid #444; 
 }
-
-.top-controls { width: 95%; max-width: 500px; background: transparent; border: none; box-shadow: none; justify-content: space-between; padding: 0; margin-bottom: 5px; }
-.album-btn { background: var(--neon-blue); color: #000; border: none; font-weight: bold; border-radius: 20px; padding: 10px 20px; box-shadow: 0 0 10px var(--neon-blue); }
-.save-btn { background: var(--neon-green); color: #000; border: none; font-weight: bold; border-radius: 20px; padding: 10px 20px; box-shadow: 0 0 10px var(--neon-green); }
-
-.color-swatch { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #555; cursor: pointer; transition: transform 0.2s; }
-.color-swatch.active { transform: scale(1.3); border-color: white; box-shadow: 0 0 10px white; z-index: 2; }
-.control-divider { width: 1px; height: 25px; background: #555; margin: 0 5px; }
-
-/* Brush sizes */
-.size-btn { width: 35px; height: 35px; background: #333; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; border: 2px solid transparent; }
+.top-controls { background: transparent; border: none; width: 95%; max-width: 500px; justify-content: space-between; padding: 0; margin-bottom: 5px; }
+.album-btn { background: var(--neon-blue); color: #000; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; }
+.save-btn { background: var(--neon-green); color: #000; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; }
+.color-swatch { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #555; }
+.color-swatch.active { transform: scale(1.3); border-color: white; box-shadow: 0 0 10px white; }
+.size-btn { width: 35px; height: 35px; background: #333; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 2px solid transparent; }
 .size-btn .dot { background: #888; border-radius: 50%; }
 .size-btn.active { border-color: var(--neon-pink); background: #000; }
 .size-btn.active .dot { background: var(--neon-pink); box-shadow: 0 0 5px var(--neon-pink); }
-.dot-s { width: 6px; height: 6px; } .dot-m { width: 12px; height: 12px; } .dot-l { width: 20px; height: 20px; }
+.tool-btn { background: #444; color: white; padding: 8px; border-radius: 50%; border: 1px solid #666; font-size: 1.2rem; }
 
-.tool-btn { background: #444; color: white; border: 1px solid #666; padding: 8px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; }
-.tool-btn:active { background: #666; }
-
-/* --- MODALS (WINNER & ZOOM) --- */
-.neon-box {
-    background: #111; border: 2px solid var(--neon-pink);
-    box-shadow: 0 0 20px var(--neon-pink), inset 0 0 20px rgba(255,0,255,0.2);
-    color: white;
-}
-.neon-text { color: white; text-shadow: 0 0 10px var(--neon-pink); font-family: 'Fredoka One'; }
-.neon-btn { 
-    background: transparent; border: 2px solid var(--neon-green); color: var(--neon-green);
-    box-shadow: 0 0 10px var(--neon-green); font-family: 'Fredoka One'; font-size: 1.2rem;
-}
-.neon-btn:hover { background: var(--neon-green); color: black; }
-
-/* Zoom overlay dark */
+/* ZOOM & ANIM */
 .zoom-content { background: transparent; pointer-events: none; }
-#zoomed-image { 
-    pointer-events: auto; border: 2px solid var(--neon-blue); 
-    box-shadow: 0 0 30px var(--neon-blue); background: black; 
-}
-.close-zoom-btn { background: #000; color: white; border: 2px solid white; pointer-events: auto; }
-.delete-btn { background: #000; color: var(--neon-pink); border: 2px solid var(--neon-pink); box-shadow: 0 0 10px var(--neon-pink); pointer-events: auto; }
+#zoomed-image { pointer-events: auto; border: 2px solid var(--neon-blue); box-shadow: 0 0 30px var(--neon-blue); background: black; max-width: 90vw; max-height: 80vh; border-radius: 10px; animation: popIn 0.3s; }
+.close-zoom-btn { background: #000; color: white; border: 2px solid white; pointer-events: auto; position: absolute; top: 20px; right: 20px; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2rem; }
+.delete-btn { background: #000; color: var(--neon-pink); border: 2px solid var(--neon-pink); margin-top: 10px; pointer-events: auto; }
 
-/* Animatie */
 @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-@keyframes bounceIn { 0% { opacity: 0; transform: scale(0.3); } 20% { transform: scale(1.1); } 40% { transform: scale(0.9); } 60% { opacity: 1; transform: scale(1.03); } 80% { transform: scale(0.97); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes bounceIn { 0% { opacity: 0; transform: scale(0.3); } 60% { opacity: 1; transform: scale(1.03); } 100% { opacity: 1; transform: scale(1); } }
 @keyframes spinSlow { 0% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } 100% { transform: rotate(-5deg); } }
