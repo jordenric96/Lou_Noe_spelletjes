@@ -4,10 +4,57 @@ const gameTitle = document.getElementById('game-title');
 const gameBoard = document.getElementById('game-board');
 let currentGame = null; 
 
+// --- AUDIO SYSTEEM (GEEN BESTANDEN NODIG!) ---
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playSound(type) {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    const now = audioCtx.currentTime;
+    
+    if (type === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+        gainNode.gain.setValueAtTime(0.3, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.start(now); osc.stop(now + 0.1);
+    } else if (type === 'win') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.setValueAtTime(600, now + 0.1);
+        osc.frequency.setValueAtTime(1000, now + 0.2);
+        gainNode.gain.setValueAtTime(0.3, now);
+        gainNode.gain.linearRampToValueAtTime(0, now + 0.5);
+        osc.start(now); osc.stop(now + 0.5);
+    } else if (type === 'lose') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(200, now);
+        osc.frequency.linearRampToValueAtTime(100, now + 0.3);
+        gainNode.gain.setValueAtTime(0.3, now);
+        gainNode.gain.linearRampToValueAtTime(0, now + 0.3);
+        osc.start(now); osc.stop(now + 0.3);
+    } else if (type === 'pop') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, now);
+        gainNode.gain.setValueAtTime(0.1, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.start(now); osc.stop(now + 0.1);
+    }
+}
+
+// --- NAVIGATIE ---
 function selectGame(gameName) {
+    playSound('click');
     mainMenu.classList.remove('active'); mainMenu.classList.add('hidden');
     gameContainer.classList.remove('hidden'); gameContainer.classList.add('active');
     currentGame = gameName; 
+
+    // Reset board
+    gameBoard.innerHTML = '';
 
     if (gameName === 'memory') {
         gameTitle.innerText = "Memory";
@@ -17,29 +64,58 @@ function selectGame(gameName) {
         if (typeof startDoolhofSetup === "function") startDoolhofSetup();
     } else if (gameName === 'blokken') {
         gameTitle.innerText = "De File 🚗";
-        // Start het nieuwe spel
         if (typeof startBlokkenGame === "function") startBlokkenGame();
+    } else if (gameName === 'stickers') {
+        gameTitle.innerText = "Mijn Stickerboek 🏆";
+        if (typeof openStickerBook === "function") openStickerBook();
+    } else if (gameName === 'simon') {
+        gameTitle.innerText = "Simon Zegt 💡";
+        if (typeof startSimonGame === "function") startSimonGame();
+    } else if (gameName === 'vang') {
+        gameTitle.innerText = "Vang ze! 🔨";
+        if (typeof startWhackGame === "function") startWhackGame();
+    } else if (gameName === 'tekenen') {
+        gameTitle.innerText = "Tekenbord 🎨";
+        if (typeof startDrawing === "function") startDrawing();
     }
 }
 
 function goHome() {
+    playSound('click');
+    // Cleanups
     if (currentGame === 'doolhof' && typeof cleanupDoolhof === "function") cleanupDoolhof();
-    // Cleanup blokken (event listeners weghalen) wordt in blokken.js geregeld indien nodig
-    
+    if (currentGame === 'simon' && typeof stopSimonGame === "function") stopSimonGame();
+    if (currentGame === 'vang' && typeof stopWhackGame === "function") stopWhackGame();
+
     gameContainer.classList.remove('active'); gameContainer.classList.add('hidden');
     mainMenu.classList.remove('hidden'); mainMenu.classList.add('active');
     gameBoard.innerHTML = "";
     currentGame = null;
 }
 
-// WINNAAR LOGICA (Ongewijzigd, maar belangrijk voor de pop-up)
+// --- WINNAAR & STICKERS ---
 function showWinnerModal(winnerName, leaderboardData) {
+    playSound('win');
     const modal = document.getElementById('winner-modal');
     const title = document.getElementById('winner-title');
     const list = document.getElementById('winner-leaderboard');
+    const stickerMsg = document.getElementById('sticker-reward-msg');
     
-    title.innerText = winnerName ? `${winnerName}` : "Gewonnen!";
+    title.innerText = winnerName ? `${winnerName} wint!` : "Gewonnen!";
     list.innerHTML = '';
+    
+    // Check voor sticker (50% kans of altijd bij winst, hier altijd)
+    let stickerEarned = false;
+    if(typeof unlockRandomSticker === 'function') {
+        stickerEarned = unlockRandomSticker(); // Probeert sticker te unlocken
+    }
+
+    if(stickerEarned) {
+        stickerMsg.classList.remove('hidden');
+        playSound('win'); // Extra geluidje
+    } else {
+        stickerMsg.classList.add('hidden');
+    }
     
     if (leaderboardData && leaderboardData.length > 0) {
         leaderboardData.forEach((player, index) => {
@@ -51,7 +127,7 @@ function showWinnerModal(winnerName, leaderboardData) {
                 if(index === 0) item.style.borderColor = player.color;
                 else { item.style.background = player.color; item.style.color = 'white'; }
             }
-            item.innerHTML = `<span>${player.name}</span><span>${player.score}</span>`;
+            item.innerHTML = `<span>${index + 1}. ${player.name}</span><span>${player.score}</span>`;
             list.appendChild(item);
         });
     }
@@ -61,13 +137,16 @@ function showWinnerModal(winnerName, leaderboardData) {
 }
 
 function closeWinnerModal() {
+    playSound('click');
     const modal = document.getElementById('winner-modal');
     modal.classList.remove('show');
     setTimeout(() => modal.classList.add('hidden'), 300);
     
     if (currentGame === 'memory') startMemorySetup();
     if (currentGame === 'doolhof') startDoolhofSetup();
-    if (currentGame === 'blokken') nextLevelBlokken(); // Naar volgend level!
+    if (currentGame === 'blokken') startBlokkenGame(); // Terug naar setup
+    if (currentGame === 'simon') startSimonGame();
+    if (currentGame === 'vang') startWhackGame();
 }
 
 function startConfetti() {
