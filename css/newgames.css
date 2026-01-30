@@ -1,87 +1,47 @@
-/* --- STICKERBOEK (NEON) --- */
-.sticker-header { 
-    font-family: 'Fredoka One'; text-align: center; color: var(--neon-yellow); 
-    margin-bottom: 10px; font-size: 1.4rem; text-shadow: 0 0 5px var(--neon-yellow);
-}
+/* STIJLEN VOOR NIEUWE FUNCTIES (SCHOON & HELDER) */
+
 .sticker-container { 
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); 
-    gap: 10px; width: 100%; padding: 10px; overflow-y: auto; 
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); 
+    gap: 10px; padding: 10px; width: 100%; 
 }
 .sticker-slot { 
-    aspect-ratio: 1/1; background: #222; border-radius: 10px; border: 2px solid #444; 
-    display: flex; justify-content: center; align-items: center; cursor: pointer;
+    aspect-ratio: 1/1; background: #FFF; border-radius: 10px; 
+    border: 2px dashed #CCC; display: flex; justify-content: center; align-items: center; 
 }
-.sticker-slot.unlocked { 
-    background: #000; border-color: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); animation: popIn 0.5s; 
-}
+.sticker-slot.unlocked { border: 2px solid #FFC107; background: white; cursor: pointer; }
 .sticker-img { width: 90%; height: 90%; object-fit: contain; }
-.sticker-lock-icon { font-size: 2rem; opacity: 0.5; color: #555; }
+.sticker-slot.locked { background: #EEE; font-size: 1.5rem; opacity: 0.5; }
 
-/* --- BELONING POPUP --- */
-.sticker-reward-anim { text-align: center; margin-bottom: 15px; animation: bounceIn 0.8s; }
-.reward-text { 
-    background: var(--neon-yellow); color: #000; padding: 5px 15px; border-radius: 20px; 
-    font-weight: bold; margin-bottom: 10px; display: inline-block; box-shadow: 0 0 15px var(--neon-yellow); 
-}
-.reward-img { width: 100px; height: 100px; object-fit: contain; animation: spinSlow 3s infinite linear; }
-
-/* --- WHACK A MOLE --- */
-.whack-container { display: flex; flex-direction: column; align-items: center; width: 100%; }
-.whack-score-board { 
-    display: flex; justify-content: space-between; width: 95%; max-width: 500px; 
-    background: #222; color: var(--neon-blue); border: 2px solid var(--neon-blue);
-    padding: 10px; border-radius: 15px; margin-bottom: 10px; 
-    font-family: 'Fredoka One'; box-shadow: 0 0 10px var(--neon-blue);
-}
-.whack-grid { display: grid; gap: 10px; width: 95%; max-width: 500px; aspect-ratio: 1/1; margin: 0 auto; }
-.whack-grid.grid-2 { grid-template-columns: repeat(2, 1fr); }
-.whack-grid.grid-3 { grid-template-columns: repeat(3, 1fr); }
-.whack-grid.grid-4 { grid-template-columns: repeat(4, 1fr); }
-.whack-hole { 
-    background: #000; border-radius: 50%; border: 3px solid #333; position: relative; 
-    overflow: hidden; cursor: pointer; box-shadow: inset 0 0 10px #000;
-}
-.whack-hole.up { border-color: var(--neon-pink); box-shadow: 0 0 15px var(--neon-pink); }
-.whack-character { position: absolute; bottom: -100%; left: 10%; width: 80%; height: 80%; transition: bottom 0.1s; background-size: contain; background-repeat: no-repeat; background-position: bottom center; pointer-events: none; }
-.whack-hole.up .whack-character { bottom: 0; }
-.whack-hole.whacked .whack-character { filter: brightness(2) sepia(1); transform: scale(0.9); }
-
-/* --- SIMON --- */
-.simon-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 15px; }
-.simon-board { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 320px; height: 320px; padding: 10px; }
-.simon-btn { 
-    border-radius: 50%; border: 4px solid #333; cursor: pointer; opacity: 0.5; 
-    background-color: #222; box-shadow: inset 0 0 10px #000; transition: all 0.1s;
-}
-.simon-btn.lit { opacity: 1; transform: scale(1.1); border-color: white; box-shadow: 0 0 20px currentColor; }
-.simon-info { background: #222; padding: 10px; border-radius: 20px; border: 2px solid var(--neon-purple); box-shadow: 0 0 10px var(--neon-purple); text-align: center; width: 80%; }
-.simon-score { font-size: 1.5rem; font-family: 'Fredoka One'; color: var(--neon-purple); }
-.simon-message { font-weight: bold; color: var(--neon-yellow); margin-top: 5px; }
-
-/* --- TEKENEN --- */
+/* Tekenbord */
 .drawing-container { display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; }
-canvas { background: white; border-radius: 15px; box-shadow: 0 0 20px var(--neon-blue); }
 .drawing-controls { 
-    display: flex; gap: 8px; margin-top: 10px; align-items: center; 
-    background: #222; padding: 8px 15px; border-radius: 50px; border: 1px solid #444; 
+    display: flex; gap: 8px; margin-bottom: 5px; align-items: center; 
+    background: white; padding: 5px 15px; border-radius: 30px; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
 }
-.top-controls { background: transparent; border: none; width: 95%; max-width: 500px; justify-content: space-between; padding: 0; margin-bottom: 5px; }
-.album-btn { background: var(--neon-blue); color: #000; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; }
-.save-btn { background: var(--neon-green); color: #000; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; }
-.color-swatch { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #555; }
-.color-swatch.active { transform: scale(1.3); border-color: white; box-shadow: 0 0 10px white; }
-.size-btn { width: 35px; height: 35px; background: #333; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 2px solid transparent; }
-.size-btn .dot { background: #888; border-radius: 50%; }
-.size-btn.active { border-color: var(--neon-pink); background: #000; }
-.size-btn.active .dot { background: var(--neon-pink); box-shadow: 0 0 5px var(--neon-pink); }
-.tool-btn { background: #444; color: white; padding: 8px; border-radius: 50%; border: 1px solid #666; font-size: 1.2rem; }
+canvas { background: white; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+.color-swatch { width: 25px; height: 25px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 3px rgba(0,0,0,0.3); }
+.color-swatch.active { transform: scale(1.2); border-color: #333; }
+.size-btn { 
+    width: 30px; height: 30px; border-radius: 50%; background: #EEE; 
+    display: flex; justify-content: center; align-items: center; cursor: pointer; 
+}
+.size-btn.selected { background: #CCC; border: 2px solid #333; }
+.size-btn .dot { background: #333; border-radius: 50%; }
+.tool-btn { 
+    background: #E0F7FA; border: 1px solid #0277BD; color: #0277BD; 
+    padding: 5px 10px; border-radius: 15px; font-weight: bold; cursor: pointer; 
+}
 
-/* ZOOM & ANIM */
-.zoom-content { background: transparent; pointer-events: none; }
-#zoomed-image { pointer-events: auto; border: 2px solid var(--neon-blue); box-shadow: 0 0 30px var(--neon-blue); background: black; max-width: 90vw; max-height: 80vh; border-radius: 10px; animation: popIn 0.3s; }
-.close-zoom-btn { background: #000; color: white; border: 2px solid white; pointer-events: auto; position: absolute; top: 20px; right: 20px; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2rem; }
-.delete-btn { background: #000; color: var(--neon-pink); border: 2px solid var(--neon-pink); margin-top: 10px; pointer-events: auto; }
-
-@keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-@keyframes bounceIn { 0% { opacity: 0; transform: scale(0.3); } 60% { opacity: 1; transform: scale(1.03); } 100% { opacity: 1; transform: scale(1); } }
-@keyframes spinSlow { 0% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } 100% { transform: rotate(-5deg); } }
+/* Whack a Mole Grid */
+.whack-hole { 
+    background: #8D6E63; border-radius: 50%; border: 4px solid #5D4037; 
+    position: relative; overflow: hidden; cursor: pointer; box-shadow: inset 0 5px 10px rgba(0,0,0,0.3);
+}
+.whack-character { 
+    position: absolute; bottom: -100%; left: 10%; width: 80%; height: 80%; 
+    transition: bottom 0.1s; background-size: contain; background-repeat: no-repeat; 
+    background-position: bottom center; pointer-events: none; 
+}
+.whack-hole.up .whack-character { bottom: 0; }
+.whack-hole.whacked .whack-character { filter: brightness(1.5) sepia(1); transform: scale(0.9); }
