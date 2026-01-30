@@ -1,6 +1,6 @@
-// MEMORY SPEL LOGICA - ROBUUSTE VERSIE
+// MEMORY SPEL LOGICA - LEVEL FIX
 
-console.log("Memory.js geladen (Level Fix)...");
+console.log("Memory.js geladen (Level Fix Version)...");
 
 let memoryState = { 
     theme: 'boerderij', 
@@ -20,10 +20,8 @@ let memoryState = {
 const palette = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#4CAF50', '#FFEB3B', '#FF9800'];
 
 const predefinedPlayers = [
-    { name: "Lou", icon: "👦🏼" }, 
-    { name: "Noé", icon: "👶🏼" }, 
-    { name: "Mama", icon: "👩🏻" }, 
-    { name: "Papa", icon: "👨🏻" }
+    { name: "Lou", icon: "👦🏼" }, { name: "Noé", icon: "👶🏼" }, 
+    { name: "Mama", icon: "👩🏻" }, { name: "Papa", icon: "👨🏻" }
 ];
 
 const themes = {
@@ -98,10 +96,11 @@ function startMemorySetup() {
             <button id="start-btn" class="start-btn" onclick="startMemoryGame()" disabled>Kies eerst een speler...</button>
         </div>`;
     
+    // Reset en init
     memoryState.playerNames = [];
     memoryState.theme = 'boerderij'; 
     memoryState.pendingPlayer = null; 
-    memoryState.gridSize = 12; // Altijd resetten naar 12 bij openen
+    memoryState.gridSize = 12; // Startwaarde
     
     renderPalette(); 
     
@@ -111,7 +110,7 @@ function startMemorySetup() {
     }, 10);
 }
 
-// SETUP FUNCTIES
+// SETUP HULPFUNCTIES
 function renderPalette() {
     const container = document.getElementById('color-palette');
     const usedColors = memoryState.playerNames.map(p => p.color);
@@ -195,14 +194,13 @@ function setTheme(name, btn) {
     btn.classList.add('selected');
 }
 
-// BELANGRIJKE FIX: Zorg dat size altijd een nummer is en visueel update
+// DE FIX: DEZE FUNCTIE WERD NIET GOED GELEZEN
 function setSize(size, btn) { 
     if(typeof playSound === 'function') playSound('click');
     
-    // Converteer naar nummer voor de zekerheid
-    memoryState.gridSize = parseInt(size); 
-    
-    console.log("Nieuw aantal kaarten gekozen:", memoryState.gridSize);
+    // Forceer naar een nummer
+    memoryState.gridSize = Number(size); 
+    console.log("Nieuwe grootte ingesteld op:", memoryState.gridSize);
 
     // Visuele update
     document.querySelectorAll('.size-selector').forEach(b => b.classList.remove('selected'));
@@ -210,23 +208,19 @@ function setSize(size, btn) {
 }
 
 
-// --- 2. GAME LOGICA (HERZIEN VOOR FULL SCREEN & ROOSTER) ---
+// --- 2. GAME LOGICA ---
 
 function calculateCardSize(cols, rows) {
     const headerHeight = 70; 
     const scoreHeight = 70; 
     const padding = 20; 
-    
     const availableWidth = window.innerWidth - padding; 
     const availableHeight = window.innerHeight - headerHeight - scoreHeight - padding;
-
     const gap = 8; 
     const totalGapWidth = (cols - 1) * gap;
     const totalGapHeight = (rows - 1) * gap;
-
     const maxCardWidth = (availableWidth - totalGapWidth) / cols;
     const maxCardHeight = (availableHeight - totalGapHeight) / rows;
-
     return Math.floor(Math.min(maxCardWidth, maxCardHeight));
 }
 
@@ -235,10 +229,13 @@ function startMemoryGame() {
     if (memoryState.playerNames.length === 0) return;
     const board = document.getElementById('game-board');
     
-    // Zorg dat gridSize een geldig nummer is, anders fallback naar 12
-    let size = parseInt(memoryState.gridSize);
-    if (![12, 16, 30].includes(size)) size = 12;
+    // Veiligheidscheck: zorg dat size een nummer is
+    let size = Number(memoryState.gridSize);
+    // Als het nummer raar is (0 of NaN), pak dan 12. Anders gewoon de keuze gebruiken.
+    if (!size || size < 4) size = 12; 
     memoryState.gridSize = size;
+
+    console.log("Start spel met aantal kaarten:", size);
 
     // Scorebord
     let scoreHTML = '<div class="score-board">';
@@ -258,7 +255,7 @@ function startMemoryGame() {
     });
     scoreHTML += '</div>';
 
-    // Bepaal rooster (Slimme check)
+    // Bepaal rooster
     const isLandscape = window.innerWidth > window.innerHeight;
     let cols, rows;
 
@@ -270,6 +267,9 @@ function startMemoryGame() {
     } else if (size === 30) {
         cols = isLandscape ? 6 : 5;
         rows = isLandscape ? 5 : 6;
+    } else {
+        // Fallback voor gekke getallen
+        cols = 4; rows = Math.ceil(size / 4);
     }
 
     board.innerHTML = `<div class="memory-game-container">${scoreHTML}<div class="memory-grid" id="memory-grid"></div></div>`;
