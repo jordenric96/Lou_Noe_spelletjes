@@ -1,10 +1,10 @@
-// MEMORY SPEL LOGICA - LEVEL FIX
+// MEMORY SPEL LOGICA - BACK TO BASICS (FIXED LEVELS)
 
-console.log("Memory.js geladen (Level Fix Version)...");
+console.log("Memory.js geladen (Levels Fixed)...");
 
 let memoryState = { 
     theme: 'boerderij', 
-    gridSize: 12, // Standaard
+    gridSize: 12, // Standaard beginwaarde
     playerNames: [], 
     currentPlayerIndex: 0, 
     scores: {}, 
@@ -96,21 +96,22 @@ function startMemorySetup() {
             <button id="start-btn" class="start-btn" onclick="startMemoryGame()" disabled>Kies eerst een speler...</button>
         </div>`;
     
-    // Reset en init
+    // Reset basiswaarden
     memoryState.playerNames = [];
     memoryState.theme = 'boerderij'; 
     memoryState.pendingPlayer = null; 
-    memoryState.gridSize = 12; // Startwaarde
+    memoryState.gridSize = 12; // Reset naar 12 bij openen menu
     
     renderPalette(); 
     
+    // Selecteer standaard thema visueel
     setTimeout(() => {
         const defaultThemeBtn = document.querySelector(`.theme-card-btn[onclick="setTheme('boerderij', this)"]`);
         if(defaultThemeBtn) defaultThemeBtn.classList.add('selected');
     }, 10);
 }
 
-// SETUP HULPFUNCTIES
+// KLEUR EN SPELER LOGICA
 function renderPalette() {
     const container = document.getElementById('color-palette');
     const usedColors = memoryState.playerNames.map(p => p.color);
@@ -194,14 +195,13 @@ function setTheme(name, btn) {
     btn.classList.add('selected');
 }
 
-// DE FIX: DEZE FUNCTIE WERD NIET GOED GELEZEN
+// SIMPELE VERSIE: GEWOON HET GETAL OPSLAAN
 function setSize(size, btn) { 
     if(typeof playSound === 'function') playSound('click');
     
-    // Forceer naar een nummer
-    memoryState.gridSize = Number(size); 
-    console.log("Nieuwe grootte ingesteld op:", memoryState.gridSize);
-
+    // Sla het op (forceer dat het een getal is, geen tekst)
+    memoryState.gridSize = parseInt(size); 
+    
     // Visuele update
     document.querySelectorAll('.size-selector').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected'); 
@@ -211,16 +211,20 @@ function setSize(size, btn) {
 // --- 2. GAME LOGICA ---
 
 function calculateCardSize(cols, rows) {
+    // Bereken ruimte
     const headerHeight = 70; 
     const scoreHeight = 70; 
     const padding = 20; 
     const availableWidth = window.innerWidth - padding; 
     const availableHeight = window.innerHeight - headerHeight - scoreHeight - padding;
+
     const gap = 8; 
     const totalGapWidth = (cols - 1) * gap;
     const totalGapHeight = (rows - 1) * gap;
+
     const maxCardWidth = (availableWidth - totalGapWidth) / cols;
     const maxCardHeight = (availableHeight - totalGapHeight) / rows;
+
     return Math.floor(Math.min(maxCardWidth, maxCardHeight));
 }
 
@@ -229,13 +233,11 @@ function startMemoryGame() {
     if (memoryState.playerNames.length === 0) return;
     const board = document.getElementById('game-board');
     
-    // Veiligheidscheck: zorg dat size een nummer is
-    let size = Number(memoryState.gridSize);
-    // Als het nummer raar is (0 of NaN), pak dan 12. Anders gewoon de keuze gebruiken.
-    if (!size || size < 4) size = 12; 
-    memoryState.gridSize = size;
-
-    console.log("Start spel met aantal kaarten:", size);
+    // GEEN COMPLEXE CONTROLES MEER. GEWOON GEBRUIKEN WAT INGESTELD IS.
+    let size = memoryState.gridSize;
+    
+    // Alleen als er echt iets mis is (bv 0), dan pas 12
+    if(!size || size < 4) size = 12;
 
     // Scorebord
     let scoreHTML = '<div class="score-board">';
@@ -313,11 +315,26 @@ function updateActiveBadgeColor() {
 function generateCards(sizePx) {
     const grid = document.getElementById('memory-grid');
     const themeData = themes[memoryState.theme];
+    
+    // HIER GEBRUIKEN WE OOK DE VARIABELE 'SIZE'
     const pairsNeeded = memoryState.gridSize / 2;
     const ext = themeData.extension; 
     
     let items = [];
-    if (memoryState.useImages) { for (let i = 1; i <= pairsNeeded; i++) items.push(i); }
+    if (memoryState.useImages) { 
+        // Zorg dat we niet meer vragen dan er plaatjes zijn (max 15 bijv)
+        // Als je meer dan 15 paren (30 kaarten) wilt, moet je de plaatjesmap uitbreiden
+        // Voor nu herhalen we plaatjes als het moet
+        for (let i = 1; i <= pairsNeeded; i++) {
+            // Als i groter is dan 15 (aantal plaatjes), begin weer bij 1
+            // Dit voorkomt lege kaartjes bij 30 stuks als je maar 15 plaatjes hebt
+            let imgIndex = i;
+            if(i > 15) imgIndex = i - 15; 
+            
+            items.push(imgIndex); 
+        } 
+    }
+    
     let deck = [...items, ...items];
     deck.sort(() => 0.5 - Math.random());
     grid.innerHTML = '';
@@ -345,7 +362,7 @@ function generateCards(sizePx) {
 function flipCard() {
     if (memoryState.lockBoard) return;
     if (this === memoryState.flippedCards[0]) return;
-    if (this.classList.contains('matched')) return;
+    if (this.classList.contains('matched')) return; // Fix voor dubbelklikken op gevonden kaart
     
     if(typeof playSound === 'function') playSound('pop');
     
