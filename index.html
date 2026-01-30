@@ -3,13 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Neon Zone">
-    
-    <title>Lou & Noé Neon Zone</title>
+    <title>Speelkwartier</title>
     
     <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00BCD4">
     <link rel="apple-touch-icon" href="assets/images/icon.png">
 
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
@@ -18,36 +15,35 @@
     <link rel="stylesheet" href="css/memory.css">
     <link rel="stylesheet" href="css/doolhof.css">
     <link rel="stylesheet" href="css/blokken.css">
-    <link rel="stylesheet" href="css/newgames.css">
-</head>
+    <link rel="stylesheet" href="css/newgames.css"> </head>
 <body>
 
     <div id="app">
         <div id="main-menu" class="screen active">
-            <h1 class="neon-title">Lou & Noé's<br>Neon Zone ⚡</h1>
+            <h1>Lou & Noé's Speelkwartier 🚀</h1>
             
             <div class="game-grid">
-                <button class="game-btn neon-blue" onclick="selectGame('memory')">
+                <button class="game-btn" onclick="selectGame('memory')">
                     <span class="icon">🎴</span><span class="text">Memory</span>
                 </button>
-                <button class="game-btn neon-pink" onclick="selectGame('doolhof')">
+                <button class="game-btn" onclick="selectGame('doolhof')">
                     <span class="icon">🌀</span><span class="text">Doolhof</span>
                 </button>
-                 <button class="game-btn neon-green" onclick="selectGame('blokken')">
+                 <button class="game-btn" onclick="selectGame('blokken')">
                     <span class="icon">🚗</span><span class="text">De File</span>
                 </button>
 
-                <button class="game-btn neon-yellow" onclick="selectGame('simon')">
+                <button class="game-btn" onclick="selectGame('simon')">
                     <span class="icon">💡</span><span class="text">Simon</span>
                 </button>
-                <button class="game-btn neon-purple" onclick="selectGame('vang')">
+                <button class="game-btn" onclick="selectGame('vang')">
                     <span class="icon">🔨</span><span class="text">Vang ze!</span>
                 </button>
-                <button class="game-btn neon-cyan" onclick="selectGame('tekenen')">
+                <button class="game-btn" onclick="selectGame('tekenen')">
                     <span class="icon">🎨</span><span class="text">Tekenen</span>
                 </button>
 
-                <button class="game-btn sticker-btn neon-border" onclick="selectGame('stickers')">
+                <button class="game-btn sticker-btn" onclick="selectGame('stickers')">
                     <span class="icon">🏆</span><span class="text">Stickers</span>
                 </button>
             </div>
@@ -55,31 +51,26 @@
 
         <div id="game-container" class="screen hidden">
             <header class="game-header">
-                <button id="back-btn" onclick="goHome()">⬅ MENU</button>
+                <button id="back-btn" onclick="goHome()">⬅ Terug</button>
                 <h2 id="game-title">Spelletje</h2>
             </header>
             <div id="game-board"></div>
         </div>
     </div>
 
-    <div id="winner-modal" class="modal hidden">
-        <div class="modal-content neon-box">
+ <div id="winner-modal" class="modal hidden">
+        <div class="modal-content">
             <div id="confetti-container"></div>
+            
             <div class="trophy-animation">🏆</div>
-            <h2 id="winner-title" class="neon-text">WINNAAR!</h2>
+            
+            <h2 id="winner-title">Winnaar!</h2>
             
             <div id="new-sticker-display"></div> 
             
             <div id="winner-leaderboard"></div>
-            <button class="modal-btn neon-btn" onclick="closeWinnerModal()">VERDER ▶</button>
-        </div>
-    </div>
 
-    <div id="zoom-overlay" class="modal hidden" onclick="closeZoom()">
-        <div class="modal-content zoom-content">
-            <span class="close-zoom-btn">×</span>
-            <img id="zoomed-image" src="" alt="Groot plaatje">
-            <button id="delete-drawing-btn" class="modal-btn delete-btn hidden">Weggooien 🗑️</button>
+            <button class="modal-btn" onclick="closeWinnerModal()">Verder ➡</button>
         </div>
     </div>
 
@@ -87,7 +78,12 @@
     <script src="js/memory.js"></script>
     <script src="js/doolhof.js"></script>
     <script src="js/blokken.js"></script>
-    <script src="js/newgames.js"></script>
-
+    <script src="js/newgames.js"></script> <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js').catch(err => console.log('SW Fout:', err));
+            });
+        }
+    </script>
 </body>
 </html>
