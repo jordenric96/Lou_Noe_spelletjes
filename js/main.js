@@ -4,7 +4,7 @@ const gameTitle = document.getElementById('game-title');
 const gameBoard = document.getElementById('game-board');
 let currentGame = null; 
 
-// --- AUDIO SYSTEEM (GEEN BESTANDEN NODIG!) ---
+// --- AUDIO SYSTEEM ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playSound(type) {
     if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -12,36 +12,23 @@ function playSound(type) {
     const gainNode = audioCtx.createGain();
     osc.connect(gainNode);
     gainNode.connect(audioCtx.destination);
-
     const now = audioCtx.currentTime;
     
     if (type === 'click') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(600, now);
-        osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
-        gainNode.gain.setValueAtTime(0.3, now);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.type = 'sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+        gainNode.gain.setValueAtTime(0.3, now); gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
         osc.start(now); osc.stop(now + 0.1);
     } else if (type === 'win') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(400, now);
-        osc.frequency.setValueAtTime(600, now + 0.1);
-        osc.frequency.setValueAtTime(1000, now + 0.2);
-        gainNode.gain.setValueAtTime(0.3, now);
-        gainNode.gain.linearRampToValueAtTime(0, now + 0.5);
+        osc.type = 'triangle'; osc.frequency.setValueAtTime(400, now); osc.frequency.setValueAtTime(600, now + 0.1); osc.frequency.setValueAtTime(1000, now + 0.2);
+        gainNode.gain.setValueAtTime(0.3, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.5);
         osc.start(now); osc.stop(now + 0.5);
     } else if (type === 'lose') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(200, now);
-        osc.frequency.linearRampToValueAtTime(100, now + 0.3);
-        gainNode.gain.setValueAtTime(0.3, now);
-        gainNode.gain.linearRampToValueAtTime(0, now + 0.3);
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, now); osc.frequency.linearRampToValueAtTime(100, now + 0.3);
+        gainNode.gain.setValueAtTime(0.3, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.3);
         osc.start(now); osc.stop(now + 0.3);
     } else if (type === 'pop') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(800, now);
-        gainNode.gain.setValueAtTime(0.1, now);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.type = 'sine'; osc.frequency.setValueAtTime(800, now);
+        gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
         osc.start(now); osc.stop(now + 0.1);
     }
 }
@@ -53,36 +40,19 @@ function selectGame(gameName) {
     gameContainer.classList.remove('hidden'); gameContainer.classList.add('active');
     currentGame = gameName; 
 
-    // Reset board
     gameBoard.innerHTML = '';
 
-    if (gameName === 'memory') {
-        gameTitle.innerText = "Memory";
-        if (typeof startMemorySetup === "function") startMemorySetup(); 
-    } else if (gameName === 'doolhof') {
-        gameTitle.innerText = "Doolhof";
-        if (typeof startDoolhofSetup === "function") startDoolhofSetup();
-    } else if (gameName === 'blokken') {
-        gameTitle.innerText = "De File 🚗";
-        if (typeof startBlokkenGame === "function") startBlokkenGame();
-    } else if (gameName === 'stickers') {
-        gameTitle.innerText = "Mijn Stickerboek 🏆";
-        if (typeof openStickerBook === "function") openStickerBook();
-    } else if (gameName === 'simon') {
-        gameTitle.innerText = "Simon Zegt 💡";
-        if (typeof startSimonGame === "function") startSimonGame();
-    } else if (gameName === 'vang') {
-        gameTitle.innerText = "Vang ze! 🔨";
-        if (typeof startWhackGame === "function") startWhackGame();
-    } else if (gameName === 'tekenen') {
-        gameTitle.innerText = "Tekenbord 🎨";
-        if (typeof startDrawing === "function") startDrawing();
-    }
+    if (gameName === 'memory') { gameTitle.innerText = "Memory"; if (typeof startMemorySetup === "function") startMemorySetup(); }
+    else if (gameName === 'doolhof') { gameTitle.innerText = "Doolhof"; if (typeof startDoolhofSetup === "function") startDoolhofSetup(); }
+    else if (gameName === 'blokken') { gameTitle.innerText = "De File 🚗"; if (typeof startBlokkenGame === "function") startBlokkenGame(); }
+    else if (gameName === 'stickers') { gameTitle.innerText = "Mijn Stickerboek 🏆"; if (typeof openStickerBook === "function") openStickerBook(); }
+    else if (gameName === 'simon') { gameTitle.innerText = "Simon Zegt 💡"; if (typeof startSimonGame === "function") startSimonGame(); }
+    else if (gameName === 'vang') { gameTitle.innerText = "Vang ze! 🔨"; if (typeof startWhackGame === "function") startWhackGame(); }
+    else if (gameName === 'tekenen') { gameTitle.innerText = "Tekenbord 🎨"; if (typeof startDrawing === "function") startDrawing(); }
 }
 
 function goHome() {
     playSound('click');
-    // Cleanups
     if (currentGame === 'doolhof' && typeof cleanupDoolhof === "function") cleanupDoolhof();
     if (currentGame === 'simon' && typeof stopSimonGame === "function") stopSimonGame();
     if (currentGame === 'vang' && typeof stopWhackGame === "function") stopWhackGame();
@@ -93,28 +63,34 @@ function goHome() {
     currentGame = null;
 }
 
-// --- WINNAAR & STICKERS ---
+// --- WINNAAR & STICKERS (BELANGRIJK) ---
 function showWinnerModal(winnerName, leaderboardData) {
     playSound('win');
     const modal = document.getElementById('winner-modal');
     const title = document.getElementById('winner-title');
     const list = document.getElementById('winner-leaderboard');
-    const stickerMsg = document.getElementById('sticker-reward-msg');
+    const stickerDisplay = document.getElementById('new-sticker-display'); // NIEUW ELEMENT
     
     title.innerText = winnerName ? `${winnerName} wint!` : "Gewonnen!";
     list.innerHTML = '';
     
-    // Check voor sticker (50% kans of altijd bij winst, hier altijd)
-    let stickerEarned = false;
+    // Probeer sticker te winnen
+    let wonSticker = null;
     if(typeof unlockRandomSticker === 'function') {
-        stickerEarned = unlockRandomSticker(); // Probeert sticker te unlocken
+        wonSticker = unlockRandomSticker(); 
     }
 
-    if(stickerEarned) {
-        stickerMsg.classList.remove('hidden');
-        playSound('win'); // Extra geluidje
+    // UPDATE: Toon de sticker VISUEEL
+    if(wonSticker) {
+        stickerDisplay.innerHTML = `
+            <div class="sticker-reward-anim">
+                <div class="reward-text">✨ NIEUWE STICKER! ✨</div>
+                <img src="${wonSticker.src}" class="reward-img">
+            </div>
+        `;
+        playSound('win');
     } else {
-        stickerMsg.classList.add('hidden');
+        stickerDisplay.innerHTML = ''; // Geen sticker gewonnen
     }
     
     if (leaderboardData && leaderboardData.length > 0) {
@@ -144,7 +120,7 @@ function closeWinnerModal() {
     
     if (currentGame === 'memory') startMemorySetup();
     if (currentGame === 'doolhof') startDoolhofSetup();
-    if (currentGame === 'blokken') startBlokkenGame(); // Terug naar setup
+    if (currentGame === 'blokken') startBlokkenGame(); 
     if (currentGame === 'simon') startSimonGame();
     if (currentGame === 'vang') startWhackGame();
 }
