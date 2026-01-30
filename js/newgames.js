@@ -306,22 +306,91 @@ function handleSimonInput(index) {
 }
 function stopSimonGame() { simonActive = false; }
 
+// --- TEKENBORD ---
+let isDrawing = false; 
+let ctx; 
+let drawColor = '#000000'; 
+let drawSize = 5; // Standaard dikte
 
-// --- TEKENBORD (Kort) ---
-let isDrawing = false; let ctx; let drawColor = '#000000'; let drawSize = 5;
 function startDrawing() {
     const board = document.getElementById('game-board');
-    board.innerHTML = `<div class="drawing-container"><div class="drawing-controls"><div class="color-swatch active" style="background:black" onclick="setColor('black', this)"></div><div class="color-swatch" style="background:red" onclick="setColor('red', this)"></div><div class="color-swatch" style="background:blue" onclick="setColor('blue', this)"></div><div class="color-swatch" style="background:green" onclick="setColor('green', this)"></div><div class="color-swatch" style="background:yellow" onclick="setColor('yellow', this)"></div><button class="tool-btn" onclick="clearCanvas()">🗑️</button></div><canvas id="drawCanvas"></canvas></div>`;
+    
+    // HTML met KLEUREN, LIJNTJE, DIKTES en GUM
+    board.innerHTML = `
+        <div class="drawing-container">
+            <div class="drawing-controls">
+                <div class="color-swatch active" style="background:black" onclick="setColor('black', this)"></div>
+                <div class="color-swatch" style="background:#F44336" onclick="setColor('#F44336', this)"></div> <div class="color-swatch" style="background:#2196F3" onclick="setColor('#2196F3', this)"></div> <div class="color-swatch" style="background:#4CAF50" onclick="setColor('#4CAF50', this)"></div> <div class="color-swatch" style="background:#FFEB3B" onclick="setColor('#FFEB3B', this)"></div> <div class="color-swatch" style="background:#9C27B0" onclick="setColor('#9C27B0', this)"></div> <div class="control-divider"></div>
+                
+                <div class="size-btn active" onclick="setBrushSize(5, this)"><div class="dot dot-s"></div></div>
+                <div class="size-btn" onclick="setBrushSize(15, this)"><div class="dot dot-m"></div></div>
+                <div class="size-btn" onclick="setBrushSize(30, this)"><div class="dot dot-l"></div></div>
+
+                <div class="control-divider"></div>
+
+                <button class="tool-btn" onclick="clearCanvas()">🗑️</button>
+            </div>
+            <canvas id="drawCanvas"></canvas>
+        </div>
+    `;
+    
     const canvas = document.getElementById('drawCanvas');
     const container = document.querySelector('.drawing-container');
-    canvas.width = container.clientWidth * 0.95; canvas.height = container.clientHeight * 0.8;
-    ctx = canvas.getContext('2d'); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    canvas.addEventListener('mousedown', startDraw); canvas.addEventListener('touchstart', startDraw, {passive: false});
-    canvas.addEventListener('mousemove', draw); canvas.addEventListener('touchmove', draw, {passive: false});
-    canvas.addEventListener('mouseup', stopDraw); canvas.addEventListener('touchend', stopDraw);
+    
+    // Canvas grootte instellen
+    canvas.width = container.clientWidth * 0.95; 
+    canvas.height = container.clientHeight * 0.85;
+    
+    ctx = canvas.getContext('2d'); 
+    ctx.lineCap = 'round'; 
+    ctx.lineJoin = 'round';
+    
+    // Event Listeners (Touch & Muis)
+    canvas.addEventListener('mousedown', startDraw); 
+    canvas.addEventListener('touchstart', startDraw, {passive: false});
+    canvas.addEventListener('mousemove', draw); 
+    canvas.addEventListener('touchmove', draw, {passive: false});
+    canvas.addEventListener('mouseup', stopDraw); 
+    canvas.addEventListener('touchend', stopDraw);
 }
+
 function startDraw(e) { isDrawing = true; draw(e); }
 function stopDraw() { isDrawing = false; ctx.beginPath(); }
-function draw(e) { if (!isDrawing) return; e.preventDefault(); const canvas = document.getElementById('drawCanvas'); const rect = canvas.getBoundingClientRect(); const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left; const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top; ctx.lineWidth = drawSize; ctx.strokeStyle = drawColor; ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y); }
-function setColor(color, btn) { drawColor = color; document.querySelectorAll('.color-swatch').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
-function clearCanvas() { const canvas = document.getElementById('drawCanvas'); ctx.clearRect(0, 0, canvas.width, canvas.height); playSound('pop'); }
+
+function draw(e) { 
+    if (!isDrawing) return; 
+    e.preventDefault(); 
+    
+    const canvas = document.getElementById('drawCanvas');
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left; 
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top; 
+    
+    ctx.lineWidth = drawSize; // Hier gebruiken we de gekozen dikte
+    ctx.strokeStyle = drawColor; 
+    
+    ctx.lineTo(x, y); 
+    ctx.stroke(); 
+    ctx.beginPath(); 
+    ctx.moveTo(x, y); 
+}
+
+function setColor(color, btn) { 
+    if(typeof playSound === 'function') playSound('click');
+    drawColor = color; 
+    document.querySelectorAll('.color-swatch').forEach(b => b.classList.remove('active')); 
+    btn.classList.add('active'); 
+}
+
+function setBrushSize(size, btn) {
+    if(typeof playSound === 'function') playSound('click');
+    drawSize = size;
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
+
+function clearCanvas() { 
+    if(typeof playSound === 'function') playSound('pop');
+    const canvas = document.getElementById('drawCanvas'); 
+    ctx.clearRect(0, 0, canvas.width, canvas.height); 
+}
