@@ -1,87 +1,26 @@
-/* DOOLHOF STIJLEN */
-
-#maze-container {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    width: 100%;
-    height: 100%;
-    padding-top: 20px;
-    background: #222;
-    overflow: hidden;
+#maze-container { 
+    position: relative; padding: 5px; border-radius: 10px; 
+    border: 3px solid var(--neon-pink); box-shadow: 0 0 15px var(--neon-pink); 
+    background: #000;
 }
+.maze-cell { float: left; box-sizing: border-box; }
+.maze-cell.wall { background-color: #333; border: 1px solid #111; }
+.maze-cell.path { background-color: #000; }
+.maze-cell.goal { background-color: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); border-radius: 50%; transform: scale(0.6); }
 
-#maze-grid {
-    display: grid;
-    gap: 0;
-    background: white;
-    border: 4px solid #fff;
-    box-shadow: 0 0 20px rgba(0,0,0,0.8);
-    position: relative;
-    margin: 0 auto; 
-}
-
-.maze-cell { box-sizing: border-box; }
-
-/* MARIO THEMA */
-.theme-mario .wall {
-    background-color: #B71C1C;
-    background-image: linear-gradient(335deg, #D32F2F 23px, transparent 23px), linear-gradient(155deg, #D32F2F 23px, transparent 23px);
-    background-size: 100% 100%;
-    border: 1px solid #8B0000;
-}
-.theme-mario .path { background-color: #FFECB3; }
-.theme-mario .goal { background-color: #FFD700; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; }
-.theme-mario .goal::after { content: '⭐'; }
-
-/* POKEMON THEMA */
-.theme-pokemon .wall {
-    background-color: #5D4037;
-    background-image: radial-gradient(circle at 30% 30%, #795548 3px, transparent 3px), radial-gradient(circle at 70% 70%, #4E342E 3px, transparent 3px);
-    background-size: 30px 30px;
-    border: 1px solid #3E2723;
-}
-.theme-pokemon .path { background-color: #FFFF00; box-shadow: inset 0 0 10px #FBC02D; }
-.theme-pokemon .goal { background-color: #F44336; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; border: 2px solid #222; border-radius: 50%; }
-.theme-pokemon .goal::after { content: ''; width: 40%; height: 40%; background: white; border-radius: 50%; border: 2px solid #222; }
-
-/* SPELER */
-#player {
-    position: absolute;
-    z-index: 10;
-    transition: top 0.1s linear, left 0.1s linear;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    filter: drop-shadow(0 3px 2px rgba(0,0,0,0.4));
+#player { 
+    position: absolute; background-size: contain; background-repeat: no-repeat; 
+    transition: all 0.2s; z-index: 10; filter: drop-shadow(0 0 5px white); 
 }
 #player.facing-left { transform: scaleX(-1); }
 
-/* CONTROLS */
-#mobile-controls {
-    display: grid;
-    position: absolute;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    grid-template-columns: repeat(3, 60px);
-    grid-template-rows: repeat(2, 60px);
-    gap: 10px;
-    z-index: 100;
+#mobile-controls { 
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px; width: 180px; 
 }
-
-.ctrl-btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: 2px solid rgba(255,255,255,0.5);
-    color: white;
-    font-size: 2rem;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex; justify-content: center; align-items: center;
-    user-select: none;
+.ctrl-btn { 
+    width: 50px; height: 50px; background: #222; border: 2px solid #444; 
+    color: white; border-radius: 10px; display: flex; justify-content: center; 
+    align-items: center; font-size: 1.5rem; cursor: pointer; 
 }
-.ctrl-btn:active { background: rgba(255, 255, 255, 0.5); transform: scale(0.95); }
-#btn-up { grid-column: 2; grid-row: 1; }
-#btn-left { grid-column: 1; grid-row: 2; }
-#btn-down { grid-column: 2; grid-row: 2; }
-#btn-right { grid-column: 3; grid-row: 2; }
+.ctrl-btn:active { background: #444; border-color: var(--neon-blue); }
+#btn-up { grid-column: 2; } #btn-left { grid-column: 1; } #btn-down { grid-column: 2; } #btn-right { grid-column: 3; }
