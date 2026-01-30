@@ -42,3 +42,19 @@
 @keyframes boomScale { 0% { transform: scale(0); } 80% { transform: scale(1.2); } 100% { transform: scale(1); } }
 .shaking { animation: shake 0.5s; }
 @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -2px); } 100% { transform: translate(1px, -1px); } }
+
+.block.hero {
+    background-color: transparent !important;
+    background-image: url('../assets/images/memory/mario/cars.png'); /* Pas pad aan als je een Cars plaatje hebt */
+    /* Of als je geen plaatje hebt, maak hem Cars-Rood met een bliksem */
+    background: red !important;
+    border: 2px solid darkred;
+}
+.block.hero::after {
+    content: '⚡';
+    color: yellow;
+    font-size: 1.5rem;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+}
