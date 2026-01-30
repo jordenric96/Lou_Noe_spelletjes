@@ -1,0 +1,36 @@
+/* --- SIMON SAYS --- */
+.simon-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 20px; }
+.simon-board { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 300px; height: 300px; position: relative; }
+.simon-btn { border-radius: 20px; border: none; cursor: pointer; opacity: 0.6; transition: all 0.1s; box-shadow: 0 5px 0 rgba(0,0,0,0.2); }
+.simon-btn:active, .simon-btn.lit { opacity: 1; transform: scale(0.95); box-shadow: 0 2px 0 rgba(0,0,0,0.2); filter: brightness(1.5); }
+.simon-green { background: #4CAF50; } .simon-red { background: #F44336; }
+.simon-yellow { background: #FFEB3B; } .simon-blue { background: #2196F3; }
+
+.simon-info { background: white; padding: 10px 20px; border-radius: 20px; text-align: center; box-shadow: 0 4px 0 #EEE; }
+.simon-score { font-size: 1.5rem; font-family: 'Fredoka One', cursive; color: #333; }
+.simon-highscore { font-size: 0.9rem; color: #888; }
+.simon-message { margin-top: 10px; font-weight: bold; color: #0288D1; height: 1.2em; }
+
+/* --- VANG DE ... (WHACK A MOLE) --- */
+.whack-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 95%; max-width: 400px; aspect-ratio: 1/1; }
+.whack-hole { background: #8D6E63; border-radius: 50%; border: 4px solid #5D4037; position: relative; overflow: hidden; box-shadow: inset 0 10px 10px rgba(0,0,0,0.3); cursor: pointer; }
+.whack-character { position: absolute; bottom: -100%; left: 10%; width: 80%; height: 80%; transition: bottom 0.1s; background-size: contain; background-repeat: no-repeat; background-position: bottom center; pointer-events: none; }
+.whack-hole.up .whack-character { bottom: 0; }
+.whack-score-board { display: flex; justify-content: space-between; width: 90%; max-width: 400px; background: white; padding: 10px; border-radius: 15px; margin-bottom: 10px; font-family: 'Fredoka One', cursive; }
+
+/* --- TEKENBORD --- */
+.drawing-container { display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; position: relative; }
+canvas { background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); touch-action: none; cursor: crosshair; }
+.drawing-controls { display: flex; gap: 10px; margin-top: 10px; align-items: center; background: rgba(255,255,255,0.8); padding: 5px; border-radius: 30px; }
+.color-swatch { width: 30px; height: 30px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer; }
+.color-swatch.active { transform: scale(1.2); border-color: #333; }
+.tool-btn { background: #EEE; border: none; padding: 8px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; }
+
+/* --- STICKERBOEK --- */
+.sticker-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 15px; width: 100%; padding: 20px; overflow-y: auto; }
+.sticker-slot { aspect-ratio: 1/1; background: rgba(255,255,255,0.5); border-radius: 15px; border: 2px dashed #CCC; display: flex; justify-content: center; align-items: center; position: relative; transition: all 0.3s; }
+.sticker-slot.unlocked { background: white; border: 3px solid #FFD700; box-shadow: 0 5px 15px rgba(255,215,0, 0.3); animation: popIn 0.5s; }
+.sticker-img { width: 80%; height: 80%; object-fit: contain; filter: drop-shadow(0 3px 2px rgba(0,0,0,0.2)); }
+.sticker-locked { font-size: 2rem; opacity: 0.3; }
+.empty-msg { grid-column: 1 / -1; text-align: center; color: #777; font-style: italic; margin-top: 50px; }
+#sticker-reward-msg { background: #FFD700; color: #333; padding: 5px 10px; border-radius: 10px; font-weight: bold; margin-bottom: 10px; animation: pulse 1s infinite; }
