@@ -1,91 +1,146 @@
-/* MEMORY STIJLEN - FLEXIBEL */
+/* --- MEMORY & SETUP STIJLEN --- */
 
-.memory-setup-container {
-    width: 100%; height: 100%; padding: 10px;
-    background: #FFF; display: flex; flex-direction: column; gap: 10px;
-    overflow-y: auto;
+/* SETUP DASHBOARD */
+.memory-setup {
+    display: flex; flex-direction: column; width: 100%; height: 100%;
+    padding: 10px; padding-bottom: max(10px, env(safe-area-inset-bottom));
+    background: rgba(255, 255, 255, 0.6); box-sizing: border-box; overflow: hidden;
 }
 
-.setup-panel {
-    background: #F1F8E9; border-radius: 15px; padding: 10px;
-    border: 2px solid #C5E1A5;
-}
-.setup-panel h3 { margin: 0 0 10px 0; color: #558B2F; font-family: 'Fredoka One'; }
-
-/* Speler Knoppen */
-.player-controls { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 5px; justify-content: center; }
-.icon-btn { 
-    background: white; border: 2px solid #DDD; border-radius: 20px; 
-    padding: 8px 15px; font-weight: bold; cursor: pointer; 
-}
-#active-players { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
-.player-tag { color: white; padding: 5px 10px; border-radius: 15px; font-family: 'Fredoka One'; font-size: 0.9rem; }
-
-/* Thema Knoppen */
-.theme-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; justify-content: center; }
-.theme-btn { 
-    min-width: 90px; border: 2px solid #EEE; background: white; 
-    border-radius: 10px; cursor: pointer; display: flex; flex-direction: column; align-items: center; 
-}
-.theme-btn img { width: 80px; height: 50px; object-fit: cover; border-radius: 5px; margin-bottom: 5px;}
-.theme-btn.active { border-color: #4CAF50; background: #E8F5E9; }
-
-/* Grootte Knoppen */
-.size-controls { display: flex; gap: 10px; justify-content: center; }
-.size-btn { 
-    padding: 10px 20px; border: 2px solid #DDD; background: white; 
-    border-radius: 10px; font-size: 1.2rem; font-family: 'Fredoka One'; cursor: pointer;
-}
-.size-btn.selected { background: #FFEB3B; border-color: #FBC02D; }
-
-.big-start-btn {
-    margin-top: auto; padding: 15px; font-size: 1.5rem; background: #4CAF50; 
-    color: white; border: none; border-radius: 20px; font-family: 'Fredoka One'; cursor: pointer;
-    box-shadow: 0 5px 0 #2E7D32; width: 100%;
-}
-.big-start-btn:disabled { background: #CCC; box-shadow: none; cursor: not-allowed; }
-
-
-/* --- HET SPELBORD --- */
-.game-container { 
-    display: flex; flex-direction: column; height: 100%; width: 100%; 
-    align-items: center; justify-content: center; 
-    padding: 5px;
+.setup-columns {
+    display: flex; flex-direction: row; gap: 15px; flex: 1; min-height: 0;
+    margin-bottom: 10px; overflow-y: auto; -webkit-overflow-scrolling: touch;
 }
 
-.score-bar { 
-    display: flex; gap: 15px; padding: 5px 15px; margin-bottom: 5px; 
-    background: white; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
-    flex-shrink: 0; max-width: 100%; overflow-x: auto;
+.setup-group {
+    background: #FFF; border-radius: 20px; padding: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 3px solid #E0F7FA;
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    min-width: 160px;
 }
-.p-badge { font-family: 'Fredoka One'; transition: all 0.3s; padding: 0 5px; white-space: nowrap; }
+.group-players { border-color: #B3E5FC; }
+.group-theme { border-color: #C8E6C9; }
+.group-size { border-color: #FFF9C4; }
 
-
-/* HET GRID */
-.memory-grid {
-    display: grid; 
-    /* Kolommen worden nu via style="" ingesteld in JS, dus hier geen template-columns nodig */
-    justify-content: center;
-    align-content: center;
-    flex: 1; /* Vul alle overige ruimte */
-}
-
-.card { 
-    /* DE CARD SIZE KOMT UIT JS VARIABELE */
-    width: var(--card-size, 80px);
-    height: var(--card-size, 80px);
-    
-    position: relative; cursor: pointer; perspective: 1000px; 
+.setup-group h3 {
+    color: #0277BD; margin: 5px 0 10px 0; font-size: 1.1rem;
+    font-family: 'Fredoka One', cursive; text-transform: uppercase; text-align: center;
+    flex-shrink: 0;
 }
 
-.inner { width: 100%; height: 100%; position: relative; transition: transform 0.6s; transform-style: preserve-3d; }
-.card.flipped .inner { transform: rotateY(180deg); }
-
-.front, .back { 
-    position: absolute; width: 100%; height: 100%; backface-visibility: hidden; 
-    border-radius: 10px; overflow: hidden; display: flex; justify-content: center; align-items: center; 
+/* THEMA KNOPPEN */
+.theme-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px; width: 100%;
 }
-.front { background: #FFF; border: 2px solid #EEE; }
-.front img { width: 80%; height: auto; }
-.back { background: white; transform: rotateY(180deg); border: 4px solid white; }
-.back img { width: 100%; height: 100%; object-fit: cover; }
+.theme-card-btn {
+    background: white; border: 3px solid #EEE; border-radius: 15px;
+    padding: 0; cursor: pointer; display: flex; flex-direction: column;
+    align-items: center; overflow: hidden; position: relative;
+    transition: all 0.2s; box-shadow: 0 4px 0 #EEE;
+}
+.theme-card-btn:active { transform: translateY(4px); box-shadow: none; }
+.theme-card-btn.selected { border-color: #4CAF50; box-shadow: 0 4px 0 #2E7D32; }
+
+.theme-img-container {
+    width: 100%; aspect-ratio: 16/9;
+    background: #f0f0f0; overflow: hidden; position: relative;
+    border-bottom: 2px solid #EEE;
+}
+.theme-img-container img {
+    width: 100%; height: 100%; object-fit: cover;
+}
+.theme-card-btn .btn-label {
+    font-family: 'Fredoka One', cursive; font-size: 0.9rem; color: #555;
+    padding: 8px 5px;
+}
+.lock-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center;
+    font-size: 2rem;
+}
+
+/* KLEUREN & SPELERS */
+.divider-line { width: 80%; height: 2px; background: #EEE; margin: 15px 0; }
+.color-picker-title { font-size: 0.8rem; color: #888; margin-bottom: 5px; font-family: 'Nunito', sans-serif; }
+
+.color-row { 
+    display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
+    margin-bottom: 15px; padding: 5px; width: 100%; flex-shrink: 0;
+}
+.color-dot { 
+    width: 45px; height: 45px;
+    border-radius: 50%; border: 4px solid white; cursor: pointer; 
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15); transition: transform 0.2s; 
+}
+.color-dot:active { transform: scale(0.9); }
+
+.option-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; }
+.player-btn { 
+    background: white; border: 3px solid #EEE; box-shadow: 0 4px 0 #EEE;
+    border-radius: 15px; padding: 10px; min-width: 70px; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; font-size: 1.8rem;
+}
+.player-btn .btn-label { font-size: 0.8rem; font-family: 'Fredoka One', cursive; color: #555; margin-top: 5px; }
+
+.player-btn.selected-pending {
+    border-color: #333; animation: pulse 1s infinite;
+}
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+#active-players-list {
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%;
+    margin-top: 10px;
+}
+.active-player-tag {
+    color: white; padding: 8px 15px; border-radius: 20px; 
+    font-family: 'Fredoka One', cursive; font-size: 1rem;
+    display: flex; align-items: center; gap: 8px; cursor: pointer;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2); animation: popIn 0.3s;
+}
+@keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+.remove-x { font-weight: bold; background: rgba(0,0,0,0.2); border-radius: 50%; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; }
+
+.player-input-container { display: flex; gap: 5px; margin-top: 10px; width: 100%; }
+#custom-player-name { flex: 1; padding: 8px; border-radius: 12px; border: 2px solid #B3E5FC; font-family: 'Nunito', sans-serif; }
+.add-btn { background: #FFC107; border: none; border-radius: 12px; padding: 0 15px; color: white; font-weight: bold; cursor: pointer; }
+
+/* START KNOP */
+.start-btn {
+    background: linear-gradient(to bottom, #66BB6A, #43A047); color: white; border: none;
+    padding: 15px; font-size: 1.5rem; border-radius: 20px; width: 100%; cursor: pointer;
+    box-shadow: 0 4px 0 #2E7D32; font-family: 'Fredoka One', cursive; flex-shrink: 0; z-index: 10;
+}
+.start-btn:disabled { background: #CFD8DC; color: #90A4AE; box-shadow: none; cursor: not-allowed; }
+
+/* SPELBORD */
+.memory-game-container { display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; overflow: hidden; }
+.score-board { display: flex; gap: 10px; padding: 5px 10px; background: rgba(255,255,255,0.7); border-radius: 50px; margin-bottom: 5px; flex-shrink: 0; }
+.player-badge { background: white; padding: 5px 15px; border-radius: 30px; display: flex; align-items: center; gap: 8px; border: 3px solid #EEE; font-family: 'Fredoka One', cursive; color: #777; opacity: 0.6; transition: all 0.3s; }
+.player-badge.active { opacity: 1; transform: scale(1.1); box-shadow: 0 4px 12px rgba(0,0,0,0.15); background: #FFF; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+
+/* GRID & KAARTEN */
+.memory-grid { display: grid; gap: 10px; margin: 0 auto; justify-content: center; align-content: center; }
+.memory-card { position: relative; user-select: none; }
+.memory-card-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.5s; border-radius: 12px; box-shadow: 0 3px 6px rgba(0,0,0,0.15); }
+.memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
+.card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.card-front { background: linear-gradient(135deg, #4FC3F7, #0288D1); border: 3px solid white; z-index: 2; }
+.card-back { background: white; transform: rotateY(180deg); border: 3px solid #FFC107; }
+
+/* AANGEPAST: AFBEELDINGEN VULLEN NU HET HELE KAARTJE */
+.card-img, .card-cover-img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; /* Zorgt dat het plaatje de hele kaart bedekt zonder vervorming */
+    display: block; 
+}
+
+/* MATCH CSS IS VERWIJDERD (GEEN VINKJE MEER) */
+
+@media (max-width: 650px) { .setup-columns { flex-direction: column; } }
+/* GROOTTE KNOPPEN */
+.option-btn { background: #E1F5FE; color: #0288D1; border: none; padding: 8px; border-radius: 15px; font-size: 1.6rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; min-width: 60px; box-shadow: 0 3px 0 #B3E5FC; transition: all 0.2s; }
+.option-btn .btn-label { font-size: 0.75rem; margin-top: 2px; font-family: 'Fredoka One', cursive; color: #555; }
+.option-btn.selected { transform: translateY(-2px); color: white; }
+.option-btn.selected .btn-label { color: white; }
