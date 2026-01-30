@@ -1,6 +1,6 @@
-// MEMORY SPEL LOGICA - DEFINITIEF (Met Crash Fix & Stickers)
+// MEMORY SPEL LOGICA - DEFINITIEF (Met Match Fix & Geluid)
 
-console.log("Memory.js geladen (Final Version)...");
+console.log("Memory.js geladen (Bug Fix Version)...");
 
 let memoryState = { 
     theme: 'boerderij', 
@@ -27,7 +27,6 @@ const predefinedPlayers = [
 ];
 
 const themes = {
-    // Let op: Extensies staan hier correct ingesteld (PNG vs JPG)
     'boerderij': { locked: false, extension: 'png', path: 'assets/images/memory/boerderij/' },
     'mario':     { locked: false, extension: 'png', path: 'assets/images/memory/mario/' },
     'pokemon':   { locked: false, extension: 'png', path: 'assets/images/memory/pokemon/' },
@@ -43,7 +42,6 @@ const themes = {
 function startMemorySetup() {
     const board = document.getElementById('game-board');
     
-    // Thema knoppen genereren
     let themeButtonsHTML = Object.keys(themes).map(key => {
         const t = themes[key];
         const isLocked = t.locked ? 'locked' : '';
@@ -60,7 +58,6 @@ function startMemorySetup() {
             </button>`;
     }).join('');
 
-    // Speler knoppen genereren
     let playerButtonsHTML = predefinedPlayers.map(p => 
         `<button class="option-btn player-btn" onclick="selectPerson('${p.name}', this)">
             <span>${p.icon}</span><span class="btn-label">${p.name}</span>
@@ -70,21 +67,16 @@ function startMemorySetup() {
     board.innerHTML = `
         <div class="memory-setup">
             <div class="setup-columns">
-                
                 <div class="setup-group group-players">
                     <h3>1. Wie speelt er?</h3>
                     <div class="option-grid" id="player-selection">${playerButtonsHTML}</div>
-                    
                     <div class="player-input-container">
                         <input type="text" id="custom-player-name" placeholder="Eigen naam...">
                         <button class="add-btn" onclick="addCustomPerson()">OK</button>
                     </div>
-
                     <div class="divider-line"></div>
-                    
                     <h3>2. Kies een kleur</h3>
                     <div class="color-row" id="color-palette"></div>
-
                     <div id="active-players-list"></div>
                 </div>
 
@@ -105,21 +97,17 @@ function startMemorySetup() {
             <button id="start-btn" class="start-btn" onclick="startMemoryGame()" disabled>Kies eerst een speler...</button>
         </div>`;
     
-    // Reset state
     memoryState.playerNames = [];
     memoryState.theme = 'boerderij'; 
     memoryState.pendingPlayer = null; 
     
     renderPalette(); 
-    
-    // Selecteer standaard thema
     setTimeout(() => {
         const defaultThemeBtn = document.querySelector(`.theme-card-btn[onclick="setTheme('boerderij', this)"]`);
         if(defaultThemeBtn) defaultThemeBtn.classList.add('selected');
     }, 10);
 }
 
-// KLEUR EN SPELER LOGICA
 function renderPalette() {
     const container = document.getElementById('color-palette');
     const usedColors = memoryState.playerNames.map(p => p.color);
@@ -157,13 +145,10 @@ function selectColor(color) {
     if(typeof playSound === 'function') playSound('pop');
 
     const name = memoryState.pendingPlayer;
-    // Verwijder oude entry als die bestaat
     const existingIdx = memoryState.playerNames.findIndex(p => p.name === name);
     if(existingIdx > -1) memoryState.playerNames.splice(existingIdx, 1);
 
     memoryState.playerNames.push({ name: name, color: color });
-    
-    // Reset selectie
     memoryState.pendingPlayer = null;
     document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending'));
     document.getElementById('custom-player-name').value = '';
@@ -310,7 +295,6 @@ function generateCards(sizePx) {
         let content = `<img src="${themeData.path}${item}.${ext}" class="card-img" draggable="false">`;
         let cover = `<img src="${themeData.path}cover.png" class="card-cover-img" draggable="false">`;
         
-        // Let op: Geen checkmark HTML meer!
         card.innerHTML = `
             <div class="memory-card-inner">
                 <div class="card-front">${cover}</div>
@@ -322,8 +306,12 @@ function generateCards(sizePx) {
 }
 
 function flipCard() {
+    // 1. Veiligheidscheck: Is bord op slot?
     if (memoryState.lockBoard) return;
+    // 2. Veiligheidscheck: Klikken we op dezelfde kaart?
     if (this === memoryState.flippedCards[0]) return;
+    // 3. VEILIGHEIDSCHECK (DE FIX): Is deze kaart al gevonden?
+    if (this.classList.contains('matched')) return;
     
     if(typeof playSound === 'function') playSound('pop');
     
@@ -343,9 +331,12 @@ function disableCards() {
     
     if(typeof playSound === 'function') playSound('win');
     
-    // Visuele update (rand kleuren)
     memoryState.flippedCards.forEach(card => {
         card.classList.add('matched');
+        
+        // DE FIX: Verwijder de klik-listener fysiek
+        card.removeEventListener('click', flipCard);
+        
         const back = card.querySelector('.card-back');
         if(back) {
             back.style.borderColor = currentP.color;
@@ -353,7 +344,6 @@ function disableCards() {
         }
     });
 
-    // Score update
     memoryState.matchedPairs++;
     memoryState.scores[currentP.name]++;
     const scoreEl = document.getElementById(`score-${memoryState.currentPlayerIndex}`);
@@ -361,7 +351,6 @@ function disableCards() {
     
     memoryState.flippedCards = [];
     
-    // WIN CHECK (Hier ging het eerder mis)
     if (memoryState.matchedPairs >= memoryState.gridSize / 2) {
         setTimeout(() => {
             let leaderboard = memoryState.playerNames.map(p => ({ 
@@ -370,11 +359,9 @@ function disableCards() {
                 color: p.color 
             })).sort((a, b) => b.score - a.score);
             
-            // Roep de modal aan (in main.js)
             if(typeof showWinnerModal === 'function') {
                 showWinnerModal(leaderboard[0].name, leaderboard);
             } else {
-                console.error("showWinnerModal function not found!");
                 alert("Gewonnen! (Reload pagina)");
             }
         }, 800);
