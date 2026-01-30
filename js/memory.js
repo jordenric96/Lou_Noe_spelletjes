@@ -1,6 +1,6 @@
-// MEMORY SPEL LOGICA - DEFINITIEF (Met Match Fix & Geluid)
+// MEMORY SPEL LOGICA - FULL SCREEN FIX
 
-console.log("Memory.js geladen (Bug Fix Version)...");
+console.log("Memory.js geladen (Full Screen Fix)...");
 
 let memoryState = { 
     theme: 'boerderij', 
@@ -20,10 +20,8 @@ let memoryState = {
 const palette = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#4CAF50', '#FFEB3B', '#FF9800'];
 
 const predefinedPlayers = [
-    { name: "Lou", icon: "👦🏼" }, 
-    { name: "Noé", icon: "👶🏼" }, 
-    { name: "Mama", icon: "👩🏻" }, 
-    { name: "Papa", icon: "👨🏻" }
+    { name: "Lou", icon: "👦🏼" }, { name: "Noé", icon: "👶🏼" }, 
+    { name: "Mama", icon: "👩🏻" }, { name: "Papa", icon: "👨🏻" }
 ];
 
 const themes = {
@@ -31,7 +29,6 @@ const themes = {
     'mario':     { locked: false, extension: 'png', path: 'assets/images/memory/mario/' },
     'pokemon':   { locked: false, extension: 'png', path: 'assets/images/memory/pokemon/' },
     'studio100': { locked: false, extension: 'png', path: 'assets/images/memory/studio100/' },
-    
     'dino':      { locked: true, extension: 'jpg', path: 'assets/images/memory/dino/' },
     'marvel':    { locked: true, extension: 'jpg', path: 'assets/images/memory/marvel/' },
     'natuur':    { locked: true, extension: 'jpg', path: 'assets/images/memory/natuur/' },
@@ -42,6 +39,7 @@ const themes = {
 function startMemorySetup() {
     const board = document.getElementById('game-board');
     
+    // Thema knoppen
     let themeButtonsHTML = Object.keys(themes).map(key => {
         const t = themes[key];
         const isLocked = t.locked ? 'locked' : '';
@@ -58,6 +56,7 @@ function startMemorySetup() {
             </button>`;
     }).join('');
 
+    // Speler knoppen
     let playerButtonsHTML = predefinedPlayers.map(p => 
         `<button class="option-btn player-btn" onclick="selectPerson('${p.name}', this)">
             <span>${p.icon}</span><span class="btn-label">${p.name}</span>
@@ -87,10 +86,10 @@ function startMemorySetup() {
 
                 <div class="setup-group group-size">
                     <h3>4. Aantal Kaartjes</h3>
-                    <div class="option-grid">
-                        <button class="option-btn selected" onclick="setSize(12, this)"><span><span class="star">★</span></span><span class="btn-label">12</span></button>
-                        <button class="option-btn" onclick="setSize(16, this)"><span><span class="star">★</span><span class="star">★</span></span><span class="btn-label">16</span></button>
-                        <button class="option-btn" onclick="setSize(30, this)"><span><span class="star">★</span><span class="star">★</span><span class="star">★</span></span><span class="btn-label">30</span></button>
+                    <div class="option-grid" id="size-options">
+                        <button class="option-btn size-selector selected" data-size="12" onclick="setSize(12, this)"><span>⭐</span><span class="btn-label">12</span></button>
+                        <button class="option-btn size-selector" data-size="16" onclick="setSize(16, this)"><span>⭐⭐</span><span class="btn-label">16</span></button>
+                        <button class="option-btn size-selector" data-size="30" onclick="setSize(30, this)"><span>⭐⭐⭐</span><span class="btn-label">30</span></button>
                     </div>
                 </div>
             </div>
@@ -100,18 +99,20 @@ function startMemorySetup() {
     memoryState.playerNames = [];
     memoryState.theme = 'boerderij'; 
     memoryState.pendingPlayer = null; 
+    memoryState.gridSize = 12; // Reset naar default
     
     renderPalette(); 
+    
     setTimeout(() => {
         const defaultThemeBtn = document.querySelector(`.theme-card-btn[onclick="setTheme('boerderij', this)"]`);
         if(defaultThemeBtn) defaultThemeBtn.classList.add('selected');
     }, 10);
 }
 
+// SETUP HULPFUNCTIES
 function renderPalette() {
     const container = document.getElementById('color-palette');
     const usedColors = memoryState.playerNames.map(p => p.color);
-    
     container.innerHTML = palette.map(color => {
         const isTaken = usedColors.includes(color);
         const style = isTaken ? 'opacity: 0.2; cursor: not-allowed;' : '';
@@ -143,17 +144,14 @@ function selectColor(color) {
         return;
     }
     if(typeof playSound === 'function') playSound('pop');
-
     const name = memoryState.pendingPlayer;
     const existingIdx = memoryState.playerNames.findIndex(p => p.name === name);
     if(existingIdx > -1) memoryState.playerNames.splice(existingIdx, 1);
-
     memoryState.playerNames.push({ name: name, color: color });
     memoryState.pendingPlayer = null;
     document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending'));
     document.getElementById('custom-player-name').value = '';
     document.getElementById('custom-player-name').style.borderColor = '#B3E5FC';
-
     renderPalette();
     renderActivePlayers();
     checkStartButton();
@@ -163,10 +161,8 @@ function renderActivePlayers() {
     const list = document.getElementById('active-players-list');
     list.innerHTML = memoryState.playerNames.map(p => `
         <div class="active-player-tag" style="background-color: ${p.color}" onclick="removePlayer('${p.name}')">
-            <span>${p.name}</span>
-            <span class="remove-x">×</span>
-        </div>
-    `).join('');
+            <span>${p.name}</span><span class="remove-x">×</span>
+        </div>`).join('');
 }
 
 function removePlayer(name) {
@@ -196,20 +192,41 @@ function setTheme(name, btn) {
     document.querySelectorAll('.theme-card-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
 }
+
+// FIX: Deze functie werkte niet goed, nu wel.
 function setSize(size, btn) { 
     if(typeof playSound === 'function') playSound('click');
     memoryState.gridSize = size; 
-    Array.from(btn.parentElement.children).forEach(c => c.classList.remove('selected')); 
+    
+    // Verwijder 'selected' class van alle size knoppen
+    document.querySelectorAll('.size-selector').forEach(b => b.classList.remove('selected'));
+    // Voeg toe aan de geklikte knop
     btn.classList.add('selected'); 
 }
 
-// 2. SPEL LOGICA
+
+// --- 2. GAME LOGICA (HERZIEN VOOR VOLLEDIG SCHERM) ---
+
 function calculateCardSize(cols, rows) {
-    const containerW = document.getElementById('game-board').offsetWidth;
-    const containerH = document.getElementById('game-board').offsetHeight - 80;
-    const cardW = Math.floor((containerW - (cols * 10)) / cols);
-    const cardH = Math.floor((containerH - (rows * 10)) / rows);
-    return Math.min(cardW, cardH, 120);
+    // 1. Haal de beschikbare ruimte op
+    const headerHeight = 60; // Hoogte van de zwarte balk bovenaan
+    const scoreHeight = 60; // Hoogte van de scorebalk (ongeveer)
+    const padding = 20; // Beetje ademruimte aan de randen
+    
+    const availableWidth = window.innerWidth - padding; 
+    const availableHeight = window.innerHeight - headerHeight - scoreHeight - padding;
+
+    // 2. Bereken de tussenruimte (gap)
+    const gap = 8; // De ruimte tussen de kaartjes in pixels
+    const totalGapWidth = (cols - 1) * gap;
+    const totalGapHeight = (rows - 1) * gap;
+
+    // 3. Bereken maximale grootte per kaart
+    const maxCardWidth = (availableWidth - totalGapWidth) / cols;
+    const maxCardHeight = (availableHeight - totalGapHeight) / rows;
+
+    // 4. Pak de kleinste waarde zodat ze vierkant blijven én passen
+    return Math.floor(Math.min(maxCardWidth, maxCardHeight));
 }
 
 function startMemoryGame() {
@@ -234,33 +251,50 @@ function startMemoryGame() {
     });
     scoreHTML += '</div>';
 
-    let cols = 4, rows = 3;
-    if(memoryState.gridSize === 16) { cols = 4; rows = 4; }
-    if(memoryState.gridSize === 30) { cols = 6; rows = 5; }
-    if(window.innerWidth < 650 && memoryState.gridSize === 30) { cols = 5; rows = 6; }
+    // Bepaal rooster op basis van schermoriëntatie
+    const isLandscape = window.innerWidth > window.innerHeight;
+    let cols, rows;
+
+    // Logica voor rooster
+    if (memoryState.gridSize === 12) {
+        cols = isLandscape ? 4 : 3;
+        rows = isLandscape ? 3 : 4;
+    } else if (memoryState.gridSize === 16) {
+        cols = 4; rows = 4; // Altijd vierkant
+    } else if (memoryState.gridSize === 30) {
+        cols = isLandscape ? 6 : 5;
+        rows = isLandscape ? 5 : 6;
+    }
 
     board.innerHTML = `<div class="memory-game-container">${scoreHTML}<div class="memory-grid" id="memory-grid"></div></div>`;
     
-    const grid = document.getElementById('memory-grid');
-    const cardSize = calculateCardSize(cols, rows);
-    
-    grid.style.gridTemplateColumns = `repeat(${cols}, ${cardSize}px)`;
-    grid.style.width = 'fit-content';
-    
-    memoryState.currentPlayerIndex = 0; 
-    memoryState.flippedCards = []; 
-    memoryState.lockBoard = false; 
-    memoryState.matchedPairs = 0;
-    
-    updateActiveBadgeColor();
-    generateCards(cardSize);
+    // Wacht even voor correcte meting
+    setTimeout(() => {
+        const grid = document.getElementById('memory-grid');
+        const cardSize = calculateCardSize(cols, rows);
+        
+        // STEL HET GRID IN
+        grid.style.gridTemplateColumns = `repeat(${cols}, ${cardSize}px)`;
+        grid.style.gap = '8px'; // Zorg dat dit overeenkomt met de berekening
+        
+        // Zorg dat het grid niet breder is dan de inhoud (zodat het centreert)
+        grid.style.width = 'fit-content'; 
+        
+        memoryState.currentPlayerIndex = 0; 
+        memoryState.flippedCards = []; 
+        memoryState.lockBoard = false; 
+        memoryState.matchedPairs = 0;
+        
+        updateActiveBadgeColor();
+        generateCards(cardSize);
+    }, 50);
 }
 
 function updateActiveBadgeColor() {
     memoryState.playerNames.forEach((p, idx) => { 
         let b = document.getElementById(`badge-${idx}`); 
         if(b) { 
-            b.style.backgroundColor = 'white'; 
+            b.style.backgroundColor = 'transparent'; // Reset background
             b.style.color = p.color; 
             b.classList.remove('active'); 
         } 
@@ -269,7 +303,7 @@ function updateActiveBadgeColor() {
     let activeBadge = document.getElementById(`badge-${memoryState.currentPlayerIndex}`);
     if(activeBadge) { 
         activeBadge.classList.add('active'); 
-        activeBadge.style.backgroundColor = currentP.color; 
+        activeBadge.style.backgroundColor = '#000'; 
         activeBadge.style.color = 'white'; 
     }
 }
@@ -290,7 +324,9 @@ function generateCards(sizePx) {
         const card = document.createElement('div');
         card.classList.add('memory-card');
         card.dataset.value = item;
-        if(sizePx) { card.style.width = `${sizePx}px`; card.style.height = `${sizePx}px`; }
+        // Zet de grootte hard erin
+        card.style.width = `${sizePx}px`; 
+        card.style.height = `${sizePx}px`;
 
         let content = `<img src="${themeData.path}${item}.${ext}" class="card-img" draggable="false">`;
         let cover = `<img src="${themeData.path}cover.png" class="card-cover-img" draggable="false">`;
@@ -306,11 +342,8 @@ function generateCards(sizePx) {
 }
 
 function flipCard() {
-    // 1. Veiligheidscheck: Is bord op slot?
     if (memoryState.lockBoard) return;
-    // 2. Veiligheidscheck: Klikken we op dezelfde kaart?
     if (this === memoryState.flippedCards[0]) return;
-    // 3. VEILIGHEIDSCHECK (DE FIX): Is deze kaart al gevonden?
     if (this.classList.contains('matched')) return;
     
     if(typeof playSound === 'function') playSound('pop');
@@ -328,15 +361,11 @@ function checkForMatch() {
 
 function disableCards() {
     let currentP = memoryState.playerNames[memoryState.currentPlayerIndex];
-    
     if(typeof playSound === 'function') playSound('win');
     
     memoryState.flippedCards.forEach(card => {
         card.classList.add('matched');
-        
-        // DE FIX: Verwijder de klik-listener fysiek
         card.removeEventListener('click', flipCard);
-        
         const back = card.querySelector('.card-back');
         if(back) {
             back.style.borderColor = currentP.color;
@@ -354,16 +383,10 @@ function disableCards() {
     if (memoryState.matchedPairs >= memoryState.gridSize / 2) {
         setTimeout(() => {
             let leaderboard = memoryState.playerNames.map(p => ({ 
-                name: p.name, 
-                score: memoryState.scores[p.name], 
-                color: p.color 
+                name: p.name, score: memoryState.scores[p.name], color: p.color 
             })).sort((a, b) => b.score - a.score);
             
-            if(typeof showWinnerModal === 'function') {
-                showWinnerModal(leaderboard[0].name, leaderboard);
-            } else {
-                alert("Gewonnen! (Reload pagina)");
-            }
+            if(typeof showWinnerModal === 'function') showWinnerModal(leaderboard[0].name, leaderboard);
         }, 800);
     }
 }
@@ -388,6 +411,7 @@ function switchPlayer() {
 }
 
 window.addEventListener('resize', () => {
+    // Alleen herstarten als het spel bezig is
     if(document.getElementById('memory-grid') && memoryState.playerNames.length > 0 && !document.querySelector('.memory-setup')) {
         startMemoryGame(); 
     }
