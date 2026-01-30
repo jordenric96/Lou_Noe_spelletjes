@@ -1,88 +1,94 @@
+/* ALGEMEEN */
 * { box-sizing: border-box; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+
 body {
-    margin: 0; padding: 0; font-family: 'Nunito', sans-serif;
-    background-color: #121212; color: white;
+    margin: 0; padding: 0; 
+    font-family: 'Nunito', sans-serif;
+    background-color: #E0F7FA; /* Lichtblauw */
+    color: #333;
     height: 100vh; width: 100vw; overflow: hidden;
 }
 
-/* NEON COLORS */
-:root {
-    --neon-bg: #121212; --neon-card: #1E1E1E;
-    --neon-pink: #FF00FF; --neon-blue: #00FFFF;
-    --neon-green: #00FF00; --neon-yellow: #FFFF00;
-    --neon-purple: #BC13FE;
-}
-
-/* ALGEMEEN LAYOUT */
+/* APP CONTAINER */
 #app { width: 100%; height: 100%; position: relative; display: flex; flex-direction: column; }
-.screen { width: 100%; height: 100%; position: absolute; top: 0; left: 0; display: flex; flex-direction: column; background: #121212; }
-.hidden { display: none !important; }
+.screen { width: 100%; height: 100%; position: absolute; top: 0; left: 0; display: flex; flex-direction: column; background: #E0F7FA; transition: opacity 0.3s; }
+.hidden { display: none !important; opacity: 0; pointer-events: none; }
+.active { opacity: 1; pointer-events: auto; }
 
-/* HOOFDMENU FIX */
-.neon-title {
-    font-family: 'Fredoka One'; color: white;
-    text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-pink);
-    text-align: center; margin: 10px 0; font-size: 2.5rem; flex-shrink: 0;
+/* HOOFDMENU */
+#main-menu { align-items: center; justify-content: center; }
+
+h1 {
+    font-family: 'Fredoka One', cursive; color: #0277BD;
+    text-align: center; font-size: 2.5rem; margin-bottom: 20px;
+    text-shadow: 2px 2px 0px white;
 }
 
 .game-grid { 
     display: grid; 
-    /* Op tablet/desktop: 3 kolommen. Op mobiel: 2 kolommen */
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
-    gap: 20px; 
-    padding: 20px; 
-    overflow-y: auto; 
-    width: 90%; 
-    max-width: 900px; /* VEEL BREDER GEMAAKT */
-    margin: 0 auto; 
-    align-content: center; /* Centreer verticaal */
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 15px; padding: 20px; 
+    max-width: 600px; width: 95%;
+    max-height: 80vh; overflow-y: auto;
 }
 
-/* KNOPPEN */
+/* VROLIJKE KNOPPEN */
 .game-btn {
-    background: var(--neon-card); border: 2px solid white; color: white;
-    border-radius: 15px; padding: 20px; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; font-family: 'Fredoka One';
-    font-size: 1.2rem; cursor: pointer; transition: transform 0.1s;
-    aspect-ratio: 1/1; /* Zorgt dat ze vierkant blijven */
+    background: white; border: none; 
+    border-radius: 20px; padding: 15px; 
+    display: flex; flex-direction: column; align-items: center; justify-content: center; 
+    font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: #555;
+    box-shadow: 0 6px 0 #DDD; 
+    cursor: pointer; transition: transform 0.1s, box-shadow 0.1s;
+    aspect-ratio: 1/1;
 }
-.game-btn:active { transform: scale(0.95); }
+
+.game-btn:active { transform: translateY(6px); box-shadow: none; }
 .game-btn .icon { font-size: 3rem; margin-bottom: 10px; }
 
-/* NEON VARIANTEN */
-.neon-blue { border-color: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); }
-.neon-pink { border-color: var(--neon-pink); box-shadow: 0 0 10px var(--neon-pink); }
-.neon-green { border-color: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
-.neon-yellow { border-color: var(--neon-yellow); box-shadow: 0 0 10px var(--neon-yellow); }
-.neon-purple { border-color: var(--neon-purple); box-shadow: 0 0 10px var(--neon-purple); }
-.neon-cyan { border-color: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); }
-.neon-border { border-color: white; box-shadow: 0 0 10px white; }
+/* Kleurtjes per knop (Geen neon, maar pastel/solid) */
+.btn-blue { color: #2196F3; border-bottom: 5px solid #BBDEFB; }
+.btn-pink { color: #E91E63; border-bottom: 5px solid #F8BBD0; }
+.btn-green { color: #4CAF50; border-bottom: 5px solid #C8E6C9; }
+.btn-yellow { color: #FFC107; border-bottom: 5px solid #FFECB3; }
+.btn-purple { color: #9C27B0; border-bottom: 5px solid #E1BEE7; }
 
-/* HEADER VOOR GAMES */
+/* SPEL HEADER */
 .game-header { 
-    display: flex; align-items: center; padding: 10px 20px; background: #000; 
-    border-bottom: 2px solid var(--neon-blue); height: 60px; flex-shrink: 0;
-    justify-content: space-between;
+    display: flex; align-items: center; padding: 10px 15px; 
+    background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+    height: 60px; flex-shrink: 0; z-index: 10;
 }
-#game-title { flex: 1; text-align: center; margin: 0; font-family: 'Fredoka One'; color: var(--neon-blue); font-size: 1.5rem; }
-#back-btn { background: #333; color: var(--neon-blue); border: 1px solid var(--neon-blue); padding: 8px 20px; border-radius: 20px; font-weight: bold; font-family: 'Fredoka One'; }
-#game-board { flex: 1; position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; width: 100%; }
+#game-title { flex: 1; text-align: center; margin: 0; font-family: 'Fredoka One'; color: #0277BD; font-size: 1.5rem; }
+#back-btn { 
+    background: #B3E5FC; color: #0277BD; border: none; 
+    padding: 8px 20px; border-radius: 20px; font-weight: bold; 
+    font-family: 'Fredoka One'; cursor: pointer;
+}
 
-/* MODAL */
-.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
-.modal.show { opacity: 1; pointer-events: auto; }
-.modal-content.neon-box {
-    background: #111; border: 2px solid var(--neon-pink); padding: 20px; border-radius: 20px;
-    box-shadow: 0 0 20px var(--neon-pink), inset 0 0 20px rgba(255,0,255,0.2);
-    text-align: center; width: 90%; max-width: 400px;
+/* GAME BOARD */
+#game-board { flex: 1; position: relative; overflow: hidden; width: 100%; display: flex; justify-content: center; align-items: center; }
+
+/* MODALS (Popups) */
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; justify-content: center; align-items: center; }
+.modal-content {
+    background: white; padding: 30px; border-radius: 25px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center;
+    width: 90%; max-width: 400px; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-.neon-text { color: white; text-shadow: 0 0 10px var(--neon-pink); }
-.neon-btn { 
-    background: transparent; border: 2px solid var(--neon-green); color: var(--neon-green);
-    padding: 10px 30px; border-radius: 30px; font-family: 'Fredoka One'; font-size: 1.2rem;
-    box-shadow: 0 0 10px var(--neon-green); margin-top: 15px; cursor: pointer;
+.modal h2 { font-family: 'Fredoka One'; color: #4CAF50; font-size: 2rem; margin: 10px 0; }
+
+.modal-btn { 
+    background: #4CAF50; color: white; border: none; padding: 12px 30px; 
+    border-radius: 30px; font-size: 1.2rem; font-family: 'Fredoka One'; 
+    cursor: pointer; margin-top: 15px; box-shadow: 0 4px 0 #388E3C;
 }
-.trophy-animation { font-size: 4rem; animation: bounce 1s infinite; margin-bottom: 10px; }
-@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-.confetti { position: absolute; width: 10px; height: 10px; background: #f00; animation: fall linear forwards; }
+.modal-btn:active { transform: translateY(4px); box-shadow: none; }
+
+@keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* Confetti en andere animaties */
+.confetti { position: absolute; width: 10px; height: 10px; background: red; animation: fall linear forwards; }
 @keyframes fall { to { transform: translateY(100vh) rotate(720deg); } }
+.trophy-animation { font-size: 5rem; animation: bounce 1s infinite; }
+@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
