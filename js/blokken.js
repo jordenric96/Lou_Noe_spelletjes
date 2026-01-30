@@ -1,6 +1,6 @@
-// BLOKKEN SPEL - "MCQUEEN RACE" (BOM EDITIE)
+// BLOKKEN SPEL - "MCQUEEN RACE" (BOM EDITIE MET GELUID)
 
-console.log("Blokken.js (Bom Versie) geladen...");
+console.log("Blokken.js (Audio Version) geladen...");
 
 let blokkenState = {
     playerNames: [],
@@ -11,7 +11,7 @@ let blokkenState = {
     gridSize: 6,
     cellSize: 0,
     timer: null,
-    timeLeft: 30, // NU 30 SECONDEN!
+    timeLeft: 30, 
     isGameActive: false,
     activeColor: '#2196F3' 
 };
@@ -19,10 +19,7 @@ let blokkenState = {
 const blokkenPalette = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#4CAF50', '#FFEB3B', '#FF9800'];
 
 const blokkenSpelersLijst = [
-    { name: "Lou", icon: "👦🏼" },
-    { name: "Noé", icon: "👶🏼" },
-    { name: "Mama", icon: "👩🏻" },
-    { name: "Papa", icon: "👨🏻" }
+    { name: "Lou", icon: "👦🏼" }, { name: "Noé", icon: "👶🏼" }, { name: "Mama", icon: "👩🏻" }, { name: "Papa", icon: "👨🏻" }
 ];
 
 const levelsDatabase = {
@@ -80,6 +77,7 @@ function startBlokkenGame() {
 
 function selectBlokkenColor(color, btn) {
     if(!btn) return;
+    playSound('click');
     blokkenState.activeColor = color;
     const container = document.querySelector('.memory-setup');
     if(container) container.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
@@ -88,12 +86,14 @@ function selectBlokkenColor(color, btn) {
 }
 
 function setBlokkenDiff(diff, btn) {
+    playSound('click');
     blokkenState.difficulty = diff;
     Array.from(btn.parentElement.children).forEach(c => c.classList.remove('selected'));
     btn.classList.add('selected');
 }
 
 function toggleBlokkenPlayer(name, btn) {
+    playSound('click');
     const existingIndex = blokkenState.playerNames.findIndex(p => p.name === name);
     if (existingIndex === -1) {
         blokkenState.playerNames.push({ name: name, color: blokkenState.activeColor });
@@ -109,6 +109,7 @@ function addCustomBlokkenPlayer() {
     const input = document.getElementById('custom-blokken-name');
     const name = input.value.trim();
     if (name && !blokkenState.playerNames.some(p => p.name === name)) {
+        playSound('click');
         const container = document.getElementById('blokken-player-selection');
         const btnHTML = document.createElement('button');
         btnHTML.className = 'option-btn player-btn';
@@ -128,6 +129,7 @@ function checkBlokkenStart() {
 
 // 2. GAME LOOP
 function initRace() {
+    playSound('win');
     blokkenState.scores = {};
     blokkenState.playerNames.forEach(p => blokkenState.scores[p.name] = 0);
     blokkenState.currentPlayerIndex = 0;
@@ -141,7 +143,6 @@ function startTurn() {
     const possibleLevels = levelsDatabase[blokkenState.difficulty];
     const randomLevel = possibleLevels[Math.floor(Math.random() * possibleLevels.length)];
     
-    // NIEUWE HTML: Met Bom Icoon!
     board.innerHTML = `
         <div id="blokken-container">
             <div id="status-bar" style="border-left-color: ${currentPlayer.color}">
@@ -179,7 +180,7 @@ function handleResize() {
 }
 
 function startTimer() {
-    blokkenState.timeLeft = 30; // 30 SECONDEN!
+    blokkenState.timeLeft = 30; 
     blokkenState.isGameActive = true;
     if(blokkenState.timer) clearInterval(blokkenState.timer);
     
@@ -187,30 +188,28 @@ function startTimer() {
     blokkenState.timer = setInterval(() => {
         if(!blokkenState.isGameActive) return;
         blokkenState.timeLeft -= 0.1;
-        let percentage = (blokkenState.timeLeft / 30) * 100; // Op basis van 30s
+        let percentage = (blokkenState.timeLeft / 30) * 100; 
         
         if(bar) {
             bar.style.width = `${percentage}%`;
         }
 
         if(blokkenState.timeLeft <= 0) {
-            triggerExplosion(); // BOEM!
+            triggerExplosion(); 
         }
     }, 100);
 }
 
-// HET EXPLOSIE EFFECT
 function triggerExplosion() {
     clearInterval(blokkenState.timer);
     blokkenState.isGameActive = false;
+    playSound('lose');
     
     const board = document.getElementById('blokken-container');
     const gameArea = document.getElementById('game-area');
     
-    // Schudden
     if(gameArea) gameArea.classList.add('shaking');
     
-    // Overlay maken
     const overlay = document.createElement('div');
     overlay.className = 'explosion-overlay';
     overlay.innerHTML = `
@@ -219,7 +218,6 @@ function triggerExplosion() {
     `;
     board.appendChild(overlay);
     
-    // Na 2.5 seconden naar volgende speler
     setTimeout(() => {
         endTurn(false);
     }, 2500);
@@ -231,7 +229,6 @@ function endTurn(success) {
         blokkenState.isGameActive = false;
         const currentPlayer = blokkenState.playerNames[blokkenState.currentPlayerIndex];
         
-        // Gewoon punt, geen explosie
         blokkenState.scores[currentPlayer.name]++;
         if(blokkenState.scores[currentPlayer.name] >= 5) {
              let leaderboard = Object.keys(blokkenState.scores).map(name => ({
@@ -244,10 +241,9 @@ function endTurn(success) {
             return;
         }
         
-        // Tussenscherm voor succes
         const board = document.getElementById('blokken-container');
         const overlay = document.createElement('div');
-        overlay.className = 'turn-overlay'; // Gebruikt oude style, prima
+        overlay.className = 'turn-overlay'; 
         overlay.style.background = "rgba(76, 175, 80, 0.9)";
         overlay.innerHTML = `<h2 style="font-size:3rem">Goed gedaan! 👍</h2>`;
         board.appendChild(overlay);
@@ -256,7 +252,6 @@ function endTurn(success) {
             nextPlayer();
         }, 1500);
     } else {
-        // Was al afgehandeld door triggerExplosion, hier alleen de speler wissel
         nextPlayer();
     }
 }
@@ -296,6 +291,7 @@ let activeBlock = null; let startX, startY, initialBlockPos, minLimit, maxLimit;
 function startDrag(e, index, el) {
     if(!blokkenState.isGameActive) return;
     e.preventDefault(); 
+    playSound('click');
     activeBlock = { index, el, data: blokkenState.currentLevelData[index] };
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -349,6 +345,7 @@ function endDrag() {
     setTimeout(() => { if(activeBlock && activeBlock.el) activeBlock.el.style.transition = ''; }, 200);
     
     if (activeBlock.data.id === 'hero' && activeBlock.data.x === 4) { 
+        playSound('win');
         endTurn(true);
     }
     
