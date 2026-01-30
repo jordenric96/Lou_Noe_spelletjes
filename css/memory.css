@@ -1,179 +1,241 @@
-/* --- MEMORY & SETUP STIJLEN (VOLLEDIG & NEON) --- */
+// MEMORY.JS - STABIELE VERSIE
 
-/* 1. SETUP DASHBOARD */
-.memory-setup {
-    display: flex; 
-    flex-direction: column; 
-    width: 100%; 
-    height: 100%;
-    padding: 10px; 
-    background: #111; 
-    box-sizing: border-box; 
-    overflow: hidden; 
-}
+console.log("Memory loaded (Stable Version)");
 
-/* De kolommen (Links spelers, Rechts thema) */
-.setup-columns {
-    display: flex; 
-    flex-direction: row; 
-    gap: 15px; 
-    flex: 1; /* Neemt alle beschikbare ruimte in */
-    min-height: 0; 
-    margin-bottom: 10px;
-    overflow-y: auto; 
-}
+let memoryState = { 
+    theme: 'boerderij', 
+    gridSize: 12, 
+    playerNames: [], 
+    currentPlayerIndex: 0, 
+    scores: {}, 
+    flippedCards: [], 
+    lockBoard: false, 
+    matchedPairs: 0, 
+    pendingPlayer: null 
+};
 
-@media (max-width: 700px) {
-    .setup-columns { flex-direction: column; }
-}
+const themes = {
+    'boerderij': { ext: 'png', path: 'assets/images/memory/boerderij/' },
+    'mario':     { ext: 'png', path: 'assets/images/memory/mario/' },
+    'pokemon':   { ext: 'png', path: 'assets/images/memory/pokemon/' },
+    'studio100': { ext: 'png', path: 'assets/images/memory/studio100/' },
+    'dino':      { ext: 'jpg', path: 'assets/images/memory/dino/' },
+    'marvel':    { ext: 'jpg', path: 'assets/images/memory/marvel/' },
+    'natuur':    { ext: 'jpg', path: 'assets/images/memory/natuur/' },
+    'beroepen':  { ext: 'jpg', path: 'assets/images/memory/beroepen/' }
+};
 
-.setup-group {
-    background: #222; border-radius: 20px; padding: 10px;
-    border: 1px solid #444; box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    text-align: center;
-    flex: 1; 
-    display: flex; flex-direction: column;
-}
+const colors = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#4CAF50', '#FFEB3B', '#FF9800'];
 
-.setup-group h3 { 
-    margin: 5px 0 10px 0; color: var(--neon-blue); 
-    font-family: 'Fredoka One'; text-transform: uppercase; 
-}
-
-/* 2. THEMA SELECTIE */
-.theme-grid {
-    display: grid; 
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); 
-    gap: 10px; 
-    width: 100%;
-}
-
-.theme-card-btn {
-    background: #222; border: 2px solid #444; border-radius: 15px; 
-    overflow: hidden; position: relative; cursor: pointer; transition: all 0.2s;
-    display: flex; flex-direction: column;
-}
-.theme-card-btn.selected { border-color: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
-
-.theme-img-container { width: 100%; aspect-ratio: 16/9; background: #000; }
-.theme-img-container img { width: 100%; height: 100%; object-fit: cover; }
-.btn-label { font-family: 'Fredoka One'; padding: 5px; color: #ddd; font-size: 0.8rem; }
-.lock-overlay {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center;
-    font-size: 2rem;
-}
-
-/* 3. SPELER & OPTIES SELECTIE */
-.option-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; }
-
-.option-btn {
-    background: #333; color: white; border: 2px solid #555; padding: 8px;
-    border-radius: 10px; cursor: pointer; min-width: 60px;
-    display: flex; flex-direction: column; align-items: center;
-}
-.option-btn span:first-child { font-size: 1.5rem; }
-.option-btn.selected { border-color: var(--neon-blue); background: #000; box-shadow: 0 0 5px var(--neon-blue); }
-.option-btn.selected-pending { border-color: var(--neon-yellow); animation: pulse 1s infinite; }
-
-/* Kleuren kiezen */
-.color-row { 
-    display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;
-    margin: 15px 0; width: 100%; flex-shrink: 0;
-}
-.color-dot { 
-    width: 45px; height: 45px; border-radius: 50%; border: 3px solid #333; 
-    cursor: pointer; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); transition: transform 0.2s; 
-}
-.color-dot:active { transform: scale(0.9); }
-
-/* Actieve spelers lijst */
-#active-players-list {
-    display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; width: 100%;
-    margin-top: 10px; min-height: 40px;
-}
-.active-player-tag {
-    color: white; padding: 8px 15px; border-radius: 20px; 
-    font-family: 'Fredoka One'; font-size: 1rem;
-    display: flex; align-items: center; gap: 8px; cursor: pointer;
-    border: 2px solid white; box-shadow: 0 0 10px currentColor; animation: popIn 0.3s;
-}
-.remove-x { 
-    background: rgba(0,0,0,0.3); border-radius: 50%; width: 20px; height: 20px; 
-    display: flex; justify-content: center; align-items: center; font-size: 0.8rem; 
+// 1. SETUP LOGICA
+function startMemorySetup() {
+    const board = document.getElementById('game-board');
+    board.innerHTML = `
+        <div class="memory-setup-container">
+            <div class="setup-panel">
+                <h3>1. Spelers</h3>
+                <div class="player-controls">
+                    <button class="icon-btn" onclick="addPlayer('Lou', '👦🏼')">👦🏼 Lou</button>
+                    <button class="icon-btn" onclick="addPlayer('Noé', '👶🏼')">👶🏼 Noé</button>
+                    <button class="icon-btn" onclick="addPlayer('Mama', '👩🏻')">👩🏻 Mama</button>
+                    <button class="icon-btn" onclick="addPlayer('Papa', '👨🏻')">👨🏻 Papa</button>
+                </div>
+                <div id="active-players"></div>
+            </div>
+            
+            <div class="setup-panel">
+                <h3>2. Thema</h3>
+                <div class="theme-scroll">
+                    ${Object.keys(themes).map(k => `
+                        <button class="theme-btn" onclick="selectTheme('${k}', this)">
+                            <img src="${themes[k].path}cover.png" onerror="this.src='assets/images/icon.png'">
+                            <span>${k}</span>
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+            
+            <div class="setup-panel">
+                <h3>3. Aantal Kaartjes</h3>
+                <div class="size-controls">
+                    <button class="size-btn selected" onclick="setSize(12, this)">12</button>
+                    <button class="size-btn" onclick="setSize(16, this)">16</button>
+                    <button class="size-btn" onclick="setSize(30, this)">30</button>
+                </div>
+            </div>
+            
+            <button id="start-game-btn" class="big-start-btn" onclick="startGame()" disabled>Kies een speler...</button>
+        </div>
+    `;
+    
+    // Reset state
+    memoryState.playerNames = [];
+    memoryState.theme = 'boerderij';
+    memoryState.gridSize = 12;
+    // Selecteer standaard thema
+    setTimeout(()=> selectTheme('boerderij', document.querySelector('.theme-btn')), 50);
 }
 
-/* Input veld eigen naam */
-.player-input-container { display: flex; gap: 5px; margin-top: 15px; width: 100%; justify-content: center; }
-#custom-player-name { 
-    flex: 1; padding: 10px; border-radius: 10px; border: 2px solid #555; 
-    background: #222; color: white; font-family: 'Nunito', sans-serif; 
-}
-.add-btn { 
-    background: var(--neon-green); border: none; border-radius: 10px; 
-    padding: 0 20px; color: black; font-weight: bold; cursor: pointer; 
-}
-
-/* 4. START KNOP (Vast onderaan) */
-.start-btn {
-    background: #000; color: var(--neon-green); border: 2px solid var(--neon-green);
-    padding: 15px; font-size: 1.5rem; border-radius: 15px; width: 100%; 
-    cursor: pointer; box-shadow: 0 0 10px var(--neon-green); font-family: 'Fredoka One'; 
-    flex-shrink: 0; margin-top: auto; 
-}
-.start-btn:disabled { border-color: #555; color: #555; box-shadow: none; cursor: not-allowed; }
-
-/* 5. HET SPELZELF (GAME BOARD) */
-.memory-game-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    padding: 5px;
+function addPlayer(name, icon) {
+    playSound('click');
+    // Check of speler al bestaat
+    if(memoryState.playerNames.find(p => p.name === name)) return;
+    
+    // Wijs kleur toe
+    const color = colors[memoryState.playerNames.length % colors.length];
+    memoryState.playerNames.push({name, icon, color});
+    renderPlayers();
+    checkStart();
 }
 
-.score-board {
-    display: flex; gap: 5px; padding: 5px; margin-bottom: 5px; flex-shrink: 0;
-    overflow-x: auto; max-width: 100%;
-}
-.player-badge {
-    background: #222; padding: 2px 10px; border-radius: 30px; 
-    display: flex; align-items: center; gap: 5px; border: 2px solid #444; 
-    font-family: 'Fredoka One'; color: #888; transition: all 0.3s; 
-    font-size: 0.9rem; white-space: nowrap;
-}
-.player-badge.active { 
-    border-color: var(--neon-blue); color: white; background: #000; 
-    box-shadow: 0 0 10px var(--neon-blue); transform: scale(1.05); 
+function renderPlayers() {
+    const div = document.getElementById('active-players');
+    div.innerHTML = memoryState.playerNames.map(p => 
+        `<span class="player-tag" style="background:${p.color}">${p.icon} ${p.name}</span>`
+    ).join('');
 }
 
-.memory-grid {
-    display: grid;
-    /* Grid settings worden gedaan door JS, maar dit centreert het blok */
-    margin: 0 auto; 
-    align-content: center;
-    justify-content: center;
+function selectTheme(t, btn) {
+    playSound('click');
+    memoryState.theme = t;
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
 }
 
-/* 6. KAARTEN */
-.memory-card { position: relative; user-select: none; }
-.memory-card-inner { 
-    width: 100%; height: 100%; position: relative; 
-    transform-style: preserve-3d; transition: transform 0.5s; border-radius: 10px; 
+function setSize(s, btn) {
+    playSound('click');
+    memoryState.gridSize = parseInt(s);
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
 }
-.memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
 
-.card-front, .card-back { 
-    position: absolute; width: 100%; height: 100%; backface-visibility: hidden; 
-    border-radius: 10px; display: flex; align-items: center; justify-content: center; 
-    overflow: hidden; 
+function checkStart() {
+    document.getElementById('start-game-btn').disabled = (memoryState.playerNames.length === 0);
 }
-.card-front { background: #222; border: 2px solid #444; z-index: 2; }
-.card-back { background: #000; transform: rotateY(180deg); border: 2px solid white; }
-.card-img, .card-cover-img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-/* Animatie */
-@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-@keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+// 2. SPEL STARTEN
+function startGame() {
+    playSound('win');
+    const board = document.getElementById('game-board');
+    const size = memoryState.gridSize;
+    
+    // Scorebord
+    let scoreHTML = '<div class="score-bar">';
+    memoryState.playerNames.forEach((p, i) => {
+        memoryState.scores[p.name] = 0;
+        scoreHTML += `<div id="p-badge-${i}" class="p-badge" style="color:${p.color}">
+            ${p.icon} ${p.name}: <span id="score-${i}">0</span>
+        </div>`;
+    });
+    scoreHTML += '</div>';
+    
+    // Grid Setup
+    let gridClass = 'grid-4'; // Standaard (12 of 16)
+    if(size === 30) gridClass = 'grid-6'; // 30 kaarten (6 breed, 5 hoog)
+    
+    board.innerHTML = `
+        <div class="game-container">
+            ${scoreHTML}
+            <div class="memory-grid ${gridClass}" id="grid"></div>
+        </div>
+    `;
+    
+    memoryState.currentPlayerIndex = 0;
+    memoryState.flippedCards = [];
+    memoryState.matchedPairs = 0;
+    memoryState.lockBoard = false;
+    updateActivePlayer();
+    
+    generateCards(size);
+}
+
+function generateCards(totalCards) {
+    const grid = document.getElementById('grid');
+    const pairs = totalCards / 2;
+    const t = themes[memoryState.theme];
+    let items = [];
+    
+    // HIER ZIT DE FIX VOOR 30 KAARTEN:
+    for(let i=1; i<=pairs; i++) {
+        // Als we bijv. 15 paren nodig hebben (voor 30 kaarten),
+        // maar er zijn misschien maar 10 of 15 plaatjes.
+        // We gebruiken modulo om te zorgen dat het altijd past.
+        // Als i = 16 (bestaat niet), wordt het (16 % 15) + 1 = plaatje 2.
+        // Zorg wel dat je mappen minstens 15 plaatjes hebben voor het mooiste resultaat.
+        let imgNum = i; 
+        if (imgNum > 15) imgNum = i - 15; 
+        
+        items.push(imgNum);
+    }
+    
+    let deck = [...items, ...items].sort(() => 0.5 - Math.random());
+    
+    grid.innerHTML = deck.map(val => `
+        <div class="card" data-val="${val}" onclick="flipCard(this)">
+            <div class="inner">
+                <div class="front"><img src="${t.path}cover.png"></div>
+                <div class="back"><img src="${t.path}${val}.${t.ext}"></div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function flipCard(card) {
+    if(memoryState.lockBoard) return;
+    if(card.classList.contains('flipped') || card.classList.contains('matched')) return;
+    
+    playSound('pop');
+    card.classList.add('flipped');
+    memoryState.flippedCards.push(card);
+    
+    if(memoryState.flippedCards.length === 2) checkMatch();
+}
+
+function checkMatch() {
+    memoryState.lockBoard = true;
+    const [c1, c2] = memoryState.flippedCards;
+    
+    if(c1.dataset.val === c2.dataset.val) {
+        // MATCH!
+        playSound('win');
+        c1.classList.add('matched');
+        c2.classList.add('matched');
+        
+        // Rand kleuren
+        const p = memoryState.playerNames[memoryState.currentPlayerIndex];
+        c1.querySelector('.back').style.borderColor = p.color;
+        c2.querySelector('.back').style.borderColor = p.color;
+        
+        memoryState.scores[p.name]++;
+        document.getElementById(`score-${memoryState.currentPlayerIndex}`).innerText = memoryState.scores[p.name];
+        
+        memoryState.flippedCards = [];
+        memoryState.matchedPairs++;
+        memoryState.lockBoard = false;
+        
+        if(memoryState.matchedPairs === memoryState.gridSize / 2) {
+            setTimeout(() => showWinnerModal(p.name, []), 1000);
+        }
+    } else {
+        // GEEN MATCH
+        setTimeout(() => {
+            c1.classList.remove('flipped');
+            c2.classList.remove('flipped');
+            memoryState.flippedCards = [];
+            memoryState.lockBoard = false;
+            nextPlayer();
+        }, 1000);
+    }
+}
+
+function nextPlayer() {
+    memoryState.currentPlayerIndex = (memoryState.currentPlayerIndex + 1) % memoryState.playerNames.length;
+    updateActivePlayer();
+}
+
+function updateActivePlayer() {
+    document.querySelectorAll('.p-badge').forEach((el, i) => {
+        el.style.opacity = (i === memoryState.currentPlayerIndex) ? '1' : '0.5';
+        el.style.transform = (i === memoryState.currentPlayerIndex) ? 'scale(1.1)' : 'scale(1)';
+    });
+}
