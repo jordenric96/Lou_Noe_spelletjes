@@ -1,7 +1,6 @@
-// BLOKKEN SPEL - "MCQUEEN RACE" EDITIE
-// Versie: Met Speler Knoppen Fix
+// BLOKKEN SPEL - "MCQUEEN RACE" (BOM EDITIE)
 
-console.log("Blokken.js geladen...");
+console.log("Blokken.js (Bom Versie) geladen...");
 
 let blokkenState = {
     playerNames: [],
@@ -12,14 +11,13 @@ let blokkenState = {
     gridSize: 6,
     cellSize: 0,
     timer: null,
-    timeLeft: 60,
+    timeLeft: 30, // NU 30 SECONDEN!
     isGameActive: false,
     activeColor: '#2196F3' 
 };
 
-const blokkenPalette = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#4CAF50', '#FF9800'];
+const blokkenPalette = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#4CAF50', '#FFEB3B', '#FF9800'];
 
-// DE STANDAARD SPELERS (Nieuw toegevoegd!)
 const blokkenSpelersLijst = [
     { name: "Lou", icon: "👦🏼" },
     { name: "Noé", icon: "👶🏼" },
@@ -27,7 +25,6 @@ const blokkenSpelersLijst = [
     { name: "Papa", icon: "👨🏻" }
 ];
 
-// DE PUZZELS
 const levelsDatabase = {
     'easy': [
         [ { id: 'hero', x: 1, y: 2, w: 2, h: 1, color: 'hero', dir: 'h' }, { id: 'b1', x: 3, y: 1, w: 1, h: 3, color: 'car', dir: 'v' }, { id: 'b2', x: 0, y: 0, w: 1, h: 2, color: 'car', dir: 'v' }, { id: 'b3', x: 4, y: 4, w: 2, h: 1, color: 'car', dir: 'h' } ],
@@ -46,17 +43,8 @@ const levelsDatabase = {
 function startBlokkenGame() {
     const board = document.getElementById('game-board');
     
-    // HTML Genereren voor kleuren
-    let paletteHTML = blokkenPalette.map(color => 
-        `<div class="color-dot" style="background-color: ${color}" onclick="selectBlokkenColor('${color}', this)"></div>`
-    ).join('');
-
-    // HTML Genereren voor vaste spelers (Lou, Noé, etc.)
-    let buttonsHTML = blokkenSpelersLijst.map(p => 
-        `<button class="option-btn player-btn" onclick="toggleBlokkenPlayer('${p.name}', this)">
-            <span>${p.icon}</span><span class="btn-label">${p.name}</span>
-        </button>`
-    ).join('');
+    let paletteHTML = blokkenPalette.map(color => `<div class="color-dot" style="background-color: ${color}" onclick="selectBlokkenColor('${color}', this)"></div>`).join('');
+    let buttonsHTML = blokkenSpelersLijst.map(p => `<button class="option-btn player-btn" onclick="toggleBlokkenPlayer('${p.name}', this)"><span>${p.icon}</span><span class="btn-label">${p.name}</span></button>`).join('');
     
     board.innerHTML = `
         <div class="memory-setup">
@@ -65,18 +53,13 @@ function startBlokkenGame() {
                     <h3>Wie racet er?</h3>
                     <div class="color-picker-title">1. Kies kleur</div>
                     <div class="color-row">${paletteHTML}</div>
-                    
                     <div class="color-picker-title">2. Kies Speler</div>
-                    <div class="option-grid" id="blokken-player-selection">
-                        ${buttonsHTML}
-                    </div>
-                    
+                    <div class="option-grid" id="blokken-player-selection">${buttonsHTML}</div>
                     <div class="player-input-container">
-                        <input type="text" id="custom-blokken-name" placeholder="Andere naam...">
+                        <input type="text" id="custom-blokken-name" placeholder="Naam...">
                         <button class="add-btn" onclick="addCustomBlokkenPlayer()">+</button>
                     </div>
                 </div>
-
                 <div class="setup-group group-size">
                     <h3>Moeilijkheid</h3>
                     <div class="option-grid">
@@ -86,34 +69,22 @@ function startBlokkenGame() {
                     </div>
                 </div>
             </div>
-            <button id="start-blokken-btn" class="start-btn" onclick="initRace()" disabled>Kies minstens 1 speler...</button>
+            <button id="start-blokken-btn" class="start-btn" onclick="initRace()" disabled>Kies spelers...</button>
         </div>
     `;
 
     blokkenState.playerNames = [];
     blokkenState.difficulty = 'medium';
-    // Selecteer standaard blauw
-    setTimeout(() => {
-        const dots = document.querySelectorAll('.memory-setup .color-dot');
-        if(dots.length > 3) selectBlokkenColor(blokkenPalette[3], dots[3]);
-    }, 50);
+    setTimeout(() => { const dots = document.querySelectorAll('.memory-setup .color-dot'); if(dots.length > 3) selectBlokkenColor(blokkenPalette[3], dots[3]); }, 50);
 }
 
 function selectBlokkenColor(color, btn) {
     if(!btn) return;
     blokkenState.activeColor = color;
-    // Let op: selecteer alleen dots binnen de blokken setup om conflicten te voorkomen
     const container = document.querySelector('.memory-setup');
-    if(container) {
-        container.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
-    }
+    if(container) container.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
     btn.classList.add('active');
-    
-    // Update randkleur van niet-geselecteerde spelers
-    document.querySelectorAll('.player-btn:not(.selected)').forEach(b => {
-        b.style.borderColor = color;
-        b.style.color = color;
-    });
+    document.querySelectorAll('.player-btn:not(.selected)').forEach(b => { b.style.borderColor = color; b.style.color = color; });
 }
 
 function setBlokkenDiff(diff, btn) {
@@ -122,44 +93,28 @@ function setBlokkenDiff(diff, btn) {
     btn.classList.add('selected');
 }
 
-// Speler toevoegen/verwijderen via de knoppen (Lou, Noé...)
 function toggleBlokkenPlayer(name, btn) {
     const existingIndex = blokkenState.playerNames.findIndex(p => p.name === name);
-    
     if (existingIndex === -1) {
-        // Toevoegen
         blokkenState.playerNames.push({ name: name, color: blokkenState.activeColor });
-        btn.classList.add('selected');
-        btn.style.backgroundColor = blokkenState.activeColor;
-        btn.style.borderColor = blokkenState.activeColor;
-        btn.style.color = 'white';
-        btn.querySelector('.btn-label').style.color = 'white';
+        btn.classList.add('selected'); btn.style.backgroundColor = blokkenState.activeColor; btn.style.borderColor = blokkenState.activeColor; btn.style.color = 'white'; btn.querySelector('.btn-label').style.color = 'white';
     } else {
-        // Verwijderen
         blokkenState.playerNames.splice(existingIndex, 1);
-        btn.classList.remove('selected');
-        btn.style.backgroundColor = 'white';
-        btn.style.borderColor = blokkenState.activeColor;
-        btn.style.color = blokkenState.activeColor;
-        btn.querySelector('.btn-label').style.color = '#888';
+        btn.classList.remove('selected'); btn.style.backgroundColor = 'white'; btn.style.borderColor = blokkenState.activeColor; btn.style.color = blokkenState.activeColor; btn.querySelector('.btn-label').style.color = '#888';
     }
     checkBlokkenStart();
 }
 
-// Speler toevoegen via typen
 function addCustomBlokkenPlayer() {
     const input = document.getElementById('custom-blokken-name');
     const name = input.value.trim();
     if (name && !blokkenState.playerNames.some(p => p.name === name)) {
-        // We maken een tijdelijke knop aan voor deze nieuwe speler
         const container = document.getElementById('blokken-player-selection');
         const btnHTML = document.createElement('button');
         btnHTML.className = 'option-btn player-btn';
         btnHTML.onclick = function() { toggleBlokkenPlayer(name, this) };
         btnHTML.innerHTML = `<span>👤</span><span class="btn-label">${name}</span>`;
         container.appendChild(btnHTML);
-        
-        // Meteen selecteren
         toggleBlokkenPlayer(name, btnHTML);
         input.value = '';
     }
@@ -186,6 +141,7 @@ function startTurn() {
     const possibleLevels = levelsDatabase[blokkenState.difficulty];
     const randomLevel = possibleLevels[Math.floor(Math.random() * possibleLevels.length)];
     
+    // NIEUWE HTML: Met Bom Icoon!
     board.innerHTML = `
         <div id="blokken-container">
             <div id="status-bar" style="border-left-color: ${currentPlayer.color}">
@@ -193,7 +149,10 @@ function startTurn() {
                     <span style="color:${currentPlayer.color}">👤 ${currentPlayer.name}</span>
                     <span>Punten: ${blokkenState.scores[currentPlayer.name]} / 5</span>
                 </div>
-                <div id="timer-bar-bg"><div id="timer-bar"></div></div>
+                <div class="timer-container">
+                    <div id="timer-bar-bg"><div id="timer-bar"></div></div>
+                    <div class="bomb-icon">💣</div>
+                </div>
             </div>
             
             <div id="game-area">
@@ -220,7 +179,7 @@ function handleResize() {
 }
 
 function startTimer() {
-    blokkenState.timeLeft = 60;
+    blokkenState.timeLeft = 30; // 30 SECONDEN!
     blokkenState.isGameActive = true;
     if(blokkenState.timer) clearInterval(blokkenState.timer);
     
@@ -228,25 +187,51 @@ function startTimer() {
     blokkenState.timer = setInterval(() => {
         if(!blokkenState.isGameActive) return;
         blokkenState.timeLeft -= 0.1;
-        let percentage = (blokkenState.timeLeft / 60) * 100;
+        let percentage = (blokkenState.timeLeft / 30) * 100; // Op basis van 30s
         
         if(bar) {
             bar.style.width = `${percentage}%`;
-            if(percentage < 20) bar.style.backgroundColor = '#FF5252';
-            else bar.style.backgroundColor = '#4CAF50';
         }
 
-        if(blokkenState.timeLeft <= 0) endTurn(false);
+        if(blokkenState.timeLeft <= 0) {
+            triggerExplosion(); // BOEM!
+        }
     }, 100);
 }
 
-function endTurn(success) {
+// HET EXPLOSIE EFFECT
+function triggerExplosion() {
     clearInterval(blokkenState.timer);
     blokkenState.isGameActive = false;
-    const currentPlayer = blokkenState.playerNames[blokkenState.currentPlayerIndex];
     
-    let msg = success ? "Goed gedaan! +1 punt" : "Tijd is op!";
+    const board = document.getElementById('blokken-container');
+    const gameArea = document.getElementById('game-area');
+    
+    // Schudden
+    if(gameArea) gameArea.classList.add('shaking');
+    
+    // Overlay maken
+    const overlay = document.createElement('div');
+    overlay.className = 'explosion-overlay';
+    overlay.innerHTML = `
+        <div class="boom-emoji">💥</div>
+        <div class="boom-text">BOEM!</div>
+    `;
+    board.appendChild(overlay);
+    
+    // Na 2.5 seconden naar volgende speler
+    setTimeout(() => {
+        endTurn(false);
+    }, 2500);
+}
+
+function endTurn(success) {
     if(success) {
+        clearInterval(blokkenState.timer);
+        blokkenState.isGameActive = false;
+        const currentPlayer = blokkenState.playerNames[blokkenState.currentPlayerIndex];
+        
+        // Gewoon punt, geen explosie
         blokkenState.scores[currentPlayer.name]++;
         if(blokkenState.scores[currentPlayer.name] >= 5) {
              let leaderboard = Object.keys(blokkenState.scores).map(name => ({
@@ -258,44 +243,47 @@ function endTurn(success) {
             showWinnerModal(currentPlayer.name, leaderboard);
             return;
         }
+        
+        // Tussenscherm voor succes
+        const board = document.getElementById('blokken-container');
+        const overlay = document.createElement('div');
+        overlay.className = 'turn-overlay'; // Gebruikt oude style, prima
+        overlay.style.background = "rgba(76, 175, 80, 0.9)";
+        overlay.innerHTML = `<h2 style="font-size:3rem">Goed gedaan! 👍</h2>`;
+        board.appendChild(overlay);
+        
+        setTimeout(() => {
+            nextPlayer();
+        }, 1500);
+    } else {
+        // Was al afgehandeld door triggerExplosion, hier alleen de speler wissel
+        nextPlayer();
     }
-    
-    const board = document.getElementById('blokken-container');
-    const overlay = document.createElement('div');
-    overlay.className = 'turn-overlay';
-    overlay.innerHTML = `<h2>${msg}</h2>`;
-    board.appendChild(overlay);
-    
-    setTimeout(() => {
-        blokkenState.currentPlayerIndex++;
-        if(blokkenState.currentPlayerIndex >= blokkenState.playerNames.length) blokkenState.currentPlayerIndex = 0;
-        startTurn();
-    }, 2000);
 }
 
-function resetCurrentLevel() {
-    startTurn(); // Simpele reset door beurt opnieuw te starten
+function nextPlayer() {
+    blokkenState.currentPlayerIndex++;
+    if(blokkenState.currentPlayerIndex >= blokkenState.playerNames.length) blokkenState.currentPlayerIndex = 0;
+    startTurn();
 }
 
-// 3. RENDER & DRAG
+function resetCurrentLevel() { startTurn(); }
+
 function loadBlocks(blocksData) {
     const gameArea = document.getElementById('game-area');
     if(!gameArea) return;
     Array.from(gameArea.querySelectorAll('.block')).forEach(e => e.remove());
 
     const rect = gameArea.getBoundingClientRect();
-    // Grid alignment fix: 16px aftrekken voor de borders (8px links + 8px rechts)
     blokkenState.cellSize = (rect.width - 16) / 6; 
 
     blocksData.forEach((block, index) => {
         const el = document.createElement('div');
         el.className = `block ${block.color} ${block.type || ''}`;
-        
         el.style.width = (block.w * blokkenState.cellSize) + 'px';
         el.style.height = (block.h * blokkenState.cellSize) + 'px';
         el.style.left = (block.x * blokkenState.cellSize) + 'px';
         el.style.top = (block.y * blokkenState.cellSize) + 'px';
-        
         if(block.id === 'hero') el.style.backgroundImage = `url('assets/images/blokken/hero.png')`;
 
         el.addEventListener('mousedown', (e) => startDrag(e, index, el));
@@ -305,7 +293,6 @@ function loadBlocks(blocksData) {
 }
 
 let activeBlock = null; let startX, startY, initialBlockPos, minLimit, maxLimit;
-
 function startDrag(e, index, el) {
     if(!blokkenState.isGameActive) return;
     e.preventDefault(); 
