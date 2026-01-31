@@ -1,3 +1,5 @@
+// MAIN.JS - VOLLEDIG (Met Puzzel Route)
+
 const mainMenu = document.getElementById('main-menu');
 const gameContainer = document.getElementById('game-container');
 const gameTitle = document.getElementById('game-title');
@@ -39,7 +41,6 @@ function selectGame(gameName) {
     mainMenu.classList.remove('active'); mainMenu.classList.add('hidden');
     gameContainer.classList.remove('hidden'); gameContainer.classList.add('active');
     currentGame = gameName; 
-
     gameBoard.innerHTML = '';
 
     if (gameName === 'memory') { gameTitle.innerText = "Memory"; if (typeof startMemorySetup === "function") startMemorySetup(); }
@@ -49,6 +50,8 @@ function selectGame(gameName) {
     else if (gameName === 'simon') { gameTitle.innerText = "Simon Zegt 💡"; if (typeof startSimonGame === "function") startSimonGame(); }
     else if (gameName === 'vang') { gameTitle.innerText = "Vang ze! 🔨"; if (typeof startWhackGame === "function") startWhackGame(); }
     else if (gameName === 'tekenen') { gameTitle.innerText = "Tekenbord 🎨"; if (typeof startDrawing === "function") startDrawing(); }
+    // NIEUW: PUZZEL
+    else if (gameName === 'puzzel') { gameTitle.innerText = "Puzzelen 🧩"; if (typeof startPuzzleGame === "function") startPuzzleGame(); }
 }
 
 function goHome() {
@@ -63,13 +66,13 @@ function goHome() {
     currentGame = null;
 }
 
-// --- WINNAAR & STICKERS (BELANGRIJK) ---
+// --- WINNAAR & STICKERS ---
 function showWinnerModal(winnerName, leaderboardData) {
     playSound('win');
     const modal = document.getElementById('winner-modal');
     const title = document.getElementById('winner-title');
     const list = document.getElementById('winner-leaderboard');
-    const stickerDisplay = document.getElementById('new-sticker-display'); // NIEUW ELEMENT
+    const stickerDisplay = document.getElementById('new-sticker-display'); 
     
     title.innerText = winnerName ? `${winnerName} wint!` : "Gewonnen!";
     list.innerHTML = '';
@@ -80,17 +83,15 @@ function showWinnerModal(winnerName, leaderboardData) {
         wonSticker = unlockRandomSticker(); 
     }
 
-    // UPDATE: Toon de sticker VISUEEL
-    if(wonSticker) {
+    if(wonSticker && stickerDisplay) {
         stickerDisplay.innerHTML = `
             <div class="sticker-reward-anim">
                 <div class="reward-text">✨ NIEUWE STICKER! ✨</div>
                 <img src="${wonSticker.src}" class="reward-img">
             </div>
         `;
-        playSound('win');
-    } else {
-        stickerDisplay.innerHTML = ''; // Geen sticker gewonnen
+    } else if (stickerDisplay) {
+        stickerDisplay.innerHTML = ''; 
     }
     
     if (leaderboardData && leaderboardData.length > 0) {
@@ -100,8 +101,6 @@ function showWinnerModal(winnerName, leaderboardData) {
             if (index === 0) item.classList.add('winner');
             if (player.color) {
                 item.style.color = player.color;
-                if(index === 0) item.style.borderColor = player.color;
-                else { item.style.background = player.color; item.style.color = 'white'; }
             }
             item.innerHTML = `<span>${index + 1}. ${player.name}</span><span>${player.score}</span>`;
             list.appendChild(item);
@@ -119,10 +118,11 @@ function closeWinnerModal() {
     setTimeout(() => modal.classList.add('hidden'), 300);
     
     if (currentGame === 'memory') startMemorySetup();
-    if (currentGame === 'doolhof') startDoolhofSetup();
-    if (currentGame === 'blokken') startBlokkenGame(); 
-    if (currentGame === 'simon') startSimonGame();
-    if (currentGame === 'vang') startWhackGame();
+    else if (currentGame === 'doolhof') startDoolhofSetup();
+    else if (currentGame === 'blokken') startBlokkenGame(); 
+    else if (currentGame === 'simon') startSimonGame();
+    else if (currentGame === 'vang') startWhackGame();
+    else if (currentGame === 'puzzel') startPuzzleGame();
 }
 
 function startConfetti() {
