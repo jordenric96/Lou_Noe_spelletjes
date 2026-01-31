@@ -1,17 +1,17 @@
-// PUZZEL.JS - Side Pools & 5 Tips
-console.log("Puzzel.js geladen (Side Layout)...");
+// PUZZEL.JS - Side Pools, 5 Tips & STARTER PIECE
+console.log("Puzzel.js geladen (Starter Piece)...");
 
 let pState = { 
     img: '', pieces: [], rows: 3, cols: 2, 
     selectedPiece: null, correctCount: 0, difficulty: 'easy',
     playerNames: [], 
-    hintsLeft: 5, // We starten met 5 tips
+    hintsLeft: 5, 
     pendingName: null, pendingIcon: null
 };
 
 const puzColors = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#4CAF50', '#FFEB3B', '#FF9800'];
 
-// --- SETUP (Ongewijzigd) ---
+// --- SETUP ---
 function startPuzzleGame() {
     const board = document.getElementById('game-board');
     const config = (typeof assetConfig !== 'undefined') ? assetConfig : {};
@@ -107,8 +107,6 @@ function initPuzzle() {
     const board = document.getElementById('game-board');
     pState.correctCount = 0;
     pState.selectedPiece = null;
-    
-    // RESET TIPS NAAR 5
     pState.hintsLeft = 5;
     
     const totalPieces = pState.rows * pState.cols;
@@ -119,7 +117,7 @@ function initPuzzle() {
         gridHTML += `<div class="puzzle-slot" id="slot-${i}" data-index="${i}" onclick="placePiece(this)"></div>`;
     }
     
-    // Stukjes maken en verdelen (Links en Rechts)
+    // Stukjes genereren
     let pieces = [];
     for(let i=0; i<totalPieces; i++) pieces.push(i);
     pieces.sort(() => Math.random() - 0.5); 
@@ -141,41 +139,33 @@ function initPuzzle() {
             </div>
         `;
         
-        // Verdeel om en om
         if(index % 2 === 0) leftPoolHTML += pieceHTML;
         else rightPoolHTML += pieceHTML;
     });
 
-    // Visuele instellingen
+    // Layout bepalen
     let boardClass = (pState.difficulty === 'easy') ? 'ghost-mode' : '';
     let boardStyle = (pState.difficulty === 'easy') ? `background-image: url('${pState.img}');` : '';
     let previewHTML = (pState.difficulty !== 'easy') ? `<div class="preview-mini"><img src="${pState.img}"></div>` : '';
 
     const cssVars = `style="--puz-cols: ${pState.cols}; --puz-rows: ${pState.rows}; ${boardStyle}"`;
 
-    // Lampjes genereren (5 stuks)
     let bulbsHTML = '';
-    for(let i=0; i<5; i++) {
-        bulbsHTML += `<span id="bulb-${i}" class="hint-bulb">💡</span>`;
-    }
+    for(let i=0; i<5; i++) bulbsHTML += `<span id="bulb-${i}" class="hint-bulb">💡</span>`;
 
     board.innerHTML = `
         <div class="puzzle-game-container">
             <div class="puzzle-header">
                 <button class="tool-btn" onclick="startPuzzleGame()">⬅ Terug</button>
-                
                 <div class="hint-container">
                     <button class="tip-btn" onclick="givePuzzleHint()">TIP</button>
                     <div class="bulb-row">${bulbsHTML}</div>
                 </div>
-
                 ${previewHTML}
             </div>
             
             <div class="puzzle-main-area">
-                <div class="puzzle-pool side-pool" id="pool-left">
-                    ${leftPoolHTML}
-                </div>
+                <div class="puzzle-pool side-pool" id="pool-left">${leftPoolHTML}</div>
                 
                 <div class="puzzle-board-wrapper">
                     <div class="puzzle-board ${boardClass}" ${cssVars}>
@@ -183,12 +173,28 @@ function initPuzzle() {
                     </div>
                 </div>
 
-                <div class="puzzle-pool side-pool" id="pool-right">
-                    ${rightPoolHTML}
-                </div>
+                <div class="puzzle-pool side-pool" id="pool-right">${rightPoolHTML}</div>
             </div>
         </div>
     `;
+
+    // --- AUTOMATISCH 1 STUKJE PLAATSEN (HET CADEAUTJE) ---
+    setTimeout(() => {
+        // Kies een willekeurig stukje (tussen 0 en totalPieces-1)
+        const starterIndex = Math.floor(Math.random() * totalPieces);
+        const starterPiece = document.getElementById(`piece-${starterIndex}`);
+        const starterSlot = document.getElementById(`slot-${starterIndex}`);
+
+        if(starterPiece && starterSlot) {
+            // Verplaatsen naar het bord
+            starterSlot.appendChild(starterPiece);
+            starterPiece.classList.add('correct');
+            starterPiece.onclick = null; // Niet meer verplaatsbaar
+            
+            // Score bijwerken
+            pState.correctCount = 1;
+        }
+    }, 100); // Kleine vertraging om zeker te zijn dat DOM klaar is
 }
 
 function selectPiece(el) {
@@ -217,10 +223,9 @@ function placePiece(slot) {
     } else {
         const wrongPiece = pState.selectedPiece;
         wrongPiece.classList.add('wrong');
-        const originPool = (Math.random() > 0.5) ? 'pool-left' : 'pool-right'; // Terug naar willekeurige kant
+        const originPool = (Math.random() > 0.5) ? 'pool-left' : 'pool-right'; 
         setTimeout(() => {
             wrongPiece.classList.remove('wrong');
-            // Probeer terug te zetten in een pool
             const pool = document.getElementById(originPool) || document.querySelector('.puzzle-pool');
             pool.appendChild(wrongPiece);
         }, 500);
@@ -229,19 +234,16 @@ function placePiece(slot) {
 }
 
 function givePuzzleHint() {
-    // Check of we nog tips hebben
     if(pState.hintsLeft <= 0) {
-        if(typeof playSound === 'function') playSound('error'); // Of ander geluidje
+        if(typeof playSound === 'function') playSound('error'); 
         return;
     }
     
-    // Zoek stukjes die nog in de pools zitten
     const pools = document.querySelectorAll('.puzzle-pool .puzzle-piece');
     const piecesInPool = Array.from(pools);
     
     if(piecesInPool.length === 0) return;
     
-    // Pak de eerste
     const piece = piecesInPool[0];
     const index = piece.getAttribute('data-index');
     const targetSlot = document.getElementById(`slot-${index}`); 
@@ -253,7 +255,6 @@ function givePuzzleHint() {
         piece.onclick = null;
         pState.correctCount++;
         
-        // VERMINDER TIPS
         pState.hintsLeft--;
         updateHintUI();
         
@@ -262,9 +263,6 @@ function givePuzzleHint() {
 }
 
 function updateHintUI() {
-    // Update de lampjes visualisatie
-    // We hebben 5 lampjes (id bulb-0 t/m bulb-4).
-    // Als hintsLeft 4 is, moet bulb-4 (de 5e) uit.
     for(let i=0; i<5; i++) {
         const bulb = document.getElementById(`bulb-${i}`);
         if(i < pState.hintsLeft) {
@@ -277,8 +275,6 @@ function updateHintUI() {
             bulb.style.filter = 'grayscale(100%)';
         }
     }
-    
-    // Update knop tekst/status
     const btn = document.querySelector('.tip-btn');
     if(pState.hintsLeft === 0) {
         btn.disabled = true;
