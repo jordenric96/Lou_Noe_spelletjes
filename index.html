@@ -15,7 +15,8 @@
     <link rel="stylesheet" href="css/memory.css">
     <link rel="stylesheet" href="css/doolhof.css">
     <link rel="stylesheet" href="css/blokken.css">
-    <link rel="stylesheet" href="css/newgames.css"> </head>
+    <link rel="stylesheet" href="css/newgames.css"> 
+</head>
 <body>
 
     <div id="app">
@@ -61,7 +62,7 @@
         </div>
     </div>
 
- <div id="winner-modal" class="modal hidden">
+    <div id="winner-modal" class="modal hidden">
         <div class="modal-content">
             <div id="confetti-container"></div>
             
@@ -78,10 +79,17 @@
     </div>
 
     <script src="js/main.js"></script>
+    
     <script src="js/memory.js"></script>
     <script src="js/doolhof.js"></script>
     <script src="js/blokken.js"></script>
-    <script src="js/newgames.js"></script> <script>
+    
+    <script src="js/stickers.js"></script> <script src="js/puzzel.js"></script>
+    <script src="js/vang.js"></script>
+    <script src="js/simon.js"></script>
+    <script src="js/tekenen.js"></script>
+
+    <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('service-worker.js').catch(err => console.log('SW Fout:', err));
