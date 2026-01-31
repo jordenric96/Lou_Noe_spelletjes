@@ -5,7 +5,7 @@
   "display": "standalone",
   "background_color": "#E0F7FA",
   "theme_color": "#00BCD4",
-  "orientation": "landscape",
+  "orientation": "natural",
   "icons": [
     {
       "src": "assets/images/icon.jpg",
