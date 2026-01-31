@@ -1,9 +1,9 @@
-// MEMORY.JS - MAXIMALE KADER GROOTTE (FIX)
-console.log("Memory.js geladen (Full Fill)...");
+// MEMORY.JS - "SMART FIT" VERSIE (CSS Variabelen)
+console.log("Memory.js geladen (Smart Fit)...");
 
 let memoryState = { 
     theme: 'boerderij', 
-    gridSize: 30, // VAST 30
+    gridSize: 30, // VAST OP 30
     playerNames: [], 
     currentPlayerIndex: 0, 
     scores: {}, 
@@ -86,11 +86,11 @@ function selectPerson(name, btn) {
     document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending'));
     if(btn) btn.classList.add('selected-pending');
     memoryState.pendingPlayer = name;
-    const p = document.getElementById('color-palette'); p.style.animation="shake 0.5s"; setTimeout(()=>p.style.animation="",500);
+    const p = document.getElementById('color-palette'); if(p) {p.style.animation="shake 0.5s"; setTimeout(()=>p.style.animation="",500);}
 }
 function addCustomPerson() {
     const i = document.getElementById('custom-player-name'); const n = i.value.trim();
-    if(n){ if(typeof playSound==='function')playSound('click'); memoryState.pendingPlayer=n; document.querySelectorAll('.player-btn').forEach(b=>b.classList.remove('selected-pending')); i.value=''; i.placeholder=n+" gekozen!"; const p=document.getElementById('color-palette'); p.style.animation="shake 0.5s"; setTimeout(()=>p.style.animation="",500); }
+    if(n){ if(typeof playSound==='function')playSound('click'); memoryState.pendingPlayer=n; document.querySelectorAll('.player-btn').forEach(b=>b.classList.remove('selected-pending')); i.value=''; i.placeholder=n+" gekozen!"; const p=document.getElementById('color-palette'); if(p){p.style.animation="shake 0.5s"; setTimeout(()=>p.style.animation="",500);} }
 }
 function renderPalette() {
     const cp = document.getElementById('color-palette'); if(!cp)return;
@@ -116,83 +116,68 @@ function checkStartButton() {
     const b=document.getElementById('start-btn'); if(b){b.disabled=memoryState.playerNames.length===0; b.innerText=b.disabled?"VOEG SPELER TOE...":"START SPEL ▶️";}
 }
 
-// --- GAME LOGIC (MAXIMALE GROOTTE) ---
+// --- GAME LOGIC (SMART RESIZE) ---
 
-function calculateCardSize(cols, rows) {
+function updateCardSize() {
     const board = document.getElementById('game-board');
-    if(!board) return 60; // Fallback
+    const grid = document.getElementById('memory-grid');
+    if (!board || !grid) return;
 
-    // Totale beschikbare ruimte
-    const w = board.clientWidth;
-    const h = board.clientHeight;
+    // 1. Meet de ruimte die we ECHT hebben (container minus padding)
+    const availableWidth = board.clientWidth - 20; // marge zijkant
+    const availableHeight = board.clientHeight - 80; // marge voor scorebord
 
-    // Trek scorebalk eraf (ongeveer 60px) + marges (20px totaal)
-    // We willen dat het spelbord de rest vult
-    const availableW = w - 10; // Kleine marge zijkant
-    const availableH = h - 70; // Marge voor scorebord bovenin
+    // 2. Bepaal het rooster (5x6 of 6x5)
+    let cols = 6, rows = 5;
+    if (availableHeight > availableWidth) { cols = 5; rows = 6; }
 
-    const gap = 6; // De ruimte tussen de kaarten
+    // 3. Bereken maximale grootte per kaartje
+    // We trekken de 'gaps' (ruimte tussen kaarten) eraf
+    const gapTotalW = (cols - 1) * 8; // 8px gap
+    const gapTotalH = (rows - 1) * 8;
 
-    // Bereken hoeveel ruimte 1 kaart mag innemen in de breedte
-    const widthPerCard = (availableW - ((cols - 1) * gap)) / cols;
-    
-    // Bereken hoeveel ruimte 1 kaart mag innemen in de hoogte
-    const heightPerCard = (availableH - ((rows - 1) * gap)) / rows;
+    const maxW = (availableWidth - gapTotalW) / cols;
+    const maxH = (availableHeight - gapTotalH) / rows;
 
-    // We willen VIERKANTE kaarten die overal passen. 
-    // Pak de kleinste waarde, zodat het nooit buiten beeld valt.
-    // Geen limiet meer van 110px!
-    let size = Math.floor(Math.min(widthPerCard, heightPerCard));
-    
-    return size;
+    // 4. De winnaar is de kleinste van de twee (zodat het altijd past)
+    const finalSize = Math.floor(Math.min(maxW, maxH));
+
+    // 5. UPDATE DE CSS VARIABELE
+    // Dit zorgt ervoor dat alle kaarten in 1x van grootte veranderen
+    grid.style.setProperty('--card-size', `${finalSize}px`);
+    grid.style.setProperty('--grid-cols', cols);
 }
 
 function startMemoryGame() {
     if(typeof playSound === 'function') playSound('win');
     const board = document.getElementById('game-board');
-    
-    // Vast 30 kaarten
     memoryState.gridSize = 30;
-    
-    // Bepaal rooster: Liggend = 6 breed, Staand = 5 breed
-    let cols = 6; let rows = 5;
-    if(board.clientHeight > board.clientWidth) { cols = 5; rows = 6; }
 
+    // HTML opbouw
     let scoreHTML = `<div class="score-board">${memoryState.playerNames.map((p, i) => `<div class="player-badge" id="badge-${i}" style="border-color:${p.color}; color:${p.color}"><span class="badge-name">${p.name}</span>: <span id="score-${i}">0</span></div>`).join('')}</div>`;
-
     board.innerHTML = `<div class="memory-game-container">${scoreHTML}<div class="memory-grid" id="memory-grid"></div></div>`;
     
+    // Initialiseer Grid
     const grid = document.getElementById('memory-grid');
     
-    // Bereken grootte
-    const cardSize = calculateCardSize(cols, rows);
-    
-    grid.style.gridTemplateColumns = `repeat(${cols}, ${cardSize}px)`;
-    grid.style.gap = '6px';
-    
+    // Voer de berekening direct uit
+    updateCardSize();
+
+    // Voeg kaarten toe
     memoryState.matchedPairs = 0; memoryState.flippedCards = []; memoryState.lockBoard = false; memoryState.currentPlayerIndex = 0;
     updateActiveBadgeColor();
-    generateCards(cardSize, cols * rows);
+    generateCards(30);
 
-    // Resize listener
-    window.onresize = () => {
-        if(document.getElementById('memory-grid')) {
-            const newCols = (board.clientHeight > board.clientWidth) ? 5 : 6;
-            const newRows = (board.clientHeight > board.clientWidth) ? 6 : 5;
-            const newSize = calculateCardSize(newCols, newRows);
-            const g = document.getElementById('memory-grid');
-            g.style.gridTemplateColumns = `repeat(${newCols}, ${newSize}px)`;
-            document.querySelectorAll('.memory-card').forEach(c => {
-                c.style.width = newSize+'px'; c.style.height = newSize+'px';
-            });
-        }
-    };
+    // Blijf luisteren naar schermveranderingen
+    window.onresize = updateCardSize;
+    // Extra veiligheid: roep het nog eens aan na 100ms voor het geval de layout verspringt
+    setTimeout(updateCardSize, 100);
 }
 
-function generateCards(sizePx, totalCards) {
+function generateCards(totalCards) {
     const grid = document.getElementById('memory-grid');
     const themeData = themes[memoryState.theme];
-    const pairsNeeded = 15;
+    const pairsNeeded = totalCards / 2; // 15
     
     let deck = [];
     for (let i = 1; i <= pairsNeeded; i++) deck.push(i, i);
@@ -202,11 +187,13 @@ function generateCards(sizePx, totalCards) {
     deck.forEach((item) => {
         const card = document.createElement('div');
         card.className = 'memory-card'; card.dataset.value = item;
-        // DE KADER GROOTTE:
-        card.style.width = `${sizePx}px`; 
-        card.style.height = `${sizePx}px`;
+        // LET OP: Geen vaste width/height hier, dat doet de CSS variabele!
         
-        card.innerHTML = `<div class="memory-card-inner"><div class="card-front"><img src="${themeData.path}cover.png"></div><div class="card-back"><img src="${themeData.path}${item}.${themeData.extension}"></div></div>`;
+        card.innerHTML = `
+            <div class="memory-card-inner">
+                <div class="card-front"><img src="${themeData.path}cover.png" alt="cover"></div>
+                <div class="card-back"><img src="${themeData.path}${item}.${themeData.extension}" alt="card"></div>
+            </div>`;
         card.addEventListener('click', flipCard);
         grid.appendChild(card);
     });
