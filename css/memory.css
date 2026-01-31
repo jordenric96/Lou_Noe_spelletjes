@@ -1,66 +1,79 @@
-/* --- COMPACT MEMORY SETUP --- */
+/* --- MEMORY SETUP --- */
 .memory-setup {
     display: flex; flex-direction: column; width: 100%; height: 100%;
-    padding: 15px; background: #F0F4F8; box-sizing: border-box; overflow: hidden;
+    padding: 10px; background: #F8FAFC; box-sizing: border-box; overflow: hidden;
 }
 
 .setup-columns {
-    display: flex; flex-direction: row; gap: 15px; flex: 1; min-height: 0;
-    margin-bottom: 15px;
+    display: flex; flex-direction: row; gap: 10px; flex: 1; min-height: 0;
+    margin-bottom: 10px;
 }
 
 .setup-group {
-    background: white; border-radius: 20px; padding: 15px; flex: 1;
+    background: white; border-radius: 15px; padding: 10px; flex: 1;
     display: flex; flex-direction: column; align-items: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 2px solid #E1E8ED;
-    min-width: 0; /* Voorkomt overflow in flexbox */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #E2E8F0;
+    min-width: 0;
 }
 
-.setup-group h3 { font-family: 'Fredoka One', cursive; font-size: 1rem; color: #00BCD4; margin-bottom: 12px; }
+.setup-group h3 { font-family: 'Fredoka One', cursive; font-size: 0.9rem; color: #00BCD4; margin: 5px 0; }
 
-/* THEMA GRID: COMPACTER */
+/* THEMA GRID (Compacter: 3 kolommen op desktop, 2 op mobiel) */
 .theme-grid {
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; width: 100%;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; width: 100%;
     overflow-y: auto; padding-right: 5px;
 }
 
 .theme-card-btn {
-    background: white; border: 2px solid #EDF2F7; border-radius: 12px;
+    background: white; border: 2px solid #F1F5F9; border-radius: 10px;
     cursor: pointer; padding: 0; overflow: hidden; transition: 0.2s;
 }
 
-.theme-card-btn.selected { border-color: #4CAF50; background: #E8F5E9; box-shadow: 0 0 8px rgba(76,175,80,0.3); }
+.theme-card-btn.selected { border-color: #4CAF50; background: #F0FDF4; }
 
-.theme-img-container { width: 100%; aspect-ratio: 16/9; position: relative; background: #f7fafc; }
+.theme-img-container { width: 100%; aspect-ratio: 1/1; position: relative; background: #F8FAFC; }
 .theme-img-container img { width: 100%; height: 100%; object-fit: cover; }
-.theme-card-btn .btn-label { font-size: 0.8rem; font-weight: bold; padding: 4px; display: block; text-align: center; }
+.theme-card-btn .btn-label { font-size: 0.7rem; font-weight: bold; padding: 2px; display: block; text-align: center; }
 
-/* OPTIE KNOPPEN (Niveau & Speler) */
-.option-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; width: 100%; }
+/* KNOPPEN (Niveau & Speler) */
+.option-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; width: 100%; }
 
 .option-btn {
-    background: #EDF2F7; border: none; padding: 10px; border-radius: 12px;
-    font-family: 'Fredoka One', cursive; cursor: pointer; transition: 0.2s; font-size: 0.9rem;
+    background: #F1F5F9; border: none; padding: 8px; border-radius: 10px;
+    font-family: 'Fredoka One', cursive; cursor: pointer; transition: 0.1s; font-size: 0.8rem;
 }
 
 .option-btn.selected { background: #4CAF50 !important; color: white !important; }
-.option-btn.selected-pending { background: #CBD5E0; border: 2px dashed #4A5568; }
+.option-btn.selected-pending { background: #E2E8F0; border: 2px dashed #64748B; }
 
-/* KLEURKEUZE */
-.color-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 10px; }
-.color-dot { width: 35px; height: 35px; border-radius: 50%; cursor: pointer; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+/* KLEUREN */
+.color-row { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin: 5px 0; }
+.color-dot { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
 .active-player-tag { 
-    padding: 5px 12px; border-radius: 15px; color: white; font-weight: bold; 
-    font-size: 0.8rem; margin: 2px; cursor: pointer;
+    padding: 3px 8px; border-radius: 10px; color: white; font-weight: bold; 
+    font-size: 0.7rem; margin: 2px; cursor: pointer;
 }
 
 /* START KNOP */
 .start-btn {
-    background: #4CAF50; color: white; border: none; padding: 15px;
-    border-radius: 15px; font-family: 'Fredoka One', cursive; font-size: 1.2rem;
+    background: #4CAF50; color: white; border: none; padding: 12px;
+    border-radius: 12px; font-family: 'Fredoka One', cursive; font-size: 1.1rem;
     box-shadow: 0 4px 0 #2E7D32; cursor: pointer;
 }
-.start-btn:disabled { background: #CBD5E0; box-shadow: none; cursor: not-allowed; }
+.start-btn:disabled { background: #E2E8F0; box-shadow: none; cursor: not-allowed; color: #94A3B8; }
 
-@media (max-width: 768px) { .setup-columns { flex-direction: column; overflow-y: auto; } }
+/* MOBIEL */
+@media (max-width: 768px) { 
+    .setup-columns { flex-direction: column; overflow-y: auto; } 
+    .theme-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* GRID & KAARTEN */
+.memory-grid { display: grid; gap: 5px; margin: 0 auto; justify-content: center; }
+.memory-card { perspective: 1000px; }
+.memory-card-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.4s; }
+.memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
+.card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 8px; border: 2px solid #ddd; }
+.card-back { transform: rotateY(180deg); background: white; }
+.card-img, .card-cover-img { width: 100%; height: 100%; object-fit: cover; }
