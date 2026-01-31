@@ -1,78 +1,94 @@
-/* --- PUZZELEN --- */
+/* PUZZEL STIJLEN */
 .puzzle-game-container {
     display: flex; flex-direction: column; align-items: center; 
-    height: 100%; width: 100%; overflow: hidden;
+    height: 100%; width: 100%; overflow: hidden; position: relative;
 }
 
-/* Het Bord (waar je puzzelt) */
+.puzzle-header {
+    width: 100%; display: flex; justify-content: space-between; align-items: center;
+    padding: 5px 10px; z-index: 10;
+}
+
+/* De Voorbeeld Foto (voor medium/hard) */
+.preview-mini {
+    background: white; padding: 5px; border-radius: 10px; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); text-align: center;
+    width: 80px;
+}
+.preview-mini img { width: 100%; height: auto; border-radius: 5px; }
+.preview-mini span { font-size: 0.7rem; color: #555; display: block; }
+
+/* Tip Knop */
+.tip-btn {
+    background: #FFEB3B; border: 2px solid #FBC02D; border-radius: 20px;
+    padding: 5px 15px; font-weight: bold; color: #333; cursor: pointer;
+    box-shadow: 0 2px 0 #FBC02D; font-family: 'Fredoka One';
+}
+.tip-btn:active { transform: translateY(2px); box-shadow: none; }
+.tip-btn:disabled { background: #EEE; color: #AAA; border-color: #DDD; box-shadow: none; }
+
+/* Het Puzzelbord */
 .puzzle-board {
     display: grid;
     width: 90%; max-width: 400px;
-    aspect-ratio: 2/3; /* Standaard portret foto */
+    /* Aspect ratio aanpassen aan foto formaat (4:3 of 3:4 vaak, hier even dynamisch) */
+    aspect-ratio: 2/3; 
     border: 4px solid #0277BD;
     background-color: #FFF;
     margin-bottom: 10px;
     position: relative;
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    /* Zorg dat achtergrond hier ook past */
+    background-size: 100% 100%; 
+    background-repeat: no-repeat;
 }
 
-/* Niveaus Grid instellingen */
-.puzzle-board.col-2 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; }
-.puzzle-board.col-4 { grid-template-columns: 1fr 1fr 1fr 1fr; grid-template-rows: repeat(8, 1fr); }
+/* Grid instellingen */
+.col-2 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; } /* Easy */
+.col-4 { grid-template-columns: 1fr 1fr 1fr 1fr; grid-template-rows: repeat(5, 1fr); } /* Medium */
+/* Hard heeft 8 rijen, wordt in JS geregeld met grid-template-rows indien nodig, of auto */
+.puzzle-board.col-4 { grid-template-rows: repeat(auto-fill, minmax(10px, 1fr)); } 
 
 /* Ghost Image (Alleen bij Easy) */
-.puzzle-board.show-ghost {
-    background-size: cover;
-    background-position: center;
-}
 .puzzle-board.show-ghost::before {
     content: ''; position: absolute; top:0; left:0; width:100%; height:100%;
     background: rgba(255,255,255, 0.7); /* Maakt het plaatje wit/doorzichtig */
     pointer-events: none;
 }
 
-/* De Slots (waar stukjes in moeten) */
-.puzzle-slot {
-    border: 1px dashed rgba(0,0,0,0.1);
-    position: relative; z-index: 2; /* Boven de ghost image */
-}
+/* Slots en Stukjes */
+.puzzle-slot { border: 1px dashed rgba(0,0,0,0.1); position: relative; z-index: 2; }
 
-/* De Stukjes zelf */
 .puzzle-piece {
     width: 100%; height: 100%;
-    background-size: 200% 300%; /* Voor Easy (2x3) */
+    /* BELANGRIJK: Zorg dat de stukjes de hele achtergrond beslaan */
+    background-size: 200% 300%; /* Easy */
     cursor: pointer;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     border-radius: 2px;
     transition: transform 0.2s;
 }
 
-/* Hard mode background size aanpassing via JS of specifieke class */
-.col-4 .puzzle-piece { background-size: 400% 800%; }
+/* Aanpassingen voor Medium/Hard background size */
+.puzzle-board.col-4 .puzzle-piece { background-size: 400% 500%; } /* Medium */
+/* Als rows=8 (Hard), moet JS dit overschrijven of we maken een aparte class .rows-8 */
 
-/* Stukjes in de wachtrij */
+/* Pool */
 .puzzle-pool {
     flex: 1; width: 100%; background: #E1F5FE;
     padding: 10px; overflow-y: auto;
     display: flex; flex-wrap: wrap; gap: 5px; justify-content: center;
     border-top: 4px solid #B3E5FC;
 }
-.puzzle-pool .puzzle-piece {
-    width: 60px; height: 60px; /* Kleinere weergave in de pool */
-    border: 2px solid white;
-}
+.puzzle-pool .puzzle-piece { width: 60px; height: 60px; border: 2px solid white; }
 
 /* Interactie */
-.puzzle-piece.selected {
-    border: 3px solid #FFD700;
-    transform: scale(1.1);
-    z-index: 10;
-}
-.puzzle-piece.correct {
-    border: none; pointer-events: none;
-    animation: popIn 0.3s;
-}
-.puzzle-piece.wrong {
-    border: 3px solid red;
-    animation: shake 0.5s;
-}
+.puzzle-piece.selected { border: 3px solid #FFD700; transform: scale(1.1); z-index: 10; }
+.puzzle-piece.correct { border: none; pointer-events: none; animation: popIn 0.3s; }
+.puzzle-piece.wrong { border: 3px solid red; animation: shake 0.5s; }
+
+/* --- BESTAANDE STIJLEN (VANG ZE, STICKERS, ETC) --- */
+/* Zorg dat je de rest van newgames.css hieronder laat staan of kopieert uit vorige berichten */
+/* ... (Stickerstyles, Whackstyles, etc) ... */
+.whack-character { position: absolute; bottom: -100%; left: 0; width: 100%; height: 100%; transition: bottom 0.1s; background-size: contain; background-repeat: no-repeat; background-position: bottom center; pointer-events: none; display: flex; justify-content: center; align-items: center; font-size: 4rem; }
+.whack-hole { overflow: hidden; }
