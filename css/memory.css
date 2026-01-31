@@ -1,6 +1,6 @@
-/* MEMORY.CSS - FULL FRAME FILL */
+/* MEMORY.CSS - SMART FIT STYLING */
 
-/* --- SETUP STYLING --- */
+/* --- SETUP (Standaard) --- */
 .memory-setup { display: flex; flex-direction: column; width: 100%; height: 100%; padding: 15px; background: #F4F7F6; box-sizing: border-box; overflow: hidden; }
 .setup-columns { display: flex; flex-direction: row; gap: 20px; flex: 1; min-height: 0; margin-bottom: 15px; }
 .setup-group { background: white; border-radius: 20px; padding: 15px; flex: 1; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 2px solid #E0F2F1; overflow-y: auto; }
@@ -26,40 +26,37 @@
 .memory-game-container {
     display: flex; flex-direction: column; align-items: center; 
     width: 100%; height: 100%;
-    /* Zorg dat de grid centraal staat */
     justify-content: center;
+    padding: 5px;
 }
 
 .score-board {
     display: flex; gap: 10px; padding: 5px 15px; margin-bottom: 5px;
     background: rgba(255,255,255,0.8); border-radius: 30px;
-    flex-shrink: 0; /* Nooit pletten */
+    flex-shrink: 0;
     justify-content: center;
-    max-height: 50px; /* Beperk hoogte */
+    min-height: 40px;
 }
-
-.player-badge {
-    padding: 4px 12px; border-radius: 20px; border: 2px solid; background: white;
-    font-weight: bold; font-size: 0.9rem;
-}
+.player-badge { padding: 4px 12px; border-radius: 20px; border: 2px solid; background: white; font-weight: bold; font-size: 0.9rem; }
 .player-badge.active { transform: scale(1.1); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 
+/* HIER ZIT DE MAGIE */
 .memory-grid {
     display: grid; 
-    /* Gap wordt geregeld door JS, maar hier fallback */
-    gap: 6px; 
-    /* Centraal uitlijnen */
+    /* Gebruik de variabelen die JS berekent */
+    grid-template-columns: repeat(var(--grid-cols, 6), var(--card-size));
+    gap: 8px; 
     justify-content: center; align-content: center;
-    /* Flexibel */
     flex: 1;
-    width: 100%;
-    height: 100%;
 }
 
 .memory-card { 
     position: relative; cursor: pointer; user-select: none;
-    /* Belangrijk: De JS zet de width/height in pixels. 
-       Hier zorgen we dat de kaart zichzelf netjes gedraagt. */
+    /* Dwing de kaart om de grootte van de variabele aan te nemen */
+    width: var(--card-size);
+    height: var(--card-size);
+    /* Extra veiligheid: nooit groter dan het scherm toelaat */
+    max-width: 100%;
     box-sizing: border-box;
 }
 
@@ -70,32 +67,26 @@
 }
 .memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
 
-/* FOTO & KADER LOGICA */
+/* DE FOTO FIX */
 .card-front, .card-back {
     position: absolute; 
-    /* Neem de VOLLEDIGE ruimte van de kader in */
+    /* Dwing 100% breedte en hoogte van de ouder (.memory-card) */
     width: 100%; height: 100%; 
     backface-visibility: hidden;
     border-radius: 8px; border: 2px solid white; overflow: hidden;
-    /* Zorg dat padding of borders de maat niet verstoren */
-    box-sizing: border-box;
+    background: white;
 }
 
 .card-front { background: linear-gradient(135deg, #4FC3F7, #0288D1); z-index: 2; }
-.card-back { transform: rotateY(180deg); background: white; }
+.card-back { transform: rotateY(180deg); }
 
-/* DE AFBEELDING */
-.card-img, .card-cover-img { 
-    /* Dwing de foto om 100% van de kader te zijn */
-    width: 100%; 
-    height: 100%; 
-    /* Zorg dat de foto niet uitrekt, maar de kader vult (bijsnijden indien nodig) */
-    object-fit: cover; 
+/* Dwing afbeeldingen om 100% te vullen en niet 'supergroot' te worden */
+.card-front img, .card-back img { 
+    width: 100% !important; 
+    height: 100% !important; 
+    object-fit: cover !important; /* Of 'contain' als je de hele afbeelding wilt zien zonder bijsnijden */
     display: block; 
 }
-
-.memory-card.matched .memory-card-inner { animation: popMatch 0.3s; }
-@keyframes popMatch { 50% { transform: scale(1.1); } }
 
 @media (max-width: 700px) {
     .setup-columns { flex-direction: column; }
