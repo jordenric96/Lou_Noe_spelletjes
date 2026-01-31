@@ -1,342 +1,409 @@
-/* --- NIEUWE SPELLEN CSS (Vang ze, Simon, Tekenen, Puzzel & Stickers) --- */
+// NEWGAMES.JS - UPDATE: GESLOTEN MAPPEN & MOOIERE SETUP
 
-/* --- ALGEMENE SETUP STIJLEN (Gedeeld door NewGames) --- */
-.ng-setup {
-    text-align: center; width: 100%; height: 100%;
-    display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-    gap: 15px; padding: 10px; overflow-y: auto;
-}
-.ng-setup h3 { font-family: 'Fredoka One', cursive; color: #0277BD; font-size: 1.5rem; margin: 0 0 10px 0; }
+console.log("Newgames.js Pro Puzzle Loaded");
 
-.ng-group { 
-    background: white; padding: 15px; border-radius: 15px; 
-    border: 2px solid #E0F7FA; width: 95%; max-width: 500px; 
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
-.ng-options { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+// Configuratie (Gelijkgetrokken met Memory.js)
+const assetConfig = {
+    'mario':     { count: 15, ext: 'png', locked: false },
+    'pokemon':   { count: 15, ext: 'png', locked: false },
+    'studio100': { count: 15, ext: 'png', locked: false },
+    'boerderij': { count: 15, ext: 'png', locked: false },
+    // Deze zijn gesloten (locked: true), dus worden genegeerd bij puzzels:
+    'dino':      { count: 15, ext: 'jpg', locked: true },
+    'marvel':    { count: 15, ext: 'jpg', locked: true },
+    'natuur':    { count: 15, ext: 'jpg', locked: true },
+    'beroepen':  { count: 15, ext: 'jpg', locked: true }
+};
 
-.ng-btn {
-    padding: 10px 20px; border: 2px solid #DDD; background: white; border-radius: 20px;
-    font-family: 'Fredoka One'; cursor: pointer; transition: all 0.2s;
-}
-.ng-btn.selected { background: #4CAF50; color: white; border-color: #388E3C; transform: scale(1.05); }
+// Kleuren voor spelers
+const ngColors = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#4CAF50', '#FFEB3B', '#FF9800'];
 
-/* --- SPELER SELECTIE TAGS (Voor Puzzel) --- */
-.active-players-box {
-    display: flex; gap: 5px; flex-wrap: wrap; justify-content: center;
-    margin-top: 10px; width: 100%; min-height: 30px;
-}
-.active-player-tag {
-    color: white; padding: 6px 12px; border-radius: 15px;
-    font-family: 'Fredoka One', cursive; font-size: 0.9rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2); animation: popIn 0.3s;
-    display: flex; align-items: center;
-}
+// --- 1. PUZZELEN ---
+let pState = { 
+    img: '', 
+    pieces: [], 
+    rows: 3, cols: 2, 
+    selectedPiece: null, 
+    correctCount: 0, 
+    difficulty: 'easy',
+    playerNames: [],
+    hintUsed: false
+};
 
-/* --- STICKERBOEK --- */
-.sticker-header { 
-    font-family: 'Fredoka One', cursive; text-align: center; color: #0097A7; 
-    margin-bottom: 10px; font-size: 1.5rem; 
-}
-.sticker-container { 
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); 
-    gap: 15px; width: 100%; padding: 10px; overflow-y: auto; max-height: 80vh; 
-}
-.sticker-slot { 
-    aspect-ratio: 1/1; background: rgba(255,255,255,0.5); border-radius: 15px; 
-    border: 2px dashed #CCC; display: flex; justify-content: center; align-items: center; position: relative; 
-}
-.sticker-slot.unlocked { 
-    background: white; border: 3px solid #FFD700; 
-    box-shadow: 0 5px 15px rgba(255,215,0, 0.3); animation: popIn 0.5s; 
-    cursor: pointer;
-}
-.sticker-img { 
-    width: 90%; height: 90%; object-fit: contain; 
-    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); 
-}
-.sticker-lock-icon { font-size: 2rem; opacity: 0.3; }
-.sticker-slot.locked { background: #EEE; }
-.empty-msg { 
-    grid-column: 1 / -1; text-align: center; color: #777; 
-    margin-top: 50px; font-style: italic; font-family: 'Nunito', sans-serif;
-}
-
-/* BELONING IN POPUP */
-.sticker-reward-anim { 
-    text-align: center; margin-bottom: 15px; 
-    animation: bounceIn 0.8s cubic-bezier(0.215, 0.610, 0.355, 1.000); 
-}
-.reward-text { 
-    background: #FFD700; color: #333; padding: 8px 20px; border-radius: 20px; 
-    font-weight: bold; margin-bottom: 15px; display: inline-block; 
-    box-shadow: 0 3px 0 #FBC02D; font-family: 'Fredoka One', cursive; 
-}
-.reward-img { 
-    width: 120px; height: 120px; object-fit: contain; 
-    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2)); animation: spinSlow 3s infinite linear; 
-}
-
-/* --- VANG ZE (WHACK A MOLE) --- */
-.whack-container { 
-    display: flex; flex-direction: column; align-items: center; height: 100%; width: 100%; 
-}
-.whack-score-board { 
-    display: flex; justify-content: space-between; width: 95%; max-width: 500px; 
-    background: white; padding: 10px 20px; border-radius: 15px; margin-bottom: 15px; 
-    font-family: 'Fredoka One', cursive; box-shadow: 0 4px 0 #EEE; font-size: 1.2rem;
-}
-
-.whack-grid { 
-    display: grid; gap: 15px; width: 95%; max-width: 500px; aspect-ratio: 1/1; margin: 0 auto; 
-}
-.grid-2 { grid-template-columns: repeat(2, 1fr); }
-.grid-3 { grid-template-columns: repeat(3, 1fr); }
-.grid-4 { grid-template-columns: repeat(4, 1fr); }
-
-.whack-hole { 
-    background: #8D6E63; border-radius: 50%; border: 5px solid #5D4037; 
-    position: relative; overflow: hidden; 
-    box-shadow: inset 0 10px 10px rgba(0,0,0,0.3); 
-    cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
-}
-
-/* KARAKTER (OF BOM/DROL) */
-.whack-character { 
-    position: absolute; bottom: -100%; left: 0; width: 100%; height: 100%; 
-    transition: bottom 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-    background-size: contain; background-repeat: no-repeat; background-position: bottom center; 
-    pointer-events: none; 
-    /* Voor emojis */
-    display: flex; justify-content: center; align-items: center;
-    font-size: 4.5rem; 
-}
-
-.whack-hole.up .whack-character { bottom: 0; }
-.whack-hole.whacked .whack-character { 
-    filter: brightness(1.5) sepia(1); transform: scale(0.9); 
-}
-
-/* --- SIMON SAYS --- */
-.simon-container { 
-    display: flex; flex-direction: column; align-items: center; 
-    justify-content: center; height: 100%; gap: 20px; 
-}
-.simon-board { 
-    display: grid; grid-template-columns: 1fr 1fr; gap: 20px; 
-    width: 90%; max-width: 350px; aspect-ratio: 1/1; padding: 10px; 
-}
-.simon-btn { 
-    border-radius: 50%; border: 5px solid white; cursor: pointer; opacity: 0.8; 
-    transition: all 0.1s; 
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2); background-color: #EEE; 
-    background-size: cover; background-position: center;
-}
-.simon-btn:active, .simon-btn.lit { 
-    opacity: 1; transform: scale(1.05); 
-    box-shadow: 0 0 30px rgba(255,255,255, 0.8), 0 10px 20px rgba(0,0,0,0.3); 
-    border-color: #FFEB3B; z-index: 10; 
-}
-.simon-info { 
-    background: white; padding: 15px 30px; border-radius: 20px; text-align: center; 
-    box-shadow: 0 4px 0 #B3E5FC; border: 2px solid #E1F5FE; width: 80%; max-width: 300px;
-}
-.simon-score { font-size: 1.5rem; font-family: 'Fredoka One', cursive; color: #0277BD; }
-.simon-message { margin-top: 5px; font-weight: bold; color: #F57C00; height: 1.2em; font-size: 1.2rem; }
-
-/* --- TEKENBORD --- */
-.drawing-container { 
-    display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; 
-    position: relative; 
-}
-
-canvas { 
-    background: white; border-radius: 15px; 
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
-    touch-action: none; cursor: crosshair; 
-    margin: 10px 0;
-}
-
-.drawing-controls { 
-    display: flex; gap: 8px; align-items: center; 
-    background: rgba(255,255,255,0.95); padding: 10px 20px; border-radius: 50px; 
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1); flex-wrap: wrap; justify-content: center;
-}
-
-/* Kleuren */
-.color-swatch { 
-    width: 35px; height: 35px; border-radius: 50%; border: 3px solid white; 
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer; transition: transform 0.2s;
-}
-.color-swatch.active { transform: scale(1.2); border-color: #333; z-index: 2; }
-
-.control-divider { width: 2px; height: 30px; background: #DDD; margin: 0 5px; }
-
-/* Dikte knoppen */
-.size-btn {
-    width: 40px; height: 40px; background: #F0F0F0; border-radius: 50%;
-    display: flex; justify-content: center; align-items: center;
-    cursor: pointer; border: 2px solid transparent; transition: all 0.2s;
-}
-.size-btn.active { border-color: #333; background: #E0E0E0; transform: scale(1.1); }
-
-.dot { background: #333; border-radius: 50%; }
-.dot-s { width: 6px; height: 6px; }
-.dot-m { width: 12px; height: 12px; }
-.dot-l { width: 20px; height: 20px; }
-
-/* Gum & Opslaan */
-.tool-btn { 
-    background: #FFEB3B; border: none; padding: 10px; border-radius: 50%; 
-    cursor: pointer; font-size: 1.4rem; box-shadow: 0 3px 0 #FBC02D; margin-left: 5px;
-}
-.tool-btn:active { transform: translateY(3px); box-shadow: none; }
-
-/* ALBUM */
-.album-grid { 
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); 
-    gap: 10px; width: 100%; padding: 10px; max-height: 60vh; overflow-y: auto;
-}
-.album-item { 
-    background: white; padding: 5px; border: 1px solid #CCC; 
-    border-radius: 5px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-.album-item img { width: 100%; height: auto; display: block; }
-/* --- PUZZELEN (GROTE UPDATE) --- */
-
-.puzzle-game-container {
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    justify-content: space-between; /* Verdeel ruimte netjes */
-    height: 100%; 
-    width: 100%; 
-    overflow: hidden; 
-    position: relative;
-    padding-bottom: 5px;
-}
-
-.puzzle-header {
-    width: 100%; 
-    max-width: 800px; /* Header mag ook breed */
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center;
-    padding: 10px 20px; 
-    z-index: 5;
-    flex-shrink: 0; /* Header mag niet krimpen */
-    height: 60px;
-}
-
-/* Voorbeeld Foto */
-.preview-mini {
-    background: white; padding: 4px; border-radius: 8px; 
-    box-shadow: 0 3px 6px rgba(0,0,0,0.2); text-align: center;
-    width: 100px; /* Iets groter */
-    transform: rotate(-3deg);
-    position: absolute; left: 10px; top: 10px; z-index: 20;
-}
-.preview-mini img { width: 100%; height: auto; border-radius: 4px; display: block; }
-
-/* Tip Knop */
-.tip-btn {
-    background: #FFEB3B; border: 3px solid #FBC02D; border-radius: 20px;
-    padding: 8px 20px; font-weight: bold; color: #5D4037; cursor: pointer;
-    box-shadow: 0 4px 0 #F9A825; font-family: 'Fredoka One'; font-size: 1.1rem;
-    margin-left: auto; /* Duw naar rechts */
-}
-.tip-btn:active { transform: translateY(3px); box-shadow: none; }
-.tip-btn:disabled { background: #EEE; color: #AAA; border-color: #DDD; box-shadow: none; cursor: default; }
-
-/* HET BORD (NU GROOT!) */
-.puzzle-board {
-    display: grid;
-    /* BELANGRIJK: Gebruik beschikbare ruimte */
-    width: 95%; 
-    max-width: 800px; /* Veel breder limiet */
-    flex-grow: 1;     /* Groei om verticale ruimte te vullen */
+function startPuzzleGame() {
+    const board = document.getElementById('game-board');
     
-    /* Zorg dat de verhouding klopt met de foto (Portrait 2:3) */
-    /* Wil je dat hij altijd past zonder scrollen? Gebruik dan dit: */
-    aspect-ratio: 2/3; 
-    max-height: 70vh; /* Zorg dat hij niet over de pool heen gaat */
+    // Genereer puzzel-opties (ALLEEN DE OPEN MAPPEN)
+    let puzzleOptions = '';
+    const themes = Object.keys(assetConfig);
+    const unlockedThemes = themes.filter(t => !assetConfig[t].locked); // Filter de gesloten mappen eruit
 
-    border: 6px solid #0277BD;
-    background-color: #FFF;
-    margin: 10px auto;
-    position: relative;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    background-size: 100% 100%; 
-    background-repeat: no-repeat;
-    border-radius: 8px;
+    // We tonen 8 opties om uit te kiezen
+    for(let i=0; i<8; i++) {
+        // Kies willekeurig thema uit de OPEN mappen
+        const t = unlockedThemes[Math.floor(Math.random() * unlockedThemes.length)];
+        const nr = Math.floor(Math.random() * assetConfig[t].count) + 1;
+        const ext = assetConfig[t].ext;
+        const src = `assets/images/memory/${t}/${nr}.${ext}`;
+        
+        puzzleOptions += `
+            <button class="theme-card-btn" onclick="setPuzzleImg('${src}', this)" style="min-width:70px; height:70px; padding:0;">
+                <img src="${src}" style="width:100%; height:100%; object-fit:contain;">
+            </button>
+        `;
+    }
+
+    board.innerHTML = `
+        <div class="memory-setup">
+            <div class="setup-columns">
+                
+                <div class="setup-group group-players">
+                    <h3>Wie Puzzelt? 🧩</h3>
+                    <div class="option-grid">
+                        <button class="option-btn player-btn" onclick="addPuzzlePlayer('Lou', '👦🏼', this)"><span>👦🏼</span><span class="btn-label">Lou</span></button>
+                        <button class="option-btn player-btn" onclick="addPuzzlePlayer('Noé', '👶🏼', this)"><span>👶🏼</span><span class="btn-label">Noé</span></button>
+                        <button class="option-btn player-btn" onclick="addPuzzlePlayer('Mama', '👩🏻', this)"><span>👩🏻</span><span class="btn-label">Mama</span></button>
+                        <button class="option-btn player-btn" onclick="addPuzzlePlayer('Papa', '👨🏻', this)"><span>👨🏻</span><span class="btn-label">Papa</span></button>
+                    </div>
+                    
+                    <div class="divider-line"></div>
+                    <div class="color-row" id="puz-color-row">
+                        ${ngColors.map(c => `<div class="color-dot" style="background:${c}" onclick="setPuzzleColor('${c}', this)"></div>`).join('')}
+                    </div>
+
+                    <div id="puz-active-players" class="active-players-box"></div>
+                </div>
+
+                <div class="setup-group group-theme">
+                    <h3>Kies een Plaatje</h3>
+                    <div class="theme-grid" style="grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); max-height:200px; overflow-y:auto;">
+                        ${puzzleOptions}
+                    </div>
+                </div>
+
+                <div class="setup-group group-size">
+                    <h3>Niveau</h3>
+                    <div class="option-grid">
+                        <button class="option-btn selected" onclick="setPuzzleDiff('easy', this)"><span>🟢</span><span class="btn-label">6</span></button>
+                        <button class="option-btn" onclick="setPuzzleDiff('medium', this)"><span>🟠</span><span class="btn-label">20</span></button>
+                        <button class="option-btn" onclick="setPuzzleDiff('hard', this)"><span>🔴</span><span class="btn-label">32</span></button>
+                    </div>
+                </div>
+            </div>
+            <button id="start-puzzle-btn" class="start-btn" onclick="initPuzzle()" disabled>Kies een speler & plaatje...</button>
+        </div>
+    `;
+    
+    pState.playerNames = [];
+    pState.img = '';
+    pState.difficulty = 'easy';
+    pState.rows = 3; pState.cols = 2;
 }
 
-/* Ghost Image (Alleen bij Easy) */
-.puzzle-board.show-ghost::before {
-    content: ''; position: absolute; top:0; left:0; width:100%; height:100%;
-    background: rgba(255,255,255, 0.75); 
-    pointer-events: none;
+// SETUP HULPFUNCTIES
+function addPuzzlePlayer(name, icon, btn) {
+    if(typeof playSound === 'function') playSound('click');
+    
+    // Visuele feedback op knop
+    document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending'));
+    btn.classList.add('selected-pending');
+
+    // We slaan de naam even tijdelijk op tot er een kleur gekozen is (net als bij Memory)
+    pState.pendingName = name;
+    pState.pendingIcon = icon;
 }
 
-/* Grid instellingen */
-.col-2 { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); } /* 2 breed, 3 hoog */
-.col-4 { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(auto-fill, minmax(10px, 1fr)); } 
+function setPuzzleColor(color, btn) {
+    if(!pState.pendingName) {
+        alert("Klik eerst op een naam!");
+        return;
+    }
+    if(typeof playSound === 'function') playSound('pop');
 
-/* Slots */
-.puzzle-slot { 
-    border: 1px dashed rgba(0,0,0,0.2); 
-    position: relative; z-index: 2; 
+    // Voeg speler toe
+    // Verwijder eerst als hij al bestaat (update kleur)
+    pState.playerNames = pState.playerNames.filter(p => p.name !== pState.pendingName);
+    pState.playerNames.push({ name: pState.pendingName, icon: pState.pendingIcon, color: color });
+    
+    // Reset selectie
+    pState.pendingName = null;
+    document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending'));
+
+    // Update lijstje
+    renderPuzzleActivePlayers();
+    checkPuzzleStart();
 }
 
-/* Stukjes op het bord */
-.puzzle-piece {
-    width: 100%; height: 100%;
-    background-size: 200% 300%; /* Default Easy */
-    cursor: pointer;
-    box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
-    border-radius: 2px;
+function renderPuzzleActivePlayers() {
+    document.getElementById('puz-active-players').innerHTML = pState.playerNames.map(p => 
+        `<div class="active-player-tag" style="background:${p.color}"><span>${p.icon} ${p.name}</span></div>`
+    ).join('');
 }
 
-/* Correctie voor Medium/Hard */
-.puzzle-board.col-4 .puzzle-piece { background-size: 400% 500%; } /* Medium */
-
-/* DE POOL (ONDERIN) - GROTER GEMAAKT */
-.puzzle-pool {
-    width: 100%; 
-    height: 140px; /* Vaste hoogte, genoeg voor grote stukken */
-    background: #E1F5FE;
-    padding: 10px; 
-    overflow-x: auto; /* Scrollen horizontaal als het niet past */
-    overflow-y: hidden;
-    display: flex; 
-    flex-wrap: nowrap; /* Naast elkaar */
-    gap: 10px; 
-    align-items: center;
-    border-top: 6px solid #81D4FA;
-    box-shadow: inset 0 5px 10px rgba(0,0,0,0.05);
-    flex-shrink: 0; /* Mag niet krimpen */
+function setPuzzleImg(src, btn) {
+    if(typeof playSound === 'function') playSound('click');
+    pState.img = src;
+    document.querySelectorAll('.theme-card-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    checkPuzzleStart();
 }
 
-/* Stukjes in de pool (GROTER!) */
-.puzzle-pool .puzzle-piece { 
-    width: 90px;  /* Veel groter dan 60px */
-    height: 90px; 
-    border: 2px solid white; 
-    flex-shrink: 0; /* Zorg dat ze niet geplet worden */
-    transform: rotate(var(--r, 0deg));
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+function setPuzzleDiff(diff, btn) {
+    if(typeof playSound === 'function') playSound('click');
+    pState.difficulty = diff;
+    
+    if(diff === 'easy') { pState.cols = 2; pState.rows = 3; } // 6
+    else if(diff === 'medium') { pState.cols = 4; pState.rows = 5; } // 20
+    else { pState.cols = 4; pState.rows = 8; } // 32
+    
+    document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
 }
 
-/* Interactie */
-.puzzle-piece.selected { 
-    border: 4px solid #FFD700; transform: scale(1.1); z-index: 100; 
-    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+function checkPuzzleStart() {
+    const btn = document.getElementById('start-puzzle-btn');
+    if (pState.playerNames.length > 0 && pState.img !== '') {
+        btn.disabled = false;
+        btn.innerText = "START PUZZEL ▶";
+    }
 }
-.puzzle-piece.correct { border: none; pointer-events: none; animation: popIn 0.3s; box-shadow: none; z-index: 1; }
-.puzzle-piece.wrong { border: 4px solid #F44336; animation: shake 0.4s; }
 
-/* Mobiele aanpassing: als het scherm te klein is, maak pool iets kleiner */
-@media (max-height: 700px) {
-    .puzzle-pool { height: 100px; }
-    .puzzle-pool .puzzle-piece { width: 70px; height: 70px; }
+// GAME START
+function initPuzzle() {
+    if(typeof playSound === 'function') playSound('win');
+    const board = document.getElementById('game-board');
+    pState.correctCount = 0;
+    pState.selectedPiece = null;
+    pState.hintUsed = false;
+    
+    const totalPieces = pState.rows * pState.cols;
+    
+    // Maak het rooster (slots)
+    let gridHTML = '';
+    for(let i=0; i<totalPieces; i++) {
+        gridHTML += `<div class="puzzle-slot" id="slot-${i}" data-index="${i}" onclick="placePiece(this)"></div>`;
+    }
+    
+    // Maak de stukjes (pieces)
+    let pieces = [];
+    for(let i=0; i<totalPieces; i++) pieces.push(i);
+    pieces.sort(() => Math.random() - 0.5); // Husselen
+    
+    let poolHTML = '';
+    pieces.forEach(i => {
+        // Bereken positie van background image voor dit stukje
+        const x = (i % pState.cols) * 100 / (pState.cols - 1);
+        const y = Math.floor(i / pState.cols) * 100 / (pState.rows - 1);
+        
+        // Let op: we gebruiken inline style voor de background-image zodat het zeker klopt
+        poolHTML += `
+            <div class="puzzle-piece" id="piece-${i}" data-index="${i}" onclick="selectPiece(this)" 
+                 style="background-image: url('${pState.img}'); background-position: ${x}% ${y}%;">
+            </div>
+        `;
+    });
+
+    // Bepaal weergave (Ghost vs Mini Preview)
+    let extraHTML = '';
+    let boardClass = `col-${pState.cols}`;
+    let boardStyle = '';
+
+    if (pState.difficulty === 'easy') {
+        // Makkelijk: Grote doorzichtige foto op achtergrond
+        boardClass += ' show-ghost';
+        boardStyle = `background-image: url('${pState.img}');`;
+    } else {
+        // Gemiddeld/Moeilijk: Kleine preview foto in de hoek
+        extraHTML = `<div class="preview-mini"><img src="${pState.img}"><span>Voorbeeld</span></div>`;
+    }
+
+    // De HTML van het spelbord
+    board.innerHTML = `
+        <div class="puzzle-game-container">
+            <div class="puzzle-header">
+                ${extraHTML}
+                <button id="tip-btn" class="tip-btn" onclick="giveHint()">💡 TIP (1x)</button>
+            </div>
+
+            <div class="puzzle-board ${boardClass}" style="${boardStyle}">
+                ${gridHTML}
+            </div>
+            
+            <div class="puzzle-pool">
+                ${poolHTML}
+            </div>
+        </div>
+    `;
 }
+
+// SPEL LOGICA
+function selectPiece(el) {
+    if(el.parentElement.classList.contains('puzzle-slot')) return; // Al geplaatst
+    if(typeof playSound === 'function') playSound('click');
+    
+    if(pState.selectedPiece) pState.selectedPiece.classList.remove('selected');
+    pState.selectedPiece = el;
+    el.classList.add('selected');
+}
+
+function placePiece(slot) {
+    if(!pState.selectedPiece) return;
+    if(slot.hasChildNodes()) return; // Slot bezet
+    
+    if(typeof playSound === 'function') playSound('pop');
+    
+    // Verplaatsen
+    slot.appendChild(pState.selectedPiece);
+    pState.selectedPiece.classList.remove('selected');
+    
+    const slotIndex = parseInt(slot.getAttribute('data-index'));
+    const pieceIndex = parseInt(pState.selectedPiece.getAttribute('data-index'));
+    
+    if(slotIndex === pieceIndex) {
+        // GOED
+        pState.selectedPiece.classList.add('correct');
+        pState.selectedPiece.onclick = null;
+        pState.correctCount++;
+        checkPuzzleWin();
+    } else {
+        // FOUT
+        const wrongPiece = pState.selectedPiece;
+        wrongPiece.classList.add('wrong');
+        setTimeout(() => {
+            wrongPiece.classList.remove('wrong');
+            document.querySelector('.puzzle-pool').appendChild(wrongPiece);
+        }, 500);
+    }
+    pState.selectedPiece = null;
+}
+
+function giveHint() {
+    if(pState.hintUsed) return;
+    
+    // Zoek een stukje dat nog in de pool zit (dus niet .correct)
+    const piecesInPool = Array.from(document.querySelectorAll('.puzzle-pool .puzzle-piece'));
+    if(piecesInPool.length === 0) return;
+    
+    // Pak de eerste
+    const piece = piecesInPool[0];
+    const index = piece.getAttribute('data-index');
+    const targetSlot = document.getElementById(`slot-${index}`);
+    
+    if(targetSlot && !targetSlot.hasChildNodes()) {
+        if(typeof playSound === 'function') playSound('win'); 
+        
+        targetSlot.appendChild(piece);
+        piece.classList.add('correct');
+        piece.onclick = null;
+        pState.correctCount++;
+        
+        pState.hintUsed = true;
+        const btn = document.getElementById('tip-btn');
+        btn.disabled = true;
+        btn.innerText = "Tip gebruikt";
+        btn.style.opacity = 0.5;
+        
+        checkPuzzleWin();
+    }
+}
+
+function checkPuzzleWin() {
+    if(pState.correctCount === (pState.rows * pState.cols)) {
+        setTimeout(() => {
+            const winner = pState.playerNames.length > 0 ? pState.playerNames[0].name : "Jij";
+            if(typeof showWinnerModal === 'function') showWinnerModal(winner, [{name:winner, score:"Puzzel Compleet!"}]);
+        }, 500);
+    }
+}
+
+
+// --- 2. STICKERBOEK ---
+function generateAllStickers() {
+    let all = [];
+    for (const [theme, data] of Object.entries(assetConfig)) {
+        for (let i=1; i<=data.count; i++) all.push({id:`${theme}-${i}`, src:`assets/images/memory/${theme}/${i}.${data.ext}`});
+    }
+    return all;
+}
+function getUnlockedStickers() { return JSON.parse(localStorage.getItem('myStickers') || '[]'); }
+function unlockRandomSticker() {
+    const all = generateAllStickers(); 
+    const unlocked = getUnlockedStickers();
+    const locked = all.filter(s => !unlocked.includes(s.id));
+    if (locked.length === 0) return null;
+    if (Math.random() > 0.3) { 
+        const newS = locked[Math.floor(Math.random() * locked.length)];
+        unlocked.push(newS.id);
+        localStorage.setItem('myStickers', JSON.stringify(unlocked));
+        return newS;
+    }
+    return null;
+}
+function openStickerBook() {
+    const board = document.getElementById('game-board');
+    const unlocked = getUnlockedStickers(); const all = generateAllStickers();
+    let html = `<div class="sticker-header">Mijn Verzameling (${unlocked.length}/${all.length})</div><div class="sticker-container">`;
+    if(unlocked.length === 0) html += '<div class="empty-msg">Win spelletjes om stickers te verdienen!</div>';
+    all.forEach(s => {
+        if(unlocked.includes(s.id)) html+=`<div class="sticker-slot unlocked"><img src="${s.src}" class="sticker-img"></div>`;
+        else html+=`<div class="sticker-slot locked"><span class="sticker-lock-icon">🔒</span></div>`;
+    });
+    board.innerHTML = html + '</div>';
+}
+
+// --- 3. VANG ZE! (Met Vallen) ---
+let wState = { score: 0, timer: 30, active: false, speed: 1000, grid: 9, timerInt: null, moleInt: null };
+function startWhackGame() {
+    const board = document.getElementById('game-board');
+    board.innerHTML = `
+        <div class="memory-setup" style="text-align:center;">
+            <div class="setup-group"><h3>Vang ze! 🔨</h3><p>Pas op voor 💣 en 💩!</p>
+                <div class="option-grid"><button class="option-btn" onclick="setWhackDiff('easy',this)">Makkelijk</button><button class="option-btn selected" onclick="setWhackDiff('medium',this)">Normaal</button><button class="option-btn" onclick="setWhackDiff('hard',this)">Snel!</button></div>
+            </div><button class="start-btn" onclick="runWhackGame()">START</button>
+        </div>`; wState.speed = 900; wState.grid = 9;
+}
+function setWhackDiff(diff, btn) {
+    if(typeof playSound==='function')playSound('click'); document.querySelectorAll('.option-btn').forEach(b=>b.classList.remove('selected')); btn.classList.add('selected');
+    if(diff==='easy'){wState.speed=1200;wState.grid=4;}else if(diff==='medium'){wState.speed=900;wState.grid=9;}else{wState.speed=550;wState.grid=12;}
+}
+function runWhackGame() {
+    if(typeof playSound==='function')playSound('win'); const board = document.getElementById('game-board'); wState.score=0;wState.timer=30;wState.active=true;
+    let gc = wState.grid===4?'grid-2':(wState.grid===12?'grid-4':'grid-3'); let h='';
+    for(let i=0;i<wState.grid;i++) h+=`<div class="whack-hole" id="hole-${i}" onmousedown="whack(this)" ontouchstart="whack(this)"><div class="whack-character"></div></div>`;
+    board.innerHTML=`<div class="whack-container"><div class="whack-score-board"><span>Tijd: <span id="w-time">30</span></span><span>Score: <span id="w-score">0</span></span></div><div class="whack-grid ${gc}">${h}</div></div>`;
+    wState.timerInt=setInterval(()=>{if(!wState.active)return;wState.timer--;document.getElementById('w-time').innerText=wState.timer;if(wState.timer<=0)endWhack(false);},1000); popMole();
+}
+function popMole(){
+    if(!wState.active)return; const holes=document.querySelectorAll('.whack-hole'); const hole=holes[Math.floor(Math.random()*holes.length)];
+    const char=hole.querySelector('.whack-character'); hole.classList.remove('trap-bomb','trap-poop'); char.innerHTML=''; char.style.backgroundImage='';
+    if(Math.random()<0.2){ if(Math.random()<0.5){hole.classList.add('trap-bomb');char.innerText='💣';}else{hole.classList.add('trap-poop');char.innerText='💩';} }
+    else { const nr=Math.floor(Math.random()*10)+1; char.style.backgroundImage=`url('assets/images/memory/mario/${nr}.png')`; }
+    hole.classList.add('up'); wState.moleInt=setTimeout(()=>{hole.classList.remove('up');if(wState.active)setTimeout(popMole,Math.random()*500);},wState.speed);
+}
+function whack(h){
+    if(!wState.active||!h.classList.contains('up')||h.classList.contains('whacked'))return;
+    if(h.classList.contains('trap-bomb')||h.classList.contains('trap-poop')){if(typeof playSound==='function')playSound('lose');h.querySelector('.whack-character').innerText='💥';h.style.backgroundColor='red';wState.active=false;setTimeout(()=>endWhack(true),500);return;}
+    if(typeof playSound==='function')playSound('pop');wState.score++;document.getElementById('w-score').innerText=wState.score;h.classList.remove('up');h.classList.add('whacked');setTimeout(()=>h.classList.remove('whacked'),200);
+}
+function endWhack(boom){wState.active=false;clearInterval(wState.timerInt);clearTimeout(wState.moleInt);if(typeof showWinnerModal==='function')showWinnerModal(boom?"BOEM!":"Tijd op!",[{name:"Score",score:wState.score}]);}
+function stopWhackGame(){wState.active=false;clearInterval(wState.timerInt);clearTimeout(wState.moleInt);}
+
+// --- 4. SIMON & TEKENEN ---
+let sSeq=[],pSeq=[],sLvl=0,sAct=false,sThm='mario';
+function startSimonGame(){const b=document.getElementById('game-board'); b.innerHTML=`<div class="memory-setup"><div class="setup-group"><h3>Kies Vriendjes</h3><div class="option-grid"><button class="option-btn selected" onclick="sT('mario',this)">Mario</button><button class="option-btn" onclick="sT('pokemon',this)">Pokemon</button></div></div><button class="start-btn" onclick="iS()">START</button></div>`;}
+function sT(t,b){sThm=t;document.querySelectorAll('.option-btn').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');}
+function iS(){const b=document.getElementById('game-board');let h='';for(let i=0;i<4;i++)h+=`<button class="simon-btn" id="sb-${i}" style="background-image:url('assets/images/memory/${sThm}/${i+1}.png');" onclick="hS(${i})"></button>`;b.innerHTML=`<div class="simon-container"><div class="simon-info">Score: <span id="sc">0</span> <span id="msg">Let op...</span></div><div class="simon-board theme-${sThm}">${h}</div><button class="start-btn" onclick="nS()" style="width:auto;margin-top:20px">Start</button></div>`;sSeq=[];sLvl=0;}
+function nS(){sLvl++;pSeq=[];document.getElementById('sc').innerText=sLvl-1;document.getElementById('msg').innerText="Kijk...";sSeq.push(Math.floor(Math.random()*4));document.querySelector('.simon-container .start-btn').style.display='none';sAct=false;let i=0;const int=setInterval(()=>{aS(sSeq[i]);i++;if(i>=sSeq.length){clearInterval(int);sAct=true;document.getElementById('msg').innerText="Jij!";}},800);}
+function aS(i){const b=document.getElementById(`sb-${i}`);if(b){b.classList.add('lit');if(typeof playSound==='function')playSound('pop');setTimeout(()=>b.classList.remove('lit'),400);}}
+function hS(i){if(!sAct)return;aS(i);pSeq.push(i);if(pSeq[pSeq.length-1]!==sSeq[pSeq.length-1]){if(typeof playSound==='function')playSound('lose');document.getElementById('msg').innerText="Fout!";sAct=false;if(typeof showWinnerModal==='function')showWinnerModal("Simon",[{name:"Score",score:sLvl-1}]);return;}if(pSeq.length===sSeq.length){sAct=false;document.getElementById('msg').innerText="Goed!";setTimeout(nS,1000);}}
+function stopSimonGame(){sAct=false;}
+
+let isD=false,ctx,dC='black',dS=5;
+function startDrawing(){const b=document.getElementById('game-board');b.innerHTML=`<div class="drawing-container"><div class="drawing-controls"><button class="tool-btn" onclick="openAlbum()">📂</button><button class="tool-btn" style="background:#4CAF50;color:white" onclick="sDr()">💾</button><div class="control-divider"></div><div class="color-swatch active" style="background:black" onclick="sC('black',this)"></div><div class="color-swatch" style="background:red" onclick="sC('red',this)"></div><div class="color-swatch" style="background:blue" onclick="sC('blue',this)"></div><div class="control-divider"></div><div class="size-btn active" onclick="sSz(5,this)"><div class="dot dot-s"></div></div><div class="size-btn" onclick="sSz(15,this)"><div class="dot dot-m"></div></div><button class="tool-btn" onclick="cC()">🗑️</button></div><canvas id="drawCanvas"></canvas></div>`;setTimeout(iCn,50);}
+function iCn(){const c=document.getElementById('drawCanvas');const con=document.querySelector('.drawing-container');if(!c)return;c.width=con.clientWidth*0.95;c.height=con.clientHeight*0.8;ctx=c.getContext('2d');ctx.lineCap='round';ctx.lineJoin='round';c.addEventListener('mousedown',sDrw);c.addEventListener('touchstart',sDrw,{passive:false});c.addEventListener('mousemove',drw);c.addEventListener('touchmove',drw,{passive:false});c.addEventListener('mouseup',eDrw);c.addEventListener('touchend',eDrw);}
+function sDrw(e){isD=true;drw(e);}function eDrw(){isD=false;ctx.beginPath();}
+function drw(e){if(!isD)return;e.preventDefault();const c=document.getElementById('drawCanvas');const r=c.getBoundingClientRect();const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;const y=(e.touches?e.touches[0].clientY:e.clientY)-r.top;ctx.lineWidth=dS;ctx.strokeStyle=dC;ctx.lineTo(x,y);ctx.stroke();ctx.beginPath();ctx.moveTo(x,y);}
+function sC(c,b){if(typeof playSound==='function')playSound('click');dC=c;document.querySelectorAll('.color-swatch').forEach(x=>x.classList.remove('active'));b.classList.add('active');}
+function sSz(s,b){if(typeof playSound==='function')playSound('click');dS=s;document.querySelectorAll('.size-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');}
+function cC(){if(typeof playSound==='function')playSound('pop');ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);}
+function sDr(){const i=document.getElementById('drawCanvas').toDataURL("image/png");let a=JSON.parse(localStorage.getItem('myDrawings')||'[]');a.unshift(i);if(a.length>10)a.pop();localStorage.setItem('myDrawings',JSON.stringify(a));if(typeof playSound==='function')playSound('win');alert("Opgeslagen!");}
