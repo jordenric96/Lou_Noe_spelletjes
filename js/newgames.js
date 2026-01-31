@@ -1,19 +1,24 @@
-// NEWGAMES.JS - MET PRO PUZZEL, VANG ZE VALLEN, SIMON & TEKENEN
+// NEWGAMES.JS - UPDATE: GESLOTEN MAPPEN & MOOIERE SETUP
 
 console.log("Newgames.js Pro Puzzle Loaded");
 
-// Configuratie
+// Configuratie (Gelijkgetrokken met Memory.js)
 const assetConfig = {
-    'mario': { count: 15, ext: 'png' }, 'pokemon': { count: 15, ext: 'png' },
-    'studio100': { count: 15, ext: 'png' }, 'boerderij': { count: 15, ext: 'png' },
-    'dino': { count: 15, ext: 'jpg' }, 'marvel': { count: 15, ext: 'jpg' },
-    'natuur': { count: 15, ext: 'jpg' }, 'beroepen': { count: 15, ext: 'jpg' }
+    'mario':     { count: 15, ext: 'png', locked: false },
+    'pokemon':   { count: 15, ext: 'png', locked: false },
+    'studio100': { count: 15, ext: 'png', locked: false },
+    'boerderij': { count: 15, ext: 'png', locked: false },
+    // Deze zijn gesloten (locked: true), dus worden genegeerd bij puzzels:
+    'dino':      { count: 15, ext: 'jpg', locked: true },
+    'marvel':    { count: 15, ext: 'jpg', locked: true },
+    'natuur':    { count: 15, ext: 'jpg', locked: true },
+    'beroepen':  { count: 15, ext: 'jpg', locked: true }
 };
 
 // Kleuren voor spelers
 const ngColors = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#4CAF50', '#FFEB3B', '#FF9800'];
 
-// --- 1. PUZZELEN (COMPLEET VERNIEUWD) ---
+// --- 1. PUZZELEN ---
 let pState = { 
     img: '', 
     pieces: [], 
@@ -28,15 +33,19 @@ let pState = {
 function startPuzzleGame() {
     const board = document.getElementById('game-board');
     
-    // Genereer 10 willekeurige puzzel-opties
+    // Genereer puzzel-opties (ALLEEN DE OPEN MAPPEN)
     let puzzleOptions = '';
     const themes = Object.keys(assetConfig);
-    
-    for(let i=0; i<10; i++) {
-        const t = themes[Math.floor(Math.random() * themes.length)];
+    const unlockedThemes = themes.filter(t => !assetConfig[t].locked); // Filter de gesloten mappen eruit
+
+    // We tonen 8 opties om uit te kiezen
+    for(let i=0; i<8; i++) {
+        // Kies willekeurig thema uit de OPEN mappen
+        const t = unlockedThemes[Math.floor(Math.random() * unlockedThemes.length)];
         const nr = Math.floor(Math.random() * assetConfig[t].count) + 1;
         const ext = assetConfig[t].ext;
         const src = `assets/images/memory/${t}/${nr}.${ext}`;
+        
         puzzleOptions += `
             <button class="theme-card-btn" onclick="setPuzzleImg('${src}', this)" style="min-width:70px; height:70px; padding:0;">
                 <img src="${src}" style="width:100%; height:100%; object-fit:contain;">
@@ -47,25 +56,32 @@ function startPuzzleGame() {
     board.innerHTML = `
         <div class="memory-setup">
             <div class="setup-columns">
-                <div class="setup-group">
+                
+                <div class="setup-group group-players">
                     <h3>Wie Puzzelt? 🧩</h3>
                     <div class="option-grid">
-                        <button class="icon-btn" onclick="addPuzzlePlayer('Lou', '👦🏼')">👦🏼 Lou</button>
-                        <button class="icon-btn" onclick="addPuzzlePlayer('Noé', '👶🏼')">👶🏼 Noé</button>
-                        <button class="icon-btn" onclick="addPuzzlePlayer('Mama', '👩🏻')">👩🏻 Mama</button>
-                        <button class="icon-btn" onclick="addPuzzlePlayer('Papa', '👨🏻')">👨🏻 Papa</button>
+                        <button class="option-btn player-btn" onclick="addPuzzlePlayer('Lou', '👦🏼', this)"><span>👦🏼</span><span class="btn-label">Lou</span></button>
+                        <button class="option-btn player-btn" onclick="addPuzzlePlayer('Noé', '👶🏼', this)"><span>👶🏼</span><span class="btn-label">Noé</span></button>
+                        <button class="option-btn player-btn" onclick="addPuzzlePlayer('Mama', '👩🏻', this)"><span>👩🏻</span><span class="btn-label">Mama</span></button>
+                        <button class="option-btn player-btn" onclick="addPuzzlePlayer('Papa', '👨🏻', this)"><span>👨🏻</span><span class="btn-label">Papa</span></button>
                     </div>
-                    <div id="puz-active-players" style="margin-top:10px; display:flex; gap:5px; flex-wrap:wrap; justify-content:center;"></div>
+                    
+                    <div class="divider-line"></div>
+                    <div class="color-row" id="puz-color-row">
+                        ${ngColors.map(c => `<div class="color-dot" style="background:${c}" onclick="setPuzzleColor('${c}', this)"></div>`).join('')}
+                    </div>
+
+                    <div id="puz-active-players" class="active-players-box"></div>
                 </div>
 
-                <div class="setup-group">
+                <div class="setup-group group-theme">
                     <h3>Kies een Plaatje</h3>
-                    <div class="theme-grid" style="grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); max-height:150px; overflow-y:auto;">
+                    <div class="theme-grid" style="grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); max-height:200px; overflow-y:auto;">
                         ${puzzleOptions}
                     </div>
                 </div>
 
-                <div class="setup-group">
+                <div class="setup-group group-size">
                     <h3>Niveau</h3>
                     <div class="option-grid">
                         <button class="option-btn selected" onclick="setPuzzleDiff('easy', this)"><span>🟢</span><span class="btn-label">6</span></button>
@@ -85,16 +101,43 @@ function startPuzzleGame() {
 }
 
 // SETUP HULPFUNCTIES
-function addPuzzlePlayer(name, icon) {
+function addPuzzlePlayer(name, icon, btn) {
     if(typeof playSound === 'function') playSound('click');
-    if(pState.playerNames.find(p => p.name === name)) return;
-    const color = ngColors[pState.playerNames.length % ngColors.length];
-    pState.playerNames.push({name, icon, color});
     
-    document.getElementById('puz-active-players').innerHTML = pState.playerNames.map(p => 
-        `<span class="player-tag" style="background:${p.color}">${p.icon} ${p.name}</span>`
-    ).join('');
+    // Visuele feedback op knop
+    document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending'));
+    btn.classList.add('selected-pending');
+
+    // We slaan de naam even tijdelijk op tot er een kleur gekozen is (net als bij Memory)
+    pState.pendingName = name;
+    pState.pendingIcon = icon;
+}
+
+function setPuzzleColor(color, btn) {
+    if(!pState.pendingName) {
+        alert("Klik eerst op een naam!");
+        return;
+    }
+    if(typeof playSound === 'function') playSound('pop');
+
+    // Voeg speler toe
+    // Verwijder eerst als hij al bestaat (update kleur)
+    pState.playerNames = pState.playerNames.filter(p => p.name !== pState.pendingName);
+    pState.playerNames.push({ name: pState.pendingName, icon: pState.pendingIcon, color: color });
+    
+    // Reset selectie
+    pState.pendingName = null;
+    document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending'));
+
+    // Update lijstje
+    renderPuzzleActivePlayers();
     checkPuzzleStart();
+}
+
+function renderPuzzleActivePlayers() {
+    document.getElementById('puz-active-players').innerHTML = pState.playerNames.map(p => 
+        `<div class="active-player-tag" style="background:${p.color}"><span>${p.icon} ${p.name}</span></div>`
+    ).join('');
 }
 
 function setPuzzleImg(src, btn) {
@@ -247,14 +290,13 @@ function giveHint() {
     const targetSlot = document.getElementById(`slot-${index}`);
     
     if(targetSlot && !targetSlot.hasChildNodes()) {
-        if(typeof playSound === 'function') playSound('win'); // Speciaal geluidje
+        if(typeof playSound === 'function') playSound('win'); 
         
         targetSlot.appendChild(piece);
         piece.classList.add('correct');
         piece.onclick = null;
         pState.correctCount++;
         
-        // Disable knop
         pState.hintUsed = true;
         const btn = document.getElementById('tip-btn');
         btn.disabled = true;
@@ -275,7 +317,7 @@ function checkPuzzleWin() {
 }
 
 
-// --- 2. STICKERBOEK FUNCTIES (Ongewijzigd) ---
+// --- 2. STICKERBOEK ---
 function generateAllStickers() {
     let all = [];
     for (const [theme, data] of Object.entries(assetConfig)) {
@@ -309,7 +351,7 @@ function openStickerBook() {
     board.innerHTML = html + '</div>';
 }
 
-// --- 3. VANG ZE! (Ongewijzigd) ---
+// --- 3. VANG ZE! (Met Vallen) ---
 let wState = { score: 0, timer: 30, active: false, speed: 1000, grid: 9, timerInt: null, moleInt: null };
 function startWhackGame() {
     const board = document.getElementById('game-board');
@@ -346,8 +388,7 @@ function whack(h){
 function endWhack(boom){wState.active=false;clearInterval(wState.timerInt);clearTimeout(wState.moleInt);if(typeof showWinnerModal==='function')showWinnerModal(boom?"BOEM!":"Tijd op!",[{name:"Score",score:wState.score}]);}
 function stopWhackGame(){wState.active=false;clearInterval(wState.timerInt);clearTimeout(wState.moleInt);}
 
-// --- 4. SIMON & TEKENEN (Basis functies) ---
-// (Deze staan hieronder verkort omdat ze niet veranderd zijn)
+// --- 4. SIMON & TEKENEN ---
 let sSeq=[],pSeq=[],sLvl=0,sAct=false,sThm='mario';
 function startSimonGame(){const b=document.getElementById('game-board'); b.innerHTML=`<div class="memory-setup"><div class="setup-group"><h3>Kies Vriendjes</h3><div class="option-grid"><button class="option-btn selected" onclick="sT('mario',this)">Mario</button><button class="option-btn" onclick="sT('pokemon',this)">Pokemon</button></div></div><button class="start-btn" onclick="iS()">START</button></div>`;}
 function sT(t,b){sThm=t;document.querySelectorAll('.option-btn').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');}
