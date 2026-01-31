@@ -1,103 +1,129 @@
-/* PUZZEL.CSS - Compleet */
+/* PUZZEL.CSS - Side Layout & 5 Tips */
 
-/* SETUP STIJLEN (Kopie van memory voor consistentie) */
+/* SETUP STIJLEN */
 .option-btn {
     background: #E0F7FA; border: none; padding: 10px; border-radius: 12px;
     font-family: 'Fredoka One', cursive; cursor: pointer; transition: 0.2s;
     min-width: 60px; color: #006064; box-shadow: 0 4px 0 #B2EBF2;
     display: flex; flex-direction: column; align-items: center; gap: 5px;
 }
-
-/* DE FIX: Zichtbare selectie voor niveaus */
 .option-btn.selected, .diff-btn.selected {
-    background-color: #4CAF50 !important;
-    color: white !important;
-    box-shadow: 0 4px 0 #2E7D32 !important;
-    transform: translateY(2px);
+    background-color: #4CAF50 !important; color: white !important;
+    box-shadow: 0 4px 0 #2E7D32 !important; transform: translateY(2px);
 }
-.option-btn.selected-pending { background: #FFEB3B; border: 2px dashed #F57F17; }
-
 .theme-card-btn.selected { border: 4px solid #4CAF50 !important; transform: scale(1.05); }
 
-/* --- PUZZEL GAME LAYOUT --- */
+/* --- GAME LAYOUT --- */
 .puzzle-game-container {
-    display: flex; flex-direction: column; align-items: center;
-    width: 100%; height: 100%; padding: 10px; box-sizing: border-box;
+    display: flex; flex-direction: column; width: 100%; height: 100%;
+    padding: 10px; box-sizing: border-box; overflow: hidden;
 }
 
 .puzzle-header {
     display: flex; justify-content: space-between; align-items: center;
-    width: 100%; margin-bottom: 10px; height: 50px;
+    width: 100%; height: 60px; flex-shrink: 0; margin-bottom: 5px;
 }
 
-/* HET BORD (GRID) */
+/* TIPS SECTION */
+.hint-container {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,0.8); padding: 5px 15px; border-radius: 20px;
+}
+.bulb-row { display: flex; gap: 2px; }
+.hint-bulb { font-size: 1.2rem; transition: 0.3s; }
+.hint-bulb.used { transform: scale(0.8); }
+
+.tip-btn {
+    background: #FF9800; color: white; border: none; padding: 5px 15px;
+    border-radius: 15px; font-weight: bold; font-family: 'Fredoka One';
+    cursor: pointer; box-shadow: 0 3px 0 #E65100;
+}
+.tip-btn:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
+
+/* HOOFD GEBIED (3 KOLOMMEN) */
+.puzzle-main-area {
+    display: flex; flex: 1; width: 100%; gap: 10px;
+    overflow: hidden; /* Belangrijk voor scroll in pools */
+}
+
+/* ZIJ KANTEN (POOLS) */
+.side-pool {
+    width: 90px; /* Vaste breedte voor de bakjes */
+    background: rgba(255,255,255,0.5); border: 2px solid #fff;
+    border-radius: 15px;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 8px; padding: 10px 5px;
+    overflow-y: auto; /* Verticaal scrollen */
+    flex-shrink: 0;
+}
+
+/* MIDDEN (BORD) */
+.puzzle-board-wrapper {
+    flex: 1; display: flex; justify-content: center; align-items: center;
+    position: relative;
+}
+
 .puzzle-board {
     display: grid;
     grid-template-columns: repeat(var(--puz-cols), 1fr);
     grid-template-rows: repeat(var(--puz-rows), 1fr);
-    width: 90vmin; height: 90vmin;
-    max-width: 500px; max-height: 500px;
-    border: 4px solid #fff;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    background-color: #eee;
-    background-size: cover; background-position: center;
-    position: relative; gap: 1px; 
+    /* Maak bord zo groot mogelijk, maar houd rekening met padding */
+    width: 100%; height: 100%;
+    max-width: 85vh; max-height: 85vh; /* Zorg dat het vierkant blijft ogen */
+    aspect-ratio: 1/1; /* Probeer vierkant te blijven indien mogelijk, of pas aan */
+    
+    border: 4px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    background-color: #eee; background-size: cover; background-position: center;
+    position: relative; gap: 1px;
 }
+/* Pas aspect ratio aan op basis van grid */
+.puzzle-board[style*="--puz-cols: 4"] { aspect-ratio: 4/5; }
+.puzzle-board[style*="--puz-cols: 5"] { aspect-ratio: 5/6; }
 
-/* GHOST MODE */
 .puzzle-board.ghost-mode::before {
     content: ''; position: absolute; top:0; left:0; right:0; bottom:0;
     background: inherit; opacity: 0.3; z-index: 0; pointer-events: none;
 }
 
 .puzzle-slot {
-    background: rgba(255,255,255,0.2);
-    border: 1px dashed rgba(0,0,0,0.1);
-    position: relative; z-index: 1;
-    display: flex; justify-content: center; align-items: center;
-    cursor: pointer; overflow: hidden;
+    background: rgba(255,255,255,0.2); border: 1px dashed rgba(0,0,0,0.1);
+    position: relative; z-index: 1; display: flex; justify-content: center; align-items: center;
 }
 
-/* DE STUKJES */
-.puzzle-pool {
-    display: flex; flex-wrap: wrap; gap: 5px; justify-content: center;
-    margin-top: 15px; width: 100%; flex: 1; overflow-y: auto; padding: 5px;
-    background: rgba(255,255,255,0.5); border-radius: 15px; border: 2px solid #fff;
-}
-
+/* STUKJES */
 .puzzle-piece {
-    width: 60px; height: 60px; 
+    width: 70px; height: 70px; flex-shrink: 0; /* Niet pletten in de zijbalk */
     background-repeat: no-repeat; border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    cursor: pointer; transition: transform 0.2s; border: 2px solid white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer;
+    border: 2px solid white; transition: transform 0.2s;
 }
 
-.puzzle-slot .puzzle-piece {
-    width: 100%; height: 100%; border-radius: 0; box-shadow: none; border: none;
-}
+/* Als stukje op bord ligt: vullen */
+.puzzle-slot .puzzle-piece { width: 100%; height: 100%; border: none; box-shadow: none; border-radius: 0; }
 
 .puzzle-piece.selected { transform: scale(1.1); border: 3px solid #2196F3; z-index: 100; }
+.puzzle-piece.correct { animation: popIn 0.3s; border: none; }
 .puzzle-piece.wrong { animation: shake 0.5s; border: 3px solid #F44336; }
-.puzzle-piece.correct { border: none; animation: popIn 0.3s; }
 
-.preview-mini {
-    display: flex; flex-direction: column; align-items: center;
-    background: white; padding: 5px; border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-.preview-mini img { width: 50px; height: 50px; object-fit: cover; border-radius: 5px; }
+/* MINI PREVIEW */
+.preview-mini img { height: 50px; border-radius: 5px; border: 2px solid white; }
 
-.tool-btn, .tip-btn {
+.tool-btn {
     background: #FF9800; color: white; border: none; padding: 5px 15px;
-    border-radius: 20px; font-weight: bold; font-family: 'Fredoka One';
-    cursor: pointer; box-shadow: 0 3px 0 #E65100;
+    border-radius: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 0 #E65100;
 }
-.tip-btn:disabled { background: #ccc; box-shadow: none; }
 
 @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
-@media (max-width: 600px) {
-    .puzzle-board { width: 95vw; height: 95vw; } 
-    .puzzle-piece { width: 45px; height: 45px; }
+/* MOBIEL AANPASSINGEN */
+@media (max-width: 768px) {
+    /* Op mobiel zetten we de pools weer onder elkaar of kleiner */
+    .puzzle-main-area { flex-direction: column; }
+    .side-pool { 
+        width: 100%; height: 80px; /* Horizontaal balkje */
+        flex-direction: row; overflow-x: auto; overflow-y: hidden;
+    }
+    .puzzle-board-wrapper { height: auto; flex: 2; }
+    .puzzle-piece { width: 50px; height: 50px; }
 }
