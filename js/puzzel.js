@@ -1,4 +1,4 @@
-// PUZZEL.JS - Pro Puzzel (Fixed & Styling)
+// PUZZEL.JS - Pro Puzzel (Met Niveau Fix)
 console.log("Puzzel.js geladen");
 
 let pState = { 
@@ -12,20 +12,17 @@ const puzColors = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#4CAF50', '#FFEB
 function startPuzzleGame() {
     const board = document.getElementById('game-board');
     
-    // Check of assetConfig bestaat (uit stickers.js/newgames.js), anders fallback
     const config = (typeof assetConfig !== 'undefined') ? assetConfig : {};
     const themes = Object.keys(config).filter(t => !config[t].locked);
     
     let puzzleOptions = '';
     if(themes.length > 0) {
-        // Genereer willekeurige opties
         const usedSrcs = [];
         for(let i=0; i<8; i++) { 
             const t = themes[Math.floor(Math.random() * themes.length)];
             const nr = Math.floor(Math.random() * config[t].count) + 1;
             const src = `assets/images/memory/${t}/${nr}.${config[t].ext}`;
             
-            // Voorkom dubbele in de keuzeijst
             if(!usedSrcs.includes(src)) {
                 usedSrcs.push(src);
                 puzzleOptions += `
@@ -63,9 +60,9 @@ function startPuzzleGame() {
                 <div class="setup-group">
                     <h3>3. Niveau</h3>
                     <div class="option-grid">
-                        <button class="option-btn selected" onclick="setPuzzleDiff('easy', this)"><span>🟢</span><span class="btn-label">6</span></button>
-                        <button class="option-btn" onclick="setPuzzleDiff('medium', this)"><span>🟠</span><span class="btn-label">20</span></button>
-                        <button class="option-btn" onclick="setPuzzleDiff('hard', this)"><span>🔴</span><span class="btn-label">30</span></button>
+                        <button class="option-btn diff-btn selected" onclick="setPuzzleDiff('easy', this)"><span>🟢</span><span class="btn-label">6</span></button>
+                        <button class="option-btn diff-btn" onclick="setPuzzleDiff('medium', this)"><span>🟠</span><span class="btn-label">20</span></button>
+                        <button class="option-btn diff-btn" onclick="setPuzzleDiff('hard', this)"><span>🔴</span><span class="btn-label">30</span></button>
                     </div>
                 </div>
             </div>
@@ -76,7 +73,7 @@ function startPuzzleGame() {
     pState.playerNames = [];
     pState.img = '';
     pState.difficulty = 'easy';
-    pState.rows = 3; pState.cols = 2; // Default easy
+    pState.rows = 3; pState.cols = 2;
 }
 
 function addPuzzlePlayer(name, icon, btn) {
@@ -95,7 +92,6 @@ function setPuzzleColor(color, btn) {
     if(!pState.pendingName) { alert("Klik eerst op een naam!"); return; }
     if(typeof playSound === 'function') playSound('pop');
 
-    // Puzzel is meestal 1 speler, dus we overschrijven de vorige
     pState.playerNames = [{ name: pState.pendingName, icon: pState.pendingIcon, color: color }];
     pState.pendingName = null;
     document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending'));
@@ -118,12 +114,13 @@ function setPuzzleDiff(diff, btn) {
     if(typeof playSound === 'function') playSound('click');
     pState.difficulty = diff;
     
-    // Hier stellen we de grid in
     if(diff === 'easy') { pState.cols = 2; pState.rows = 3; }
-    else if(diff === 'medium') { pState.cols = 4; pState.rows = 5; } // 20
-    else { pState.cols = 5; pState.rows = 6; } // 30
+    else if(diff === 'medium') { pState.cols = 4; pState.rows = 5; }
+    else { pState.cols = 5; pState.rows = 6; }
     
-    document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+    // DE FIX: Selecteer alleen de diff-knoppen binnen dezelfde groep
+    const container = btn.parentElement;
+    container.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
 }
 
@@ -144,25 +141,19 @@ function initPuzzle() {
     
     const totalPieces = pState.rows * pState.cols;
     
-    // Grid Slots (De lege gaten)
     let gridHTML = '';
     for(let i=0; i<totalPieces; i++) {
         gridHTML += `<div class="puzzle-slot" id="slot-${i}" data-index="${i}" onclick="placePiece(this)"></div>`;
     }
     
-    // Pieces (De losse stukjes)
     let pieces = [];
     for(let i=0; i<totalPieces; i++) pieces.push(i);
-    pieces.sort(() => Math.random() - 0.5); // Husselen
+    pieces.sort(() => Math.random() - 0.5); 
     
     let poolHTML = '';
     pieces.forEach(i => {
-        // Bereken positie van dit stukje in de originele foto
         const x = (i % pState.cols) * 100 / (pState.cols - 1);
         const y = Math.floor(i / pState.cols) * 100 / (pState.rows - 1);
-        
-        // Bereken de background-size zodat de foto opgeknipt wordt
-        // Als je 4 kolommen hebt, moet de afbeelding 400% groot zijn in elk stukje
         const sizeX = pState.cols * 100;
         const sizeY = pState.rows * 100;
 
@@ -175,21 +166,17 @@ function initPuzzle() {
         `;
     });
 
-    // Layout bepalen op basis van moeilijkheid
     let boardClass = '';
-    let boardStyle = ''; // Voor de ghost image
+    let boardStyle = ''; 
     let previewHTML = '';
 
     if (pState.difficulty === 'easy') {
         boardClass = 'ghost-mode';
-        // Zet de afbeelding wazig op de achtergrond van het bord
         boardStyle = `background-image: url('${pState.img}');`;
     } else {
-        // Bij medium/hard geen achtergrond op het bord, maar een preview erboven
         previewHTML = `<div class="preview-mini"><img src="${pState.img}"><span>Voorbeeld</span></div>`;
     }
 
-    // Variabelen voor CSS Grid
     const cssVars = `style="--puz-cols: ${pState.cols}; --puz-rows: ${pState.rows}; ${boardStyle}"`;
 
     board.innerHTML = `
@@ -199,34 +186,24 @@ function initPuzzle() {
                 ${previewHTML}
                 <button id="tip-btn" class="tip-btn" onclick="givePuzzleHint()">💡 TIP</button>
             </div>
-            
-            <div class="puzzle-board ${boardClass}" ${cssVars}>
-                ${gridHTML}
-            </div>
-            
-            <div class="puzzle-pool">
-                ${poolHTML}
-            </div>
+            <div class="puzzle-board ${boardClass}" ${cssVars}>${gridHTML}</div>
+            <div class="puzzle-pool">${poolHTML}</div>
         </div>
     `;
 }
 
 function selectPiece(el) {
-    // Als het stukje al in een slot zit, mag je het niet meer selecteren (of verplaatsen als je dat zou willen bouwen)
     if(el.parentElement.classList.contains('puzzle-slot')) return;
-    
     if(typeof playSound === 'function') playSound('click');
     
-    // Verwijder selectie van vorige
     if(pState.selectedPiece) pState.selectedPiece.classList.remove('selected');
-    
     pState.selectedPiece = el;
     el.classList.add('selected');
 }
 
 function placePiece(slot) {
-    if(!pState.selectedPiece) return; // Niets geselecteerd
-    if(slot.hasChildNodes()) return; // Slot is al bezet
+    if(!pState.selectedPiece) return; 
+    if(slot.hasChildNodes()) return; 
     
     if(typeof playSound === 'function') playSound('pop');
     
@@ -236,18 +213,14 @@ function placePiece(slot) {
     const slotIndex = parseInt(slot.getAttribute('data-index'));
     const pieceIndex = parseInt(pState.selectedPiece.getAttribute('data-index'));
     
-    // Check of het goed is
     if(slotIndex === pieceIndex) {
-        // JUIST!
         pState.selectedPiece.classList.add('correct');
-        pState.selectedPiece.onclick = null; // Niet meer aanklikbaar
+        pState.selectedPiece.onclick = null; 
         pState.correctCount++;
         checkPuzzleWin();
     } else {
-        // FOUT!
         const wrongPiece = pState.selectedPiece;
         wrongPiece.classList.add('wrong');
-        // Terug naar pool na korte animatie
         setTimeout(() => {
             wrongPiece.classList.remove('wrong');
             document.querySelector('.puzzle-pool').appendChild(wrongPiece);
@@ -258,27 +231,22 @@ function placePiece(slot) {
 
 function givePuzzleHint() {
     if(pState.hintUsed) return;
-    
-    // Zoek het eerste stukje in de pool
     const piecesInPool = Array.from(document.querySelectorAll('.puzzle-pool .puzzle-piece'));
     if(piecesInPool.length === 0) return;
     
     const piece = piecesInPool[0];
     const index = piece.getAttribute('data-index');
-    const targetSlot = document.getElementById(`slot-${index}`); // FIX: TargetSlot definieren
+    const targetSlot = document.getElementById(`slot-${index}`); 
     
     if(targetSlot && !targetSlot.hasChildNodes()) {
         if(typeof playSound === 'function') playSound('win');
-        targetSlot.appendChild(piece); // FIX: targetSlot gebruiken
+        targetSlot.appendChild(piece);
         piece.classList.add('correct');
         piece.onclick = null;
         pState.correctCount++;
         pState.hintUsed = true;
-        
         const btn = document.getElementById('tip-btn');
-        btn.disabled = true;
-        btn.style.opacity = 0.5;
-        
+        btn.disabled = true; btn.style.opacity = 0.5;
         checkPuzzleWin();
     }
 }
@@ -287,11 +255,8 @@ function checkPuzzleWin() {
     if(pState.correctCount === (pState.rows * pState.cols)) {
         setTimeout(() => {
             const winner = pState.playerNames.length > 0 ? pState.playerNames[0].name : "Jij";
-            if(typeof showWinnerModal === 'function') {
-                showWinnerModal(winner, [{name:winner, score:"Puzzel Compleet!"}]);
-            } else {
-                alert("Puzzel Compleet!");
-            }
+            if(typeof showWinnerModal === 'function') showWinnerModal(winner, [{name:winner, score:"Puzzel Compleet!"}]);
+            else alert("Puzzel Compleet!");
         }, 500);
     }
 }
