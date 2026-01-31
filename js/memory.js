@@ -1,5 +1,5 @@
-// MEMORY.JS - MAXIMALE GROOTTE & VASTE 30 KAARTEN
-console.log("Memory.js geladen (Max Fit)...");
+// MEMORY.JS - MAXIMALE KADER GROOTTE (FIX)
+console.log("Memory.js geladen (Full Fill)...");
 
 let memoryState = { 
     theme: 'boerderij', 
@@ -116,31 +116,33 @@ function checkStartButton() {
     const b=document.getElementById('start-btn'); if(b){b.disabled=memoryState.playerNames.length===0; b.innerText=b.disabled?"VOEG SPELER TOE...":"START SPEL ▶️";}
 }
 
-// --- GAME LOGIC (OPTIMALISATIE) ---
+// --- GAME LOGIC (MAXIMALE GROOTTE) ---
 
 function calculateCardSize(cols, rows) {
     const board = document.getElementById('game-board');
-    if(!board) return 60;
+    if(!board) return 60; // Fallback
 
-    // Pak de totale beschikbare ruimte
+    // Totale beschikbare ruimte
     const w = board.clientWidth;
     const h = board.clientHeight;
 
-    // Trek ruimte af voor de scorebalk (ongeveer 60px) + marge (20px)
-    const availableH = h - 80; 
-    const availableW = w - 20;
+    // Trek scorebalk eraf (ongeveer 60px) + marges (20px totaal)
+    // We willen dat het spelbord de rest vult
+    const availableW = w - 10; // Kleine marge zijkant
+    const availableH = h - 70; // Marge voor scorebord bovenin
 
-    const gap = 8; // De ruimte tussen de kaarten
+    const gap = 6; // De ruimte tussen de kaarten
 
-    // Bereken maximale breedte per kaart
-    const maxCardW = (availableW - (cols - 1) * gap) / cols;
+    // Bereken hoeveel ruimte 1 kaart mag innemen in de breedte
+    const widthPerCard = (availableW - ((cols - 1) * gap)) / cols;
     
-    // Bereken maximale hoogte per kaart
-    const maxCardH = (availableH - (rows - 1) * gap) / rows;
+    // Bereken hoeveel ruimte 1 kaart mag innemen in de hoogte
+    const heightPerCard = (availableH - ((rows - 1) * gap)) / rows;
 
-    // Pak de kleinste van de twee om vierkant te blijven en alles te laten passen
-    // Geen harde limiet meer, behalve dat het niet absurd groot wordt (>200)
-    let size = Math.floor(Math.min(maxCardW, maxCardH));
+    // We willen VIERKANTE kaarten die overal passen. 
+    // Pak de kleinste waarde, zodat het nooit buiten beeld valt.
+    // Geen limiet meer van 110px!
+    let size = Math.floor(Math.min(widthPerCard, heightPerCard));
     
     return size;
 }
@@ -149,15 +151,15 @@ function startMemoryGame() {
     if(typeof playSound === 'function') playSound('win');
     const board = document.getElementById('game-board');
     
-    // Bepaal orientatie voor 30 kaarten
-    // 6 breed x 5 hoog (landschap) of 5 breed x 6 hoog (portret)
+    // Vast 30 kaarten
+    memoryState.gridSize = 30;
+    
+    // Bepaal rooster: Liggend = 6 breed, Staand = 5 breed
     let cols = 6; let rows = 5;
     if(board.clientHeight > board.clientWidth) { cols = 5; rows = 6; }
 
-    // Scorebord
     let scoreHTML = `<div class="score-board">${memoryState.playerNames.map((p, i) => `<div class="player-badge" id="badge-${i}" style="border-color:${p.color}; color:${p.color}"><span class="badge-name">${p.name}</span>: <span id="score-${i}">0</span></div>`).join('')}</div>`;
 
-    // Bouw de container
     board.innerHTML = `<div class="memory-game-container">${scoreHTML}<div class="memory-grid" id="memory-grid"></div></div>`;
     
     const grid = document.getElementById('memory-grid');
@@ -166,22 +168,20 @@ function startMemoryGame() {
     const cardSize = calculateCardSize(cols, rows);
     
     grid.style.gridTemplateColumns = `repeat(${cols}, ${cardSize}px)`;
-    grid.style.gap = '8px';
+    grid.style.gap = '6px';
     
     memoryState.matchedPairs = 0; memoryState.flippedCards = []; memoryState.lockBoard = false; memoryState.currentPlayerIndex = 0;
     updateActiveBadgeColor();
     generateCards(cardSize, cols * rows);
 
-    // Resize listener voor als je je scherm draait
+    // Resize listener
     window.onresize = () => {
-        // Alleen herberekenen als het spelbord er is
         if(document.getElementById('memory-grid')) {
             const newCols = (board.clientHeight > board.clientWidth) ? 5 : 6;
             const newRows = (board.clientHeight > board.clientWidth) ? 6 : 5;
             const newSize = calculateCardSize(newCols, newRows);
             const g = document.getElementById('memory-grid');
             g.style.gridTemplateColumns = `repeat(${newCols}, ${newSize}px)`;
-            // Update alle kaarten
             document.querySelectorAll('.memory-card').forEach(c => {
                 c.style.width = newSize+'px'; c.style.height = newSize+'px';
             });
@@ -192,7 +192,7 @@ function startMemoryGame() {
 function generateCards(sizePx, totalCards) {
     const grid = document.getElementById('memory-grid');
     const themeData = themes[memoryState.theme];
-    const pairsNeeded = totalCards / 2; // 15
+    const pairsNeeded = 15;
     
     let deck = [];
     for (let i = 1; i <= pairsNeeded; i++) deck.push(i, i);
@@ -202,7 +202,10 @@ function generateCards(sizePx, totalCards) {
     deck.forEach((item) => {
         const card = document.createElement('div');
         card.className = 'memory-card'; card.dataset.value = item;
-        card.style.width = `${sizePx}px`; card.style.height = `${sizePx}px`;
+        // DE KADER GROOTTE:
+        card.style.width = `${sizePx}px`; 
+        card.style.height = `${sizePx}px`;
+        
         card.innerHTML = `<div class="memory-card-inner"><div class="card-front"><img src="${themeData.path}cover.png"></div><div class="card-back"><img src="${themeData.path}${item}.${themeData.extension}"></div></div>`;
         card.addEventListener('click', flipCard);
         grid.appendChild(card);
