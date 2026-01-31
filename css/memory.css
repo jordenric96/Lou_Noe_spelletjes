@@ -1,79 +1,138 @@
-/* --- MEMORY SETUP --- */
+/* MEMORY.CSS - DEFINITIEVE STYLING */
+
+/* --- 1. SETUP SCHERM --- */
 .memory-setup {
     display: flex; flex-direction: column; width: 100%; height: 100%;
-    padding: 10px; background: #F8FAFC; box-sizing: border-box; overflow: hidden;
+    padding: 15px; background: #F4F7F6; box-sizing: border-box; overflow: hidden;
 }
 
 .setup-columns {
-    display: flex; flex-direction: row; gap: 10px; flex: 1; min-height: 0;
-    margin-bottom: 10px;
+    display: flex; flex-direction: row; gap: 20px; flex: 1; min-height: 0;
+    margin-bottom: 15px;
 }
 
 .setup-group {
-    background: white; border-radius: 15px; padding: 10px; flex: 1;
+    background: white; border-radius: 20px; padding: 15px; flex: 1;
     display: flex; flex-direction: column; align-items: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #E2E8F0;
-    min-width: 0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 2px solid #E0F2F1;
+    overflow-y: auto; /* Zorgt dat content scrollbaar is als het niet past */
 }
 
-.setup-group h3 { font-family: 'Fredoka One', cursive; font-size: 0.9rem; color: #00BCD4; margin: 5px 0; }
-
-/* THEMA GRID (Compacter: 3 kolommen op desktop, 2 op mobiel) */
-.theme-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; width: 100%;
-    overflow-y: auto; padding-right: 5px;
+.setup-group h3 {
+    font-family: 'Fredoka One', cursive; color: #0097A7; margin: 0 0 10px 0;
+    font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px;
 }
 
-.theme-card-btn {
-    background: white; border: 2px solid #F1F5F9; border-radius: 10px;
-    cursor: pointer; padding: 0; overflow: hidden; transition: 0.2s;
-}
+/* Knoppen roosters */
+.option-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%; margin-bottom: 10px; }
 
-.theme-card-btn.selected { border-color: #4CAF50; background: #F0FDF4; }
-
-.theme-img-container { width: 100%; aspect-ratio: 1/1; position: relative; background: #F8FAFC; }
-.theme-img-container img { width: 100%; height: 100%; object-fit: cover; }
-.theme-card-btn .btn-label { font-size: 0.7rem; font-weight: bold; padding: 2px; display: block; text-align: center; }
-
-/* KNOPPEN (Niveau & Speler) */
-.option-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; width: 100%; }
-
+/* Speler & Niveau knoppen */
 .option-btn {
-    background: #F1F5F9; border: none; padding: 8px; border-radius: 10px;
-    font-family: 'Fredoka One', cursive; cursor: pointer; transition: 0.1s; font-size: 0.8rem;
+    background: #E0F7FA; border: none; padding: 10px 15px; border-radius: 12px;
+    font-family: 'Fredoka One', cursive; cursor: pointer; transition: 0.2s;
+    min-width: 60px; color: #006064; box-shadow: 0 3px 0 #B2EBF2;
 }
 
-.option-btn.selected { background: #4CAF50 !important; color: white !important; }
-.option-btn.selected-pending { background: #E2E8F0; border: 2px dashed #64748B; }
-
-/* KLEUREN */
-.color-row { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin: 5px 0; }
-.color-dot { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-
-.active-player-tag { 
-    padding: 3px 8px; border-radius: 10px; color: white; font-weight: bold; 
-    font-size: 0.7rem; margin: 2px; cursor: pointer;
+/* DE FIX VOOR SELECTIE */
+.option-btn.selected {
+    background: #4CAF50 !important; color: white !important;
+    box-shadow: 0 3px 0 #2E7D32 !important; transform: translateY(2px);
+}
+.player-btn.selected-pending {
+    background: #FFEB3B; color: #333; border: 2px dashed #F57F17;
 }
 
-/* START KNOP */
+/* Eigen naam veld */
+.custom-name-container { display: flex; gap: 5px; width: 90%; margin-bottom: 10px; }
+#custom-player-name {
+    flex: 1; padding: 8px; border: 2px solid #B2EBF2; border-radius: 10px;
+    font-family: 'Nunito', sans-serif;
+}
+.add-btn {
+    background: #FFC107; border: none; padding: 0 15px; border-radius: 10px;
+    font-weight: bold; cursor: pointer; color: #333;
+}
+
+/* Kleuren */
+.color-row { display: flex; gap: 10px; margin: 10px 0; justify-content: center; flex-wrap: wrap; }
+.color-dot { width: 32px; height: 32px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer; transition: transform 0.2s; }
+.color-dot:active { transform: scale(0.9); }
+
+.active-player-tag {
+    padding: 6px 12px; border-radius: 20px; color: white; font-weight: bold;
+    font-size: 0.9rem; margin: 3px; cursor: pointer; display: inline-block;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Thema Grid (Netjes uitgelijnd) */
+.theme-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 10px; width: 100%; padding: 5px;
+}
+.theme-card-btn {
+    background: white; border: 3px solid #ECEFF1; border-radius: 12px;
+    overflow: hidden; cursor: pointer; transition: 0.2s; padding: 0;
+}
+.theme-card-btn.selected { border-color: #4CAF50; transform: scale(1.03); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+
+.theme-img-container { width: 100%; aspect-ratio: 16/9; position: relative; }
+.theme-img-container img { width: 100%; height: 100%; object-fit: cover; }
+.btn-label { display: block; padding: 5px; font-size: 0.8rem; font-weight: bold; text-align: center; }
+
+/* Start Knop */
 .start-btn {
-    background: #4CAF50; color: white; border: none; padding: 12px;
-    border-radius: 12px; font-family: 'Fredoka One', cursive; font-size: 1.1rem;
-    box-shadow: 0 4px 0 #2E7D32; cursor: pointer;
+    background: #4CAF50; color: white; border: none; padding: 15px;
+    border-radius: 15px; font-family: 'Fredoka One', cursive; font-size: 1.3rem;
+    box-shadow: 0 5px 0 #2E7D32; cursor: pointer; margin-top: 10px;
 }
-.start-btn:disabled { background: #E2E8F0; box-shadow: none; cursor: not-allowed; color: #94A3B8; }
+.start-btn:disabled { background: #CFD8DC; box-shadow: none; cursor: not-allowed; color: #90A4AE; }
+
+/* --- 2. GAME BOARD (Mooi & Ruim) --- */
+.memory-game-container {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    width: 100%; height: 100%;
+}
+
+.score-board {
+    display: flex; gap: 15px; margin-bottom: 10px; padding: 5px;
+    background: rgba(255,255,255,0.5); border-radius: 30px;
+}
+.player-badge {
+    padding: 5px 15px; border-radius: 20px; border: 3px solid; background: white;
+    font-weight: bold; transition: 0.3s; opacity: 0.7;
+}
+.player-badge.active { opacity: 1; transform: scale(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+
+.memory-grid {
+    display: grid; gap: 10px; justify-content: center; align-content: center;
+    perspective: 1000px;
+}
+
+.memory-card { position: relative; cursor: pointer; user-select: none; }
+.memory-card-inner {
+    width: 100%; height: 100%; position: relative;
+    transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border-radius: 10px; box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+}
+
+.memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
+
+.card-front, .card-back {
+    position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+    border-radius: 10px; border: 3px solid white; overflow: hidden;
+}
+.card-front { background: linear-gradient(135deg, #4FC3F7, #0288D1); z-index: 2; }
+.card-back { transform: rotateY(180deg); background: white; }
+
+.card-img, .card-cover-img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Match Effect */
+.memory-card.matched .memory-card-inner { animation: popMatch 0.3s ease-out; }
+@keyframes popMatch { 50% { transform: scale(1.1) rotateY(180deg); } }
 
 /* MOBIEL */
-@media (max-width: 768px) { 
-    .setup-columns { flex-direction: column; overflow-y: auto; } 
-    .theme-grid { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 700px) {
+    .setup-columns { flex-direction: column; }
+    .theme-grid { grid-template-columns: repeat(3, 1fr); }
+    .setup-group { max-height: 40vh; }
 }
-
-/* GRID & KAARTEN */
-.memory-grid { display: grid; gap: 5px; margin: 0 auto; justify-content: center; }
-.memory-card { perspective: 1000px; }
-.memory-card-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.4s; }
-.memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
-.card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 8px; border: 2px solid #ddd; }
-.card-back { transform: rotateY(180deg); background: white; }
-.card-img, .card-cover-img { width: 100%; height: 100%; object-fit: cover; }
