@@ -1,11 +1,10 @@
-// PUZZEL.JS - Side Pools, 5 Tips & STARTER PIECE
-console.log("Puzzel.js geladen (Starter Piece)...");
+// PUZZEL.JS - Side Pools, 5 Tips & JS RESIZE (Fix voor oude tablets)
+console.log("Puzzel.js geladen (JS Resize Fix)...");
 
 let pState = { 
     img: '', pieces: [], rows: 3, cols: 2, 
     selectedPiece: null, correctCount: 0, difficulty: 'easy',
-    playerNames: [], 
-    hintsLeft: 5, 
+    playerNames: [], hintsLeft: 5, 
     pendingName: null, pendingIcon: null
 };
 
@@ -102,28 +101,53 @@ function checkPuzzleStart() {
 
 // --- GAME LOGIC ---
 
+// NIEUWE FUNCTIE: Berekent de grootte in pixels
+function updatePuzzleSize() {
+    const wrapper = document.querySelector('.puzzle-board-wrapper');
+    const board = document.querySelector('.puzzle-board');
+    if (!wrapper || !board) return;
+
+    // Meet de ruimte die we ECHT hebben in het midden
+    const availW = wrapper.clientWidth - 10; // minus padding
+    const availH = wrapper.clientHeight - 10;
+
+    if (availW <= 0 || availH <= 0) return;
+
+    // Bereken max grootte per stukje om in de breedte te passen
+    const maxPieceW = availW / pState.cols;
+    // Bereken max grootte per stukje om in de hoogte te passen
+    const maxPieceH = availH / pState.rows;
+
+    // Kies de kleinste (zodat het altijd past)
+    const pieceSize = Math.floor(Math.min(maxPieceW, maxPieceH));
+
+    // Stel de CSS variabelen in op het bord
+    board.style.setProperty('--piece-size', `${pieceSize}px`);
+    
+    // Stel exacte breedte/hoogte in (fallback voor oude browsers)
+    board.style.width = `${pieceSize * pState.cols}px`;
+    board.style.height = `${pieceSize * pState.rows}px`;
+}
+
 function initPuzzle() {
     if(typeof playSound === 'function') playSound('win');
     const board = document.getElementById('game-board');
-    pState.correctCount = 0;
-    pState.selectedPiece = null;
-    pState.hintsLeft = 5;
+    pState.correctCount = 0; pState.selectedPiece = null; pState.hintsLeft = 5;
     
     const totalPieces = pState.rows * pState.cols;
     
-    // Grid maken
+    // Grid
     let gridHTML = '';
     for(let i=0; i<totalPieces; i++) {
         gridHTML += `<div class="puzzle-slot" id="slot-${i}" data-index="${i}" onclick="placePiece(this)"></div>`;
     }
     
-    // Stukjes genereren
+    // Stukjes
     let pieces = [];
     for(let i=0; i<totalPieces; i++) pieces.push(i);
     pieces.sort(() => Math.random() - 0.5); 
     
-    let leftPoolHTML = '';
-    let rightPoolHTML = '';
+    let leftPoolHTML = '', rightPoolHTML = '';
 
     pieces.forEach((i, index) => {
         const x = (i % pState.cols) * 100 / (pState.cols - 1);
@@ -136,18 +160,15 @@ function initPuzzle() {
                  style="background-image: url('${pState.img}'); 
                         background-position: ${x}% ${y}%;
                         background-size: ${sizeX}% ${sizeY}%;">
-            </div>
-        `;
-        
-        if(index % 2 === 0) leftPoolHTML += pieceHTML;
-        else rightPoolHTML += pieceHTML;
+            </div>`;
+        if(index % 2 === 0) leftPoolHTML += pieceHTML; else rightPoolHTML += pieceHTML;
     });
 
-    // Layout bepalen
     let boardClass = (pState.difficulty === 'easy') ? 'ghost-mode' : '';
     let boardStyle = (pState.difficulty === 'easy') ? `background-image: url('${pState.img}');` : '';
     let previewHTML = (pState.difficulty !== 'easy') ? `<div class="preview-mini"><img src="${pState.img}"></div>` : '';
 
+    // CSS Grid variabelen
     const cssVars = `style="--puz-cols: ${pState.cols}; --puz-rows: ${pState.rows}; ${boardStyle}"`;
 
     let bulbsHTML = '';
@@ -178,23 +199,22 @@ function initPuzzle() {
         </div>
     `;
 
-    // --- AUTOMATISCH 1 STUKJE PLAATSEN (HET CADEAUTJE) ---
+    // Activeer de resize logica
+    updatePuzzleSize();
+    window.addEventListener('resize', updatePuzzleSize);
+
+    // Starter stukje
     setTimeout(() => {
-        // Kies een willekeurig stukje (tussen 0 en totalPieces-1)
         const starterIndex = Math.floor(Math.random() * totalPieces);
         const starterPiece = document.getElementById(`piece-${starterIndex}`);
         const starterSlot = document.getElementById(`slot-${starterIndex}`);
-
         if(starterPiece && starterSlot) {
-            // Verplaatsen naar het bord
             starterSlot.appendChild(starterPiece);
             starterPiece.classList.add('correct');
-            starterPiece.onclick = null; // Niet meer verplaatsbaar
-            
-            // Score bijwerken
+            starterPiece.onclick = null; 
             pState.correctCount = 1;
         }
-    }, 100); // Kleine vertraging om zeker te zijn dat DOM klaar is
+    }, 100);
 }
 
 function selectPiece(el) {
@@ -207,7 +227,6 @@ function selectPiece(el) {
 function placePiece(slot) {
     if(!pState.selectedPiece) return; 
     if(slot.hasChildNodes()) return; 
-    
     if(typeof playSound === 'function') playSound('pop');
     slot.appendChild(pState.selectedPiece);
     pState.selectedPiece.classList.remove('selected');
@@ -234,54 +253,31 @@ function placePiece(slot) {
 }
 
 function givePuzzleHint() {
-    if(pState.hintsLeft <= 0) {
-        if(typeof playSound === 'function') playSound('error'); 
-        return;
-    }
-    
+    if(pState.hintsLeft <= 0) { if(typeof playSound === 'function') playSound('error'); return; }
     const pools = document.querySelectorAll('.puzzle-pool .puzzle-piece');
     const piecesInPool = Array.from(pools);
-    
     if(piecesInPool.length === 0) return;
     
     const piece = piecesInPool[0];
     const index = piece.getAttribute('data-index');
     const targetSlot = document.getElementById(`slot-${index}`); 
-    
     if(targetSlot && !targetSlot.hasChildNodes()) {
         if(typeof playSound === 'function') playSound('win');
         targetSlot.appendChild(piece);
-        piece.classList.add('correct');
-        piece.onclick = null;
-        pState.correctCount++;
-        
-        pState.hintsLeft--;
-        updateHintUI();
-        
-        checkPuzzleWin();
+        piece.classList.add('correct'); piece.onclick = null; pState.correctCount++;
+        pState.hintsLeft--; updateHintUI(); checkPuzzleWin();
     }
 }
 
 function updateHintUI() {
     for(let i=0; i<5; i++) {
         const bulb = document.getElementById(`bulb-${i}`);
-        if(i < pState.hintsLeft) {
-            bulb.classList.remove('used');
-            bulb.style.opacity = '1';
-            bulb.style.filter = 'grayscale(0%)';
-        } else {
-            bulb.classList.add('used');
-            bulb.style.opacity = '0.3';
-            bulb.style.filter = 'grayscale(100%)';
-        }
+        if(i < pState.hintsLeft) { bulb.classList.remove('used'); bulb.style.opacity = '1'; bulb.style.filter = 'grayscale(0%)'; }
+        else { bulb.classList.add('used'); bulb.style.opacity = '0.3'; bulb.style.filter = 'grayscale(100%)'; }
     }
     const btn = document.querySelector('.tip-btn');
-    if(pState.hintsLeft === 0) {
-        btn.disabled = true;
-        btn.innerText = "OP";
-    } else {
-        btn.innerText = `TIP (${pState.hintsLeft})`;
-    }
+    if(pState.hintsLeft === 0) { btn.disabled = true; btn.innerText = "OP"; } 
+    else { btn.innerText = `TIP (${pState.hintsLeft})`; }
 }
 
 function checkPuzzleWin() {
