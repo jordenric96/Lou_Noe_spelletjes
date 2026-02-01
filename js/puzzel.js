@@ -1,5 +1,5 @@
-// PUZZEL.JS - Side Pools, 5 Tips & JS RESIZE (Fix voor oude tablets)
-console.log("Puzzel.js geladen (JS Resize Fix)...");
+// PUZZEL.JS - Landscape/Portrait Detection
+console.log("Puzzel.js geladen (Auto Orientation)...");
 
 let pState = { 
     img: '', pieces: [], rows: 3, cols: 2, 
@@ -65,7 +65,7 @@ function startPuzzleGame() {
             <button id="start-puzzle-btn" class="start-btn" onclick="initPuzzle()" disabled>Kies eerst een plaatje...</button>
         </div>
     `;
-    pState.playerNames = []; pState.img = ''; pState.difficulty = 'easy'; pState.rows = 3; pState.cols = 2;
+    pState.playerNames = []; pState.img = ''; pState.difficulty = 'easy';
 }
 
 function addPuzzlePlayer(name, icon, btn) {
@@ -88,10 +88,8 @@ function setPuzzleImg(src, btn) {
     document.querySelectorAll('.theme-card-btn').forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); checkPuzzleStart();
 }
 function setPuzzleDiff(diff, btn) {
-    if(typeof playSound === 'function') playSound('click'); pState.difficulty = diff;
-    if(diff === 'easy') { pState.cols = 2; pState.rows = 3; }
-    else if(diff === 'medium') { pState.cols = 4; pState.rows = 5; }
-    else { pState.cols = 5; pState.rows = 6; }
+    if(typeof playSound === 'function') playSound('click'); 
+    pState.difficulty = diff;
     btn.parentElement.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected')); btn.classList.add('selected');
 }
 function checkPuzzleStart() {
@@ -101,30 +99,22 @@ function checkPuzzleStart() {
 
 // --- GAME LOGIC ---
 
-// NIEUWE FUNCTIE: Berekent de grootte in pixels
 function updatePuzzleSize() {
     const wrapper = document.querySelector('.puzzle-board-wrapper');
     const board = document.querySelector('.puzzle-board');
     if (!wrapper || !board) return;
 
-    // Meet de ruimte die we ECHT hebben in het midden
-    const availW = wrapper.clientWidth - 10; // minus padding
+    const availW = wrapper.clientWidth - 10; 
     const availH = wrapper.clientHeight - 10;
 
     if (availW <= 0 || availH <= 0) return;
 
-    // Bereken max grootte per stukje om in de breedte te passen
     const maxPieceW = availW / pState.cols;
-    // Bereken max grootte per stukje om in de hoogte te passen
     const maxPieceH = availH / pState.rows;
 
-    // Kies de kleinste (zodat het altijd past)
     const pieceSize = Math.floor(Math.min(maxPieceW, maxPieceH));
 
-    // Stel de CSS variabelen in op het bord
     board.style.setProperty('--piece-size', `${pieceSize}px`);
-    
-    // Stel exacte breedte/hoogte in (fallback voor oude browsers)
     board.style.width = `${pieceSize * pState.cols}px`;
     board.style.height = `${pieceSize * pState.rows}px`;
 }
@@ -132,6 +122,38 @@ function updatePuzzleSize() {
 function initPuzzle() {
     if(typeof playSound === 'function') playSound('win');
     const board = document.getElementById('game-board');
+    
+    // We tonen even een laad-tekstje terwijl we de foto meten
+    board.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100%;"><h2>Laden...</h2></div>';
+
+    // Foto laden om afmetingen te checken
+    const tempImg = new Image();
+    tempImg.src = pState.img;
+    
+    tempImg.onload = function() {
+        // Bepaal orientatie
+        const isLandscape = tempImg.naturalWidth >= tempImg.naturalHeight;
+        
+        // Stel grid in op basis van moeilijkheid EN orientatie
+        if(pState.difficulty === 'easy') {
+            // 6 stukjes (3x2 of 2x3)
+            pState.cols = isLandscape ? 3 : 2;
+            pState.rows = isLandscape ? 2 : 3;
+        } else if(pState.difficulty === 'medium') {
+            // 20 stukjes (5x4 of 4x5)
+            pState.cols = isLandscape ? 5 : 4;
+            pState.rows = isLandscape ? 4 : 5;
+        } else {
+            // 30 stukjes (6x5 of 5x6)
+            pState.cols = isLandscape ? 6 : 5;
+            pState.rows = isLandscape ? 5 : 6;
+        }
+
+        buildPuzzleBoard(board);
+    };
+}
+
+function buildPuzzleBoard(board) {
     pState.correctCount = 0; pState.selectedPiece = null; pState.hintsLeft = 5;
     
     const totalPieces = pState.rows * pState.cols;
@@ -168,7 +190,6 @@ function initPuzzle() {
     let boardStyle = (pState.difficulty === 'easy') ? `background-image: url('${pState.img}');` : '';
     let previewHTML = (pState.difficulty !== 'easy') ? `<div class="preview-mini"><img src="${pState.img}"></div>` : '';
 
-    // CSS Grid variabelen
     const cssVars = `style="--puz-cols: ${pState.cols}; --puz-rows: ${pState.rows}; ${boardStyle}"`;
 
     let bulbsHTML = '';
@@ -199,7 +220,6 @@ function initPuzzle() {
         </div>
     `;
 
-    // Activeer de resize logica
     updatePuzzleSize();
     window.addEventListener('resize', updatePuzzleSize);
 
