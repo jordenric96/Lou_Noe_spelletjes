@@ -8,7 +8,7 @@ const assetConfig = {
     'studio100': { count: 15, ext: 'png', locked: false },
     'boerderij': { count: 15, ext: 'png', locked: false },
     'dino':      { count: 15, ext: 'jpg', locked: true },
-    'marvel':    { count: 15, ext: 'jpg', locked: true },
+    'marvel':    { count: 15, ext: 'png', locked: false },
     'natuur':    { count: 15, ext: 'jpg', locked: true },
     'beroepen':  { count: 15, ext: 'jpg', locked: true }
 };
