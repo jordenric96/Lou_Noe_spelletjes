@@ -1,157 +1,133 @@
-/* PUZZEL.CSS - DEFINITIEVE VERSIE (Met veilige marges) */
+/* MEMORY.CSS - DEFINITIEVE VERSIE (Met Scorebalk & Full Screen) */
 
-/* --- 1. ALGEMENE SETUP & KNOPPEN --- */
-.option-btn {
-    background: #E0F7FA; border: none; padding: 10px; border-radius: 12px;
-    font-family: 'Fredoka One', cursive; cursor: pointer; transition: 0.2s;
-    min-width: 60px; color: #006064; box-shadow: 0 4px 0 #B2EBF2;
-    display: flex; flex-direction: column; align-items: center; gap: 5px;
+/* --- 1. SETUP & MENU STIJLEN --- */
+.memory-setup { display: flex; flex-direction: column; width: 100%; height: 100%; padding: 15px; background: #F4F7F6; box-sizing: border-box; overflow: hidden; }
+.setup-columns { display: flex; flex-direction: row; gap: 20px; flex: 1; min-height: 0; margin-bottom: 15px; }
+.setup-group { background: white; border-radius: 20px; padding: 15px; flex: 1; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 2px solid #E0F2F1; overflow-y: auto; }
+.setup-group h3 { font-family: 'Fredoka One', cursive; color: #0097A7; margin: 0 0 10px 0; font-size: 1.1rem; }
+
+.option-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%; }
+.option-btn { background: #E0F7FA; border: none; padding: 10px 15px; border-radius: 12px; font-family: 'Fredoka One', cursive; cursor: pointer; min-width: 60px; color: #006064; box-shadow: 0 3px 0 #B2EBF2; }
+.player-btn.selected-pending { background: #FFEB3B; color: #333; border: 2px dashed #F57F17; }
+
+.custom-name-container { display: flex; gap: 5px; width: 90%; margin: 10px 0; }
+#custom-player-name { flex: 1; padding: 8px; border: 2px solid #B2EBF2; border-radius: 10px; }
+.add-btn { background: #FFC107; border: none; padding: 0 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+
+.color-row { display: flex; gap: 10px; margin: 10px 0; justify-content: center; flex-wrap: wrap; }
+.color-dot { width: 32px; height: 32px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer; }
+
+.active-player-tag { padding: 6px 12px; border-radius: 20px; color: white; font-weight: bold; font-size: 0.9rem; margin: 3px; cursor: pointer; }
+
+.theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; width: 100%; }
+.theme-card-btn { background: white; border: 3px solid #ECEFF1; border-radius: 12px; overflow: hidden; cursor: pointer; padding: 0; }
+.theme-card-btn.selected { border-color: #4CAF50; transform: scale(1.03); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+.theme-img-container { width: 100%; aspect-ratio: 16/9; }
+.theme-img-container img { width: 100%; height: 100%; object-fit: cover; }
+
+.start-btn { background: #4CAF50; color: white; border: none; padding: 15px; border-radius: 15px; font-family: 'Fredoka One', cursive; font-size: 1.3rem; box-shadow: 0 5px 0 #2E7D32; cursor: pointer; margin-top: auto; width: 100%; }
+.start-btn:disabled { background: #CFD8DC; box-shadow: none; cursor: not-allowed; }
+
+/* --- 2. GAME BOARD LAYOUT --- */
+.memory-game-container {
+    display: flex; flex-direction: column; align-items: center; 
+    width: 100%; height: 100%;
+    /* Veilige marge zodat kaarten niet tegen de rand plakken */
+    padding: 5px 15px; 
+    box-sizing: border-box;
 }
 
-/* Groene selectie */
-.option-btn.selected, .diff-btn.selected {
-    background-color: #4CAF50 !important; 
-    color: white !important;
-    box-shadow: 0 4px 0 #2E7D32 !important; 
-    transform: translateY(2px);
+/* --- 3. SCOREBORD MET PROGRESS BARS --- */
+.score-board {
+    display: flex; gap: 10px; padding: 5px 10px; margin-bottom: 5px;
+    background: rgba(255,255,255,0.8); border-radius: 30px;
+    flex-shrink: 0;
+    justify-content: center;
+    max-height: 50px;
+    flex-wrap: wrap;
 }
 
-.theme-card-btn.selected { 
-    border: 4px solid #4CAF50 !important; 
-    transform: scale(1.05); 
-}
-
-/* --- 2. GAME LAYOUT (Full Screen) --- */
-.puzzle-game-container {
-    display: flex; flex-direction: column; 
-    width: 100%; height: 100%; 
-    
-    /* VEILIGE MARGES: 15px boven/onder, 30px zijkant tegen afsnijden */
-    padding: 15px 30px; 
-    
-    box-sizing: border-box; 
+.player-badge {
+    position: relative;
+    padding: 4px 15px; 
+    border-radius: 20px; 
+    border: 3px solid; /* Kleur via JS */
+    background: white; 
+    font-weight: bold; font-size: 0.9rem;
     overflow: hidden; 
-    background: #F0F4C3; 
+    display: flex; align-items: center; justify-content: center;
+    min-width: 80px;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-/* HEADER */
-.puzzle-header {
-    display: flex; justify-content: space-between; align-items: center;
-    width: 100%; height: 60px; flex-shrink: 0; margin-bottom: 5px; gap: 5px;
+/* De balk die volloopt */
+.score-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 0%;
+    opacity: 0.3; 
+    transition: width 0.5s ease;
+    z-index: 0;
 }
 
-/* SCOREBORD */
-.puzzle-score {
-    background: white; padding: 5px 15px; border-radius: 20px;
-    border: 3px solid #333; font-family: 'Fredoka One', cursive;
-    font-size: 1.1rem; box-shadow: 0 3px 0 rgba(0,0,0,0.1);
-    white-space: nowrap;
+/* De naam en score tekst */
+.badge-content {
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 0 2px rgba(255,255,255,0.8);
 }
 
-/* TIPS SECTION */
-.hint-container {
-    display: flex; align-items: center; gap: 5px;
-    background: rgba(255,255,255,0.8); padding: 5px 10px; border-radius: 20px;
-    border: 2px solid #fff;
-}
-.bulb-row { display: flex; gap: 1px; }
-.hint-bulb { font-size: 1rem; transition: 0.3s; }
-.hint-bulb.used { transform: scale(0.8); opacity: 0.3; filter: grayscale(100%); }
+.player-badge.active { transform: scale(1.1); }
 
-.tip-btn {
-    background: #FF9800; color: white; border: none; padding: 5px 10px;
-    border-radius: 15px; font-weight: bold; font-family: 'Fredoka One'; font-size: 0.9rem;
-    cursor: pointer; box-shadow: 0 3px 0 #E65100;
-}
-.tip-btn:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
-
-.tool-btn {
-    background: #FF9800; color: white; border: none; padding: 5px 15px;
-    border-radius: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 0 #E65100;
+/* --- 4. DE GRID & KAARTEN --- */
+.memory-grid {
+    display: grid; 
+    /* Grid variabelen via JS */
+    grid-template-columns: repeat(var(--grid-cols, 6), var(--card-size));
+    gap: 4px; 
+    justify-content: center; align-content: center;
+    flex: 1; 
 }
 
-.preview-mini {
-    background: white; padding: 4px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-.preview-mini img { height: 50px; border-radius: 4px; display: block; }
-
-/* --- 3. MAIN AREA --- */
-.puzzle-main-area {
-    display: flex; flex: 1; width: 100%; gap: 15px; min-height: 0; 
-    align-items: center; justify-content: center;
+.memory-card { 
+    position: relative; cursor: pointer; user-select: none;
+    width: var(--card-size);
+    height: var(--card-size);
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
-.side-pool {
-    width: 90px; height: 100%; background: rgba(255,255,255,0.6); 
-    border: 3px solid #fff; border-radius: 15px;
-    display: flex; flex-direction: column; align-items: center;
-    gap: 8px; padding: 10px 5px; overflow-y: auto; flex-shrink: 0; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+.memory-card-inner {
+    width: 100%; height: 100%; position: relative;
+    transform-style: preserve-3d; transition: transform 0.4s;
+    border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+.memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
+
+.card-front, .card-back {
+    position: absolute; width: 100%; height: 100%; 
+    backface-visibility: hidden;
+    border-radius: 8px; border: 2px solid white; overflow: hidden;
+    background: white;
 }
 
-.puzzle-board-wrapper {
-    flex: 1; display: flex; justify-content: center; align-items: center;
-    height: 100%; width: 100%; position: relative; padding: 5px; 
+.card-front { background: linear-gradient(135deg, #4FC3F7, #0288D1); z-index: 2; }
+.card-back { transform: rotateY(180deg); }
+
+/* Images full fit */
+.card-front img, .card-back img { 
+    width: 100% !important; 
+    height: 100% !important; 
+    object-fit: cover !important; 
+    display: block; 
 }
 
-/* --- 4. BORD & STUKJES --- */
-.puzzle-board {
-    display: grid;
-    grid-template-columns: repeat(var(--puz-cols), 1fr);
-    grid-template-rows: repeat(var(--puz-rows), 1fr);
-    max-width: 100%; max-height: 100%;
-    border: 4px solid #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-    background-color: #ddd; background-size: cover; background-position: center;
-    position: relative; gap: 1px; transition: width 0.3s, height 0.3s;
-}
+/* Matched animatie */
+.memory-card.matched .memory-card-inner { animation: popMatch 0.3s; }
+@keyframes popMatch { 50% { transform: scale(1.1); } }
 
-.puzzle-board.ghost-mode::before {
-    content: ''; position: absolute; top:0; left:0; right:0; bottom:0;
-    background: inherit; opacity: 0.3; z-index: 0; pointer-events: none;
-}
-
-.puzzle-slot { 
-    background: rgba(255,255,255,0.2); 
-    border: 1px dashed rgba(0,0,0,0.15); 
-    position: relative; z-index: 1; 
-    display: flex; justify-content: center; align-items: center; 
-    overflow: hidden; 
-}
-
-.puzzle-piece {
-    width: 70px; height: 70px; flex-shrink: 0; 
-    background-repeat: no-repeat; border-radius: 5px;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.3); cursor: pointer; 
-    border: 2px solid white; transition: transform 0.2s, border-color 0.2s; 
-    background-color: #fff; 
-}
-
-.puzzle-slot .puzzle-piece { 
-    width: 100%; height: 100%; 
-    border: none; box-shadow: none; border-radius: 0; 
-}
-
-.puzzle-piece.selected { 
-    transform: scale(1.15); border: 3px solid #2196F3; 
-    z-index: 100; box-shadow: 0 10px 20px rgba(0,0,0,0.4); 
-}
-
-.puzzle-piece.correct { 
-    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-    border: none; z-index: 2; 
-}
-
-.puzzle-piece.wrong { 
-    animation: shake 0.5s; border: 3px solid #F44336; 
-}
-
-@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-@keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-
-/* MOBIEL */
-@media (max-width: 768px) and (orientation: portrait) {
-    .puzzle-game-container { padding: 10px 15px; }
-    .puzzle-main-area { flex-direction: column; }
-    .side-pool { width: 100%; height: 70px; flex-direction: row; overflow-x: auto; overflow-y: hidden; padding: 5px 10px; }
-    .puzzle-board-wrapper { flex: 2; width: 100%; }
-    .puzzle-piece { width: 60px; height: 60px; }
+/* Mobiel responsiviteit */
+@media (max-width: 700px) {
+    .setup-columns { flex-direction: column; }
+    .theme-grid { grid-template-columns: repeat(3, 1fr); }
 }
