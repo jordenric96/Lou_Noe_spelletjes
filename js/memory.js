@@ -1,5 +1,5 @@
-// MEMORY.JS - NaN Fix & Max Screen Fill
-console.log("Memory.js geladen (NaN Fix + Max Fill)...");
+// MEMORY.JS - VISUELE SCORE BALK
+console.log("Memory.js geladen (Visual Score)...");
 
 let memoryState = { 
     theme: 'boerderij', 
@@ -116,7 +116,7 @@ function checkStartButton() {
     const b=document.getElementById('start-btn'); if(b){b.disabled=memoryState.playerNames.length===0; b.innerText=b.disabled?"VOEG SPELER TOE...":"START SPEL ▶️";}
 }
 
-// --- GAME LOGIC (MAX SCREEN SIZE) ---
+// --- GAME LOGIC ---
 
 function updateCardSize() {
     const board = document.getElementById('game-board');
@@ -124,33 +124,26 @@ function updateCardSize() {
     const scoreBoard = document.querySelector('.score-board');
     if (!board || !grid) return;
 
-    // 1. Meet de totale beschikbare hoogte van het venster
     const windowH = window.innerHeight;
     const windowW = window.innerWidth;
-    
-    // 2. Trek de hoogte van de scorebalk en header eraf
-    // We schatten de header+terugknop op 50px, scorebalk op 60px.
-    // We willen GEEN margin rondom de grid, alleen minimale padding.
     const scoreHeight = scoreBoard ? scoreBoard.offsetHeight : 60;
-    const availableHeight = windowH - scoreHeight - 20; // 20px totale marge verticaal
-    const availableWidth = windowW - 10; // 10px totale marge horizontaal
+    
+    // We trekken de header + marge af
+    const availableHeight = windowH - scoreHeight - 20; 
+    const availableWidth = windowW - 10; 
 
-    // 3. Bepaal het rooster (Liggend of Staand)
     let cols = 6, rows = 5;
-    if (availableHeight > availableWidth) { cols = 5; rows = 6; } // Portret modus
+    if (availableHeight > availableWidth) { cols = 5; rows = 6; } // Portret
 
-    // 4. Bereken maximale grootte per kaartje
-    const gap = 4; // Zeer kleine tussenruimte (4px)
+    const gap = 4;
     const gapTotalW = (cols - 1) * gap;
     const gapTotalH = (rows - 1) * gap;
 
     const maxW = (availableWidth - gapTotalW) / cols;
     const maxH = (availableHeight - gapTotalH) / rows;
 
-    // 5. De kleinste wint (zodat het altijd past)
     const finalSize = Math.floor(Math.min(maxW, maxH));
 
-    // 6. Pas toe
     grid.style.setProperty('--card-size', `${finalSize}px`);
     grid.style.setProperty('--grid-cols', cols);
     grid.style.gap = `${gap}px`;
@@ -159,37 +152,42 @@ function updateCardSize() {
 function startMemoryGame() {
     if(typeof playSound === 'function') playSound('win');
     const board = document.getElementById('game-board');
-    memoryState.gridSize = 30;
+    memoryState.gridSize = 30; // Vast
 
-    // RESET SCORES HARD (Fix voor NaN)
+    // Reset scores
     memoryState.scores = {};
     memoryState.playerNames.forEach(p => {
         memoryState.scores[p.name] = 0;
     });
 
-    // HTML opbouw
-    let scoreHTML = `<div class="score-board">${memoryState.playerNames.map((p, i) => `<div class="player-badge" id="badge-${i}" style="border-color:${p.color}; color:${p.color}"><span class="badge-name">${p.name}</span>: <span id="score-${i}">0</span></div>`).join('')}</div>`;
+    // Scorebord HTML met PROGRESS BAR
+    let scoreHTML = `<div class="score-board">
+        ${memoryState.playerNames.map((p, i) => `
+            <div class="player-badge" id="badge-${i}" style="border-color:${p.color}">
+                <div class="score-fill" id="fill-${i}" style="background-color:${p.color}; width:0%;"></div>
+                
+                <span class="badge-content" style="color:${p.color}">
+                    ${p.name}: <span id="score-${i}">0</span>
+                </span>
+            </div>
+        `).join('')}
+    </div>`;
+
     board.innerHTML = `<div class="memory-game-container">${scoreHTML}<div class="memory-grid" id="memory-grid"></div></div>`;
     
-    // Initialiseer
     updateCardSize();
-
-    // Voeg kaarten toe
     memoryState.matchedPairs = 0; memoryState.flippedCards = []; memoryState.lockBoard = false; memoryState.currentPlayerIndex = 0;
     updateActiveBadgeColor();
     generateCards(30);
 
-    // Blijf luisteren naar schermveranderingen
-    window.onresize = () => {
-        setTimeout(updateCardSize, 50);
-    };
-    setTimeout(updateCardSize, 100); // Dubbele check
+    window.onresize = () => { setTimeout(updateCardSize, 50); };
+    setTimeout(updateCardSize, 100);
 }
 
 function generateCards(totalCards) {
     const grid = document.getElementById('memory-grid');
     const themeData = themes[memoryState.theme];
-    const pairsNeeded = totalCards / 2; // 15
+    const pairsNeeded = totalCards / 2;
     
     let deck = [];
     for (let i = 1; i <= pairsNeeded; i++) deck.push(i, i);
@@ -199,7 +197,6 @@ function generateCards(totalCards) {
     deck.forEach((item) => {
         const card = document.createElement('div');
         card.className = 'memory-card'; card.dataset.value = item;
-        
         card.innerHTML = `
             <div class="memory-card-inner">
                 <div class="card-front"><img src="${themeData.path}cover.png" alt="cover"></div>
@@ -221,16 +218,22 @@ function flipCard() {
         const [c1, c2] = memoryState.flippedCards;
         
         if (c1.dataset.value === c2.dataset.value) {
-            // MATCH
+            // MATCH!
             let p = memoryState.playerNames[memoryState.currentPlayerIndex];
             
-            // NaN SAFETY CHECK
             if (typeof memoryState.scores[p.name] === 'undefined' || isNaN(memoryState.scores[p.name])) {
                 memoryState.scores[p.name] = 0;
             }
 
             memoryState.scores[p.name]++; 
             document.getElementById(`score-${memoryState.currentPlayerIndex}`).innerText = memoryState.scores[p.name];
+            
+            // --- UPDATE PROGRESS BAR ---
+            const totalPairs = memoryState.gridSize / 2;
+            const percentage = (memoryState.scores[p.name] / totalPairs) * 100;
+            const fillBar = document.getElementById(`fill-${memoryState.currentPlayerIndex}`);
+            if(fillBar) fillBar.style.width = `${percentage}%`;
+            // ---------------------------
             
             memoryState.matchedPairs++; 
             c1.classList.add('matched'); c2.classList.add('matched');
@@ -248,7 +251,6 @@ function flipCard() {
                 }, 500);
             }
         } else {
-            // GEEN MATCH
             setTimeout(() => { 
                 c1.classList.remove('flipped'); c2.classList.remove('flipped'); 
                 memoryState.flippedCards = []; memoryState.lockBoard = false; 
@@ -258,4 +260,23 @@ function flipCard() {
     }
 }
 function switchPlayer() { memoryState.currentPlayerIndex = (memoryState.currentPlayerIndex + 1) % memoryState.playerNames.length; updateActiveBadgeColor(); }
-function updateActiveBadgeColor() { memoryState.playerNames.forEach((p, i) => { let b = document.getElementById(`badge-${i}`); if(b) { const a = i === memoryState.currentPlayerIndex; b.classList.toggle('active', a); b.style.backgroundColor = a ? p.color : 'white'; b.style.color = a ? 'white' : p.color; } }); }
+
+function updateActiveBadgeColor() { 
+    memoryState.playerNames.forEach((p, i) => { 
+        let b = document.getElementById(`badge-${i}`); 
+        let txt = b.querySelector('.badge-content');
+        
+        if(b) { 
+            const active = i === memoryState.currentPlayerIndex; 
+            b.classList.toggle('active', active); 
+            
+            // Als actief: Iets groter maken en duidelijke schaduw
+            // De kleur zit al in de border en de balk
+            if(active) {
+                b.style.boxShadow = `0 0 10px ${p.color}`;
+            } else {
+                b.style.boxShadow = "none";
+            }
+        } 
+    }); 
+}
