@@ -1,5 +1,5 @@
-// MEMORY.JS - VISUELE SCORE BALK
-console.log("Memory.js geladen (Visual Score)...");
+// MEMORY.JS - VEILIGE MARGES
+console.log("Memory.js geladen (Safe Margins)...");
 
 let memoryState = { 
     theme: 'boerderij', 
@@ -20,8 +20,8 @@ const themes = {
     'mario':     { locked: false, extension: 'png', path: 'assets/images/memory/mario/' },
     'pokemon':   { locked: false, extension: 'png', path: 'assets/images/memory/pokemon/' },
     'studio100': { locked: false, extension: 'png', path: 'assets/images/memory/studio100/' },
+    'marvel':    { locked: false, extension: 'jpg', path: 'assets/images/memory/marvel/' },
     'dino':      { locked: true, extension: 'jpg', path: 'assets/images/memory/dino/' },
-    'marvel':    { locked: false, extension: 'png', path: 'assets/images/memory/marvel/' },
     'natuur':    { locked: true, extension: 'jpg', path: 'assets/images/memory/natuur/' },
     'beroepen':  { locked: true, extension: 'jpg', path: 'assets/images/memory/beroepen/' }
 };
@@ -128,9 +128,12 @@ function updateCardSize() {
     const windowW = window.innerWidth;
     const scoreHeight = scoreBoard ? scoreBoard.offsetHeight : 60;
     
-    // We trekken de header + marge af
-    const availableHeight = windowH - scoreHeight - 20; 
-    const availableWidth = windowW - 10; 
+    // --- HIER IS DE AANPASSING ---
+    // We trekken nu 30px van de hoogte af en 40px van de breedte.
+    // Dit zorgt voor een veilige marge aan alle kanten.
+    const availableHeight = windowH - scoreHeight - 30; 
+    const availableWidth = windowW - 40; 
+    // -----------------------------
 
     let cols = 6, rows = 5;
     if (availableHeight > availableWidth) { cols = 5; rows = 6; } // Portret
@@ -165,7 +168,6 @@ function startMemoryGame() {
         ${memoryState.playerNames.map((p, i) => `
             <div class="player-badge" id="badge-${i}" style="border-color:${p.color}">
                 <div class="score-fill" id="fill-${i}" style="background-color:${p.color}; width:0%;"></div>
-                
                 <span class="badge-content" style="color:${p.color}">
                     ${p.name}: <span id="score-${i}">0</span>
                 </span>
@@ -233,7 +235,6 @@ function flipCard() {
             const percentage = (memoryState.scores[p.name] / totalPairs) * 100;
             const fillBar = document.getElementById(`fill-${memoryState.currentPlayerIndex}`);
             if(fillBar) fillBar.style.width = `${percentage}%`;
-            // ---------------------------
             
             memoryState.matchedPairs++; 
             c1.classList.add('matched'); c2.classList.add('matched');
@@ -264,19 +265,11 @@ function switchPlayer() { memoryState.currentPlayerIndex = (memoryState.currentP
 function updateActiveBadgeColor() { 
     memoryState.playerNames.forEach((p, i) => { 
         let b = document.getElementById(`badge-${i}`); 
-        let txt = b.querySelector('.badge-content');
-        
         if(b) { 
             const active = i === memoryState.currentPlayerIndex; 
             b.classList.toggle('active', active); 
-            
-            // Als actief: Iets groter maken en duidelijke schaduw
-            // De kleur zit al in de border en de balk
-            if(active) {
-                b.style.boxShadow = `0 0 10px ${p.color}`;
-            } else {
-                b.style.boxShadow = "none";
-            }
+            if(active) { b.style.boxShadow = `0 0 10px ${p.color}`; } 
+            else { b.style.boxShadow = "none"; }
         } 
     }); 
 }
