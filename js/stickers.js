@@ -1,61 +1,97 @@
-// STICKERS.JS - Config & Stickerboek
-console.log("Stickers.js geladen");
+// STICKERS.JS - SLIM STICKERBOEK (Gekoppeld aan Memory)
+console.log("Stickers.js geladen (Smart Mode)...");
 
-// Centrale configuratie (wordt ook door Puzzel gebruikt)
-const assetConfig = {
-    'mario':     { count: 15, ext: 'png', locked: false },
-    'pokemon':   { count: 15, ext: 'png', locked: false },
-    'studio100': { count: 15, ext: 'png', locked: false },
-    'boerderij': { count: 15, ext: 'png', locked: false },
-    'dino':      { count: 15, ext: 'png', locked: true },
-    'marvel':    { count: 15, ext: 'png', locked: false },
-    'sonic':    { count: 15, ext: 'png', locked: true },
-    'cars':  { count: 15, ext: 'png', locked: true }
-};
-
-function generateAllStickers() {
-    let all = [];
-    for (const [theme, data] of Object.entries(assetConfig)) {
-        for (let i=1; i<=data.count; i++) {
-            all.push({id:`${theme}-${i}`, src:`assets/images/memory/${theme}/${i}.${data.ext}`});
-        }
+// Functie om ALLE mogelijke stickers te genereren op basis van Memory Thema's
+function getAllStickersList() {
+    let list = [];
+    
+    // Check of memThemes bestaat (uit memory.js)
+    if(typeof memThemes !== 'undefined') {
+        Object.keys(memThemes).forEach(key => {
+            const t = memThemes[key];
+            
+            // We slaan 'mix' en gelockte thema's over (optioneel)
+            // Wil je ook stickers van gelockte thema's zien (als vraagteken)? Haal dan '!t.locked' weg.
+            if(!t.isMix) {
+                // We gaan ervan uit dat elk thema 15 plaatjes heeft
+                for(let i=1; i<=15; i++) {
+                    list.push({
+                        id: `${key}-${i}`, // Unieke ID: b.v. 'mario-1'
+                        src: `${t.path}${i}.${t.extension}`,
+                        theme: key
+                    });
+                }
+            }
+        });
+    } else {
+        console.warn("Memory.js is nog niet geladen! Kan geen stickers vinden.");
     }
-    return all;
+    return list;
 }
 
 function getUnlockedStickers() { 
     return JSON.parse(localStorage.getItem('myStickers') || '[]'); 
 }
 
+// Wordt aangeroepen als je een spel wint
 function unlockRandomSticker() {
-    const all = generateAllStickers(); 
+    const all = getAllStickersList(); 
     const unlocked = getUnlockedStickers();
+    
+    // Zoek stickers die we nog NIET hebben
     const locked = all.filter(s => !unlocked.includes(s.id));
     
-    if (locked.length === 0) return null;
+    if (locked.length === 0) return null; // Alles al verzameld!
     
-    // 30% kans op sticker bij winst
-    if (Math.random() > 0.3) { 
+    // 30% kans om een sticker te krijgen (of 100% als je dat leuker vindt voor Lou)
+    // Zet dit op 1.0 voor ALTIJD prijs.
+    if (Math.random() < 0.4) { 
         const newS = locked[Math.floor(Math.random() * locked.length)];
         unlocked.push(newS.id);
         localStorage.setItem('myStickers', JSON.stringify(unlocked));
-        return newS;
+        return newS; // Geef de nieuwe sticker terug om te laten zien
     }
     return null;
 }
 
 function openStickerBook() {
     const board = document.getElementById('game-board');
-    const unlocked = getUnlockedStickers(); 
-    const all = generateAllStickers();
+    const unlockedIds = getUnlockedStickers(); 
+    const allStickers = getAllStickersList();
     
-    let html = `<div class="sticker-header">Mijn Verzameling (${unlocked.length}/${all.length})</div><div class="sticker-container">`;
-    if(unlocked.length === 0) html += '<div class="empty-msg">Win spelletjes om stickers te verdienen!</div>';
+    let stickersHTML = '';
     
-    all.forEach(s => {
-        if(unlocked.includes(s.id)) html+=`<div class="sticker-slot unlocked"><img src="${s.src}" class="sticker-img"></div>`;
-        else html+=`<div class="sticker-slot locked"><span class="sticker-lock-icon">🔒</span></div>`;
-    });
-    
-    board.innerHTML = html + '</div>';
+    if(allStickers.length === 0) {
+        stickersHTML = '<div class="empty-msg">Laden... (Start eerst memory op)</div>';
+    } else {
+        // We tonen ALLES, maar wat je niet hebt is een vraagteken
+        allStickers.forEach(s => {
+            if(unlockedIds.includes(s.id)) {
+                stickersHTML += `
+                    <div class="sticker-slot" title="${s.theme}">
+                        <img src="${s.src}" class="sticker-img">
+                    </div>`;
+            } else {
+                stickersHTML += `
+                    <div class="sticker-slot locked">
+                        <span class="sticker-locked">❓</span>
+                    </div>`;
+            }
+        });
+    }
+
+    board.innerHTML = `
+        <div class="sticker-game-container">
+            <div class="sticker-header">
+                <button class="tool-btn" onclick="location.reload()">⬅ Terug</button>
+                <div class="sticker-title">Mijn Stickers (${unlockedIds.length}/${allStickers.length})</div>
+                <div style="width:60px"></div> </div>
+            
+            <div class="sticker-book-wrapper">
+                <div class="sticker-book">
+                    ${stickersHTML}
+                </div>
+            </div>
+        </div>
+    `;
 }
