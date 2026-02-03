@@ -1,69 +1,99 @@
-/* STICKERS.CSS - FIX IMAGE SIZES */
+/* STICKERS.CSS - HET SLIMME STICKERBOEK */
 
+.sticker-game-container {
+    display: flex; flex-direction: column;
+    width: 100%; height: 100%;
+    padding: 10px; box-sizing: border-box;
+    font-family: 'Fredoka One', cursive;
+    /* Achtergrond is transparant (komt van body) */
+    background: transparent;
+}
+
+/* HEADER */
 .sticker-header {
-    font-family: 'Fredoka One', cursive;
-    color: #0097A7;
-    font-size: 1.5rem;
-    margin-bottom: 10px;
-    text-align: center;
+    display: flex; justify-content: space-between; align-items: center;
+    height: 60px; flex-shrink: 0; margin-bottom: 10px;
 }
 
-.sticker-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-    padding: 10px;
-    width: 100%;
-    box-sizing: border-box;
-    overflow-y: auto;
-    height: calc(100% - 100px); /* Ruimte overlaten voor header/knoppen */
+.sticker-title {
+    color: white; font-size: 1.5rem; 
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+    background: #FFC107;
+    padding: 5px 20px; border-radius: 20px;
+    box-shadow: 0 4px 0 #FFA000;
 }
 
-/* De kaart waar de sticker in zit */
-.sticker-card {
-    width: 100px;
-    height: 100px;
+/* HET BOEK ZELF (De container) */
+.sticker-book-wrapper {
+    flex: 1;
+    display: flex; justify-content: center;
+    overflow: hidden; /* Zorgt dat scrollbalk IN het boek zit */
+}
+
+.sticker-book {
     background: white;
-    border: 3px solid #B2EBF2;
+    width: 100%; 
+    max-width: 800px; /* NIET HEEL HET SCHERM, MAAR EEN MOOIE BREEDTE */
+    height: 100%;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    border: 8px solid white;
+    padding: 15px;
+    box-sizing: border-box;
+    
+    /* Grid layout voor de stickers */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    grid-auto-rows: 100px;
+    gap: 15px;
+    
+    overflow-y: auto; /* Scrollen binnen het boek */
+    -webkit-overflow-scrolling: touch;
+}
+
+/* EEN STICKER VAKJE */
+.sticker-slot {
+    background: #F5F5F5;
+    border: 2px dashed #DDD;
     border-radius: 15px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    display: flex; justify-content: center; align-items: center;
+    position: relative;
     transition: transform 0.2s;
-    overflow: hidden; /* Zorgt dat niks uitsteekt */
 }
 
-.sticker-card:hover {
-    transform: scale(1.05);
-    border-color: #00BCD4;
+/* HET PLAATJE */
+.sticker-img {
+    width: 90%; height: 90%;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1));
+    transition: transform 0.2s;
 }
 
-/* FIX VOOR MEGA GROTE AFBEELDINGEN */
-.sticker-card img {
-    width: 90%;       /* Niet helemaal tegen de rand */
-    height: 90%;
-    object-fit: contain; /* Zorgt dat de hele afbeelding zichtbaar blijft zonder vervorming */
+.sticker-slot:hover .sticker-img {
+    transform: scale(1.1) rotate(5deg);
 }
 
-.sticker-card.locked {
-    background: #E0F7FA;
-    font-size: 2rem;
-    color: #006064;
-    opacity: 0.7;
+/* LOCKED STICKER (Vraagteken) */
+.sticker-locked {
+    font-size: 2rem; color: #DDD;
+    user-select: none;
 }
 
+/* LEGE MELDING */
 .empty-msg {
-    font-family: 'Fredoka One', cursive;
-    color: #888;
+    grid-column: 1 / -1; /* Over de hele breedte */
+    text-align: center;
+    color: #999;
     margin-top: 50px;
+    font-size: 1.2rem;
 }
 
-/* Voor kleinere schermpjes */
+/* Mobiele aanpassingen */
 @media (max-width: 600px) {
-    .sticker-card {
-        width: 80px;
-        height: 80px;
+    .sticker-book {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        grid-auto-rows: 80px;
+        gap: 10px;
     }
+    .sticker-title { font-size: 1.2rem; }
 }
