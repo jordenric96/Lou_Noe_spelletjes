@@ -1,126 +1,153 @@
-/* MEMORY.CSS - FULL SCREEN & GEEN KADER */
+/* MEMORY.CSS - MODERN & STRAK */
 
-/* --- 1. SETUP SCHERM --- */
-.memory-setup { 
-    display: flex; flex-direction: column; width: 100%; height: 100%; 
-    padding: 15px; box-sizing: border-box; overflow-y: auto; 
-    background: #E0F7FA; /* Lichte achtergrond voor setup */
-}
-
-/* Setup blokken styling... (deze mogen blijven zoals ze waren) */
-.setup-columns { display: flex; flex-direction: row; gap: 20px; flex: 1; min-height: 0; margin-bottom: 15px; }
-.setup-group { background: white; border-radius: 20px; padding: 15px; flex: 1; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); overflow-y: auto; }
-.option-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
-.option-btn { background: #E0F7FA; border: none; padding: 10px; border-radius: 10px; font-family: 'Fredoka One'; cursor: pointer; min-width: 60px; color: #006064; }
-.player-btn.selected-pending { background: #FFEB3B; border: 2px dashed #F57F17; }
-.theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; width: 100%; }
-.theme-card-btn { background: white; border: 3px solid #eee; border-radius: 10px; overflow: hidden; }
-.theme-card-btn.selected { border-color: #4CAF50; transform: scale(1.05); }
-.theme-img-container img { width: 100%; height: 100%; object-fit: cover; }
-.start-btn { background: #4CAF50; color: white; border: none; padding: 15px; border-radius: 15px; font-size: 1.5rem; width: 100%; margin-top: auto; }
-
-
-/* --- 2. HET SPELZELF (DE FIX) --- */
-
+/* --- 1. DE CONTAINER (ACHTERGROND) --- */
 .memory-game-container {
     display: flex; flex-direction: column; align-items: center; 
+    width: 100%; height: 100%;
     
-    /* GEBRUIK 100% VAN HET SCHERM */
-    width: 100%; 
-    height: 100%;
-    
-    /* Vrolijke achtergrond die het hele scherm vult */
-    background: #81D4FA url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M10 50 Q 25 35 40 50 T 70 50 T 100 50" stroke="white" fill="none" stroke-width="2" opacity="0.3"/></svg>');
-    animation: slideClouds 60s linear infinite;
+    /* De bewegende regenboog achtergrond (zoals in het menu) */
+    background: linear-gradient(-45deg, #FFEB3B, #4CAF50, #2196F3, #9C27B0);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
 
-    /* BELANGRIJK: GEEN WIT KADER MEER */
-    border-radius: 0; 
-    box-shadow: none;
-    border: none;
-    
-    /* Alleen minimale padding voor de "notch" van de iPad/iPhone */
-    padding-top: max(5px, env(safe-area-inset-top));
-    padding-bottom: max(5px, env(safe-area-inset-bottom));
-    padding-left: max(5px, env(safe-area-inset-left));
-    padding-right: max(5px, env(safe-area-inset-right));
-    
+    /* Geen wit kader, gewoon full screen */
+    padding: 10px;
     box-sizing: border-box;
+    overflow: hidden;
 }
 
-@keyframes slideClouds { from { background-position: 0 0; } to { background-position: 100% 100%; } }
+/* De animatie voor de achtergrondkleuren */
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
 
+/* --- 2. DE HEADER (Terugknop & Score) --- */
+.memory-header-row {
+    width: 100%; max-width: 800px;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px;
+    padding: 0 5px;
+    z-index: 10;
+}
 
-/* SCOREBORD - Klein en transparant bovenaan */
+/* De Terug-knop: Mooi oranje en rond */
+.back-btn {
+    background: #FF9800; color: white; border: none;
+    padding: 8px 20px; border-radius: 25px;
+    font-family: 'Fredoka One', cursive; font-size: 1rem;
+    box-shadow: 0 4px 0 #E65100;
+    cursor: pointer; transition: transform 0.1s;
+    text-transform: uppercase;
+}
+.back-btn:active { transform: translateY(4px); box-shadow: none; }
+
+/* Het Scorebord: Zwevend en doorzichtig */
 .score-board {
-    display: flex; gap: 10px; padding: 5px 10px; margin-bottom: 0;
-    /* Licht doorzichtig wit, geen hard blok */
-    background: rgba(255,255,255,0.6); 
-    border-radius: 0 0 20px 20px; /* Alleen onderaan rond */
-    
-    flex-shrink: 0; justify-content: center; max-height: 50px; flex-wrap: wrap;
+    display: flex; gap: 10px;
+    background: rgba(255, 255, 255, 0.25); /* Glas effect */
     backdrop-filter: blur(5px);
+    padding: 5px 10px;
+    border-radius: 30px;
+    border: 2px solid rgba(255,255,255,0.4);
 }
 
 .player-badge {
-    position: relative; padding: 4px 12px; border-radius: 20px; 
-    border: 3px solid; background: white; font-weight: bold; font-size: 0.9rem;
-    overflow: hidden; display: flex; align-items: center; justify-content: center;
-    min-width: 80px; transition: transform 0.3s;
+    position: relative; 
+    padding: 5px 15px; 
+    border-radius: 20px; 
+    background: white; 
+    font-weight: bold; font-size: 1rem;
+    min-width: 80px; text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    overflow: hidden;
+    border: 3px solid transparent; /* Wordt ingekleurd door JS */
 }
 
-.score-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; opacity: 0.4; transition: width 0.6s ease; }
-.badge-content { position: relative; z-index: 1; }
-.player-badge.active { transform: scale(1.1); z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+/* De speler die aan de beurt is wordt groter */
+.player-badge.active {
+    transform: scale(1.15);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 5;
+}
 
-
-/* GRID - MOET NU ECHT ALLES PAKKEN */
+/* --- 3. HET GRID (De kaarten) --- */
 .memory-grid {
-    display: grid; 
+    display: grid;
+    /* Variabelen worden door JS ingevuld */
     grid-template-columns: repeat(var(--grid-cols, 6), var(--card-size));
-    
-    /* Zeer kleine gap zodat kaarten groter kunnen zijn */
-    gap: 4px; 
-    
+    gap: 8px; /* Iets meer ruimte tussen kaarten */
     justify-content: center; align-content: center;
-    
-    /* Pak alle beschikbare ruimte in de container */
-    width: 100%; 
-    height: 100%; 
-    flex: 1; 
+    width: 100%; flex: 1;
 }
 
-
-/* KAARTEN */
-.memory-card { 
-    position: relative; cursor: pointer; user-select: none;
+/* --- 4. DE KAARTEN (De fixes!) --- */
+.memory-card {
+    position: relative; cursor: pointer;
     width: var(--card-size); height: var(--card-size);
-    box-sizing: border-box; transition: transform 0.1s;
+    perspective: 1000px;
 }
-.memory-card:active { transform: scale(0.95); }
 
 .memory-card-inner {
     width: 100%; height: 100%; position: relative;
-    transform-style: preserve-3d; transition: transform 0.4s; 
-    border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transform-style: preserve-3d; transition: transform 0.4s;
+    border-radius: 12px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
 }
+
 .memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
 
 .card-front, .card-back {
-    position: absolute; width: 100%; height: 100%; 
-    backface-visibility: hidden; border-radius: 8px; border: 2px solid white; overflow: hidden; background: white;
+    position: absolute; width: 100%; height: 100%;
+    backface-visibility: hidden; 
+    border-radius: 12px; 
+    border: 3px solid white; /* Mooie witte rand om elk plaatje */
+    overflow: hidden;
+    background: white; /* Zorgt dat transparante plaatjes wit zijn */
 }
-.card-front { background: linear-gradient(135deg, #29B6F6, #0277BD); z-index: 2; display:flex; justify-content:center; align-items:center; }
-.card-front::after { content: '★'; color: rgba(255,255,255,0.3); font-size: 2rem; }
-.card-back { transform: rotateY(180deg); }
-.card-front img, .card-back img { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block; }
 
-.memory-card.matched .memory-card-inner { 
-    animation: winnerPulse 0.5s ease-in-out; 
-    box-shadow: 0 0 15px gold; border-color: gold;
+/* VOORKANT (Dicht): Het patroon/Logo */
+.card-front {
+    /* WEG MET DE BLAUWE ACHTERGROND EN DE STERREN */
+    background: linear-gradient(135deg, #ffffff, #f0f0f0);
+    display: flex; justify-content: center; align-items: center;
 }
-@keyframes winnerPulse { 0% { transform: rotateY(180deg) scale(1); } 50% { transform: rotateY(180deg) scale(1.1); } 100% { transform: rotateY(180deg) scale(1); } }
 
-@media (max-width: 700px) {
-    .setup-columns { flex-direction: column; }
-    .theme-grid { grid-template-columns: repeat(3, 1fr); }
+/* FIX: Plaatje vult nu alles netjes */
+.card-front img {
+    width: 90%; height: 90%; /* Iets marge zodat logo niet tegen rand plakt */
+    object-fit: contain; /* Zorgt dat logo niet vervormt */
+}
+
+/* ACHTERKANT (Open): Het plaatje */
+.card-back {
+    transform: rotateY(180deg);
+    background: white;
+}
+.card-back img {
+    width: 100%; height: 100%; 
+    object-fit: cover; /* Vult de hele kaart */
+}
+
+/* Als gevonden: Gouden gloed */
+.memory-card.matched .memory-card-inner {
+    box-shadow: 0 0 15px #FFD700;
+    border-color: #FFD700;
+    animation: popWin 0.4s ease-out;
+}
+
+@keyframes popWin {
+    0% { transform: rotateY(180deg) scale(1); }
+    50% { transform: rotateY(180deg) scale(1.15); }
+    100% { transform: rotateY(180deg) scale(1); }
+}
+
+/* --- SETUP SCHERM (Nog steeds netjes) --- */
+.memory-setup {
+    background: #E3F2FD; 
+    height: 100%; width: 100%;
+    padding: 20px; box-sizing: border-box;
+    display: flex; flex-direction: column;
 }
