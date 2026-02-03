@@ -1,88 +1,132 @@
-/* SCHADUW.CSS - WIE IS HET? */
+/* SCHADUW.CSS - MET DOEL EN PROGRESSIE */
 
 .shadow-game-container {
-    display: flex; flex-direction: column;
+    display: flex; flex-direction: column; align-items: center;
     width: 100%; height: 100%;
+    /* Donkere mysterieuze achtergrond */
+    background: linear-gradient(135deg, #2c3e50, #4ca1af); 
     padding: 10px; box-sizing: border-box;
-    font-family: 'Fredoka One', cursive;
+    overflow: hidden;
+    color: white;
 }
 
-/* HEADER */
+/* HEADER: Terugknop + Progressie */
 .shadow-header {
-    display: flex; justify-content: space-between; align-items: center;
-    height: 60px; flex-shrink: 0;
+    width: 100%; max-width: 600px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
 }
 
-.shadow-score-box {
-    background: white; padding: 5px 20px; border-radius: 20px;
-    font-size: 1.5rem; color: #673AB7; /* Paars */
-    box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+/* PROGRESSIE BALK (De Sterren) */
+.progress-container {
+    background: rgba(0,0,0,0.3);
+    border-radius: 20px;
+    padding: 5px 15px;
+    display: flex; align-items: center; gap: 5px;
+    border: 2px solid rgba(255,255,255,0.2);
 }
 
-/* HET MYSTERIE VAK (Midden) */
+.star-icon {
+    font-size: 1.5rem;
+    color: #555; /* Lege ster is grijs */
+    transition: transform 0.3s, color 0.3s;
+}
+
+.star-icon.earned {
+    color: #FFD700; /* Volle ster is goud */
+    transform: scale(1.3);
+    text-shadow: 0 0 10px #FFD700;
+}
+
+.goal-icon {
+    font-size: 2rem;
+    margin-left: 10px;
+    animation: wiggle 3s infinite;
+}
+
+@keyframes wiggle {
+    0%, 90% { transform: rotate(0deg); }
+    92% { transform: rotate(-10deg); }
+    94% { transform: rotate(10deg); }
+    96% { transform: rotate(-10deg); }
+    98% { transform: rotate(10deg); }
+    100% { transform: rotate(0deg); }
+}
+
+/* HET SPELZELF */
 .shadow-stage {
     flex: 1;
-    display: flex; flex-direction: column;
-    justify-content: center; align-items: center;
-    position: relative;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    width: 100%;
 }
 
 .mystery-card {
-    width: 200px; height: 200px;
+    width: 220px; height: 220px;
+    background: white; border-radius: 20px;
+    padding: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
     display: flex; justify-content: center; align-items: center;
-    /* Een spotlight effect */
-    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
-    animation: floatShadow 3s ease-in-out infinite;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
 }
 
-@keyframes floatShadow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-
 .mystery-img {
-    width: 100%; height: 100%;
-    object-fit: contain;
-    /* DIT IS DE TRUC: Maak het plaatje 100% zwart (schaduw) */
-    filter: brightness(0) contrast(100%);
+    width: 100%; height: 100%; object-fit: contain;
+    filter: brightness(0) blur(0px); /* DIT MAAKT DE SCHADUW (ZWART) */
     transition: filter 0.5s ease;
 }
 
-/* Als het geraden is, toon de kleur weer */
+/* Als geraden: kleur terug */
 .mystery-img.revealed {
-    filter: brightness(1) contrast(100%);
-    transform: scale(1.1);
+    filter: brightness(1) blur(0px);
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    0% { transform: scale(0.5); } 80% { transform: scale(1.1); } 100% { transform: scale(1); }
 }
 
 .shadow-question {
-    font-size: 1.5rem; color: white; margin-top: 20px;
-    text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
-    text-align: center;
+    font-size: 1.5rem; margin-bottom: 20px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
-/* DE ANTWOORDEN (Onderaan) */
+/* ANTWOORDEN */
 .shadow-options {
-    height: 120px; flex-shrink: 0;
-    display: flex; justify-content: center; gap: 20px;
-    padding-bottom: 20px;
+    display: flex; gap: 15px; justify-content: center; width: 100%;
 }
 
 .option-card {
     width: 100px; height: 100px;
-    background: white; border: 4px solid white;
-    border-radius: 15px;
-    cursor: pointer;
+    background: white; border-radius: 15px;
+    padding: 5px; cursor: pointer;
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     transition: transform 0.2s;
-    overflow: hidden;
+    border: 4px solid white;
 }
+.option-card img { width: 100%; height: 100%; object-fit: contain; }
 
-.option-card img {
-    width: 100%; height: 100%; object-fit: contain;
+.option-card:active { transform: scale(0.9); }
+.option-card.correct { border-color: #4CAF50; background: #e8f5e9; }
+.option-card.wrong { border-color: #F44336; background: #ffebee; opacity: 0.6; }
+
+/* BELONING MODAL (Pop-up als je 5 sterren hebt) */
+.reward-modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); z-index: 100;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    animation: fadeIn 0.3s;
 }
-
-.option-card:active { transform: scale(0.95); }
-.option-card.correct { border-color: #4CAF50; background: #C8E6C9; }
-.option-card.wrong { border-color: #F44336; animation: shake 0.4s; opacity: 0.5; }
-
-@media (max-width: 600px) {
-    .mystery-card { width: 150px; height: 150px; }
-    .option-card { width: 80px; height: 80px; }
+.reward-content {
+    background: white; border-radius: 30px; padding: 30px; text-align: center; color: #333;
+    max-width: 90%; box-shadow: 0 0 50px #FFD700;
+    animation: popIn 0.5s;
+}
+.reward-emoji { font-size: 5rem; margin-bottom: 10px; }
+.reward-btn {
+    background: #4CAF50; color: white; border: none; padding: 15px 30px;
+    font-size: 1.2rem; border-radius: 15px; margin-top: 20px;
+    font-family: 'Fredoka One'; cursor: pointer;
+    box-shadow: 0 5px 0 #2E7D32;
 }
