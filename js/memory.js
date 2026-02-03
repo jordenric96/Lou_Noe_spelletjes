@@ -21,7 +21,7 @@ const themes = {
     'pokemon':   { locked: false, extension: 'png', path: 'assets/images/memory/pokemon/' },
     'studio100': { locked: false, extension: 'png', path: 'assets/images/memory/studio100/' },
     'marvel':    { locked: false, extension: 'jpg', path: 'assets/images/memory/marvel/' },
-    'dino':      { locked: true, extension: 'jpg', path: 'assets/images/memory/dino/' },
+    'dino':      { locked: false, extension: 'png', path: 'assets/images/memory/dino/' },
     'natuur':    { locked: true, extension: 'jpg', path: 'assets/images/memory/natuur/' },
     'beroepen':  { locked: true, extension: 'jpg', path: 'assets/images/memory/beroepen/' }
 };
