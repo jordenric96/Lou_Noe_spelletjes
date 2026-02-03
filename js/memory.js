@@ -1,9 +1,9 @@
-// MEMORY.JS - KIDS FUN EDITION (Confetti & Visuals)
-console.log("Memory.js geladen (Kids Edition)...");
+// MEMORY.JS - SPACE EDITION & SMART FIT
+console.log("Memory.js geladen (Space + Smart Fit)...");
 
 let memoryState = { 
     theme: 'boerderij', 
-    gridSize: 30, 
+    gridSize: 30, // 30 kaarten = 15 paren
     playerNames: [], 
     currentPlayerIndex: 0, 
     scores: {}, 
@@ -14,7 +14,8 @@ let memoryState = {
     pendingPlayer: null 
 };
 
-const palette = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#4CAF50', '#FFEB3B', '#FF9800'];
+// Neon Palette voor Space Thema
+const palette = ['#FF0055', '#00E5FF', '#00FF00', '#FFD700', '#BD00FF', '#FF9100'];
 
 const themes = {
     'boerderij': { locked: false, extension: 'png', path: 'assets/images/memory/boerderij/' },
@@ -27,35 +28,30 @@ const themes = {
     'cars':      { locked: false, extension: 'png', path: 'assets/images/memory/beroepen/' }
 };
 
-// --- CONFETTI FUNCTIE (NIEUW) ---
+// --- CONFETTI (STERRENREGEN) ---
 function fireConfetti() {
-    const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'];
+    const colors = ['#00E5FF', '#BD00FF', '#FFFF00', '#FFFFFF'];
     const container = document.body;
-    
-    for(let i=0; i<100; i++) {
+    for(let i=0; i<80; i++) {
         const conf = document.createElement('div');
         conf.style.position = 'fixed';
-        conf.style.width = '10px'; conf.style.height = '10px';
+        conf.style.width = Math.random() * 8 + 4 + 'px';
+        conf.style.height = conf.style.width;
         conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
         conf.style.left = Math.random() * 100 + 'vw';
-        conf.style.top = '-10px';
+        conf.style.top = '-20px';
         conf.style.zIndex = '9999';
-        conf.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
-        conf.style.transform = `rotate(${Math.random() * 360}deg)`;
+        conf.style.borderRadius = '50%'; // Rondjes (planeten)
+        conf.style.boxShadow = `0 0 10px ${conf.style.backgroundColor}`; // Gloed
         
-        // Willekeurige val snelheid
-        const duration = Math.random() * 2 + 1; 
-        conf.style.transition = `top ${duration}s linear, transform ${duration}s linear`;
-        
+        const duration = Math.random() * 2 + 1.5; 
+        conf.style.transition = `top ${duration}s ease-in, opacity ${duration}s`;
         container.appendChild(conf);
         
-        // Start animatie
         setTimeout(() => {
             conf.style.top = '110vh';
-            conf.style.transform = `rotate(${Math.random() * 720}deg)`;
+            conf.style.opacity = '0';
         }, 100);
-
-        // Opruimen
         setTimeout(() => conf.remove(), duration * 1000);
     }
 }
@@ -82,7 +78,7 @@ function startMemorySetup() {
         <div class="memory-setup">
             <div class="setup-columns">
                 <div class="setup-group">
-                    <h3>1. Spelers</h3>
+                    <h3>1. Ruimtevaarders</h3>
                     <div class="option-grid">
                         <button class="option-btn player-btn" onclick="selectPerson('Lou', this)">👦🏼 Lou</button>
                         <button class="option-btn player-btn" onclick="selectPerson('Noé', this)">👶🏼 Noé</button>
@@ -97,7 +93,7 @@ function startMemorySetup() {
                     <div id="active-players-list"></div>
                 </div>
                 <div class="setup-group">
-                    <h3>2. Thema</h3>
+                    <h3>2. Missie (Thema)</h3>
                     <div class="theme-grid">${themeBtns}</div>
                 </div>
             </div>
@@ -107,7 +103,7 @@ function startMemorySetup() {
     renderPalette(); renderActivePlayers(); checkStartButton();
 }
 
-// --- SETUP HELPERS ---
+// --- HELPERS (Setup) ---
 function setTheme(name, btn) {
     if(themes[name].locked) return;
     if(typeof playSound === 'function') playSound('click');
@@ -131,7 +127,7 @@ function renderPalette() {
     const used = memoryState.playerNames.map(p => p.color);
     cp.innerHTML = palette.map(c => {
         const u = used.includes(c);
-        return `<div class="color-dot" style="background:${c}; opacity:${u?0.2:1}" onclick="${u?'':`selectColor('${c}')`}"></div>`;
+        return `<div class="color-dot" style="background:${c}; border-color:${c}; box-shadow:0 0 10px ${c}; opacity:${u?0.2:1}" onclick="${u?'':`selectColor('${c}')`}"></div>`;
     }).join('');
 }
 function selectColor(c) {
@@ -143,15 +139,14 @@ function selectColor(c) {
     renderPalette(); renderActivePlayers(); checkStartButton();
 }
 function renderActivePlayers() {
-    document.getElementById('active-players-list').innerHTML = memoryState.playerNames.map(p=>`<div class="active-player-tag" style="background:${p.color}" onclick="removePlayer('${p.name}')">${p.name} ×</div>`).join('');
+    document.getElementById('active-players-list').innerHTML = memoryState.playerNames.map(p=>`<div class="active-player-tag" style="background:rgba(0,0,0,0.5); border:1px solid ${p.color}; color:${p.color};" onclick="removePlayer('${p.name}')">${p.name} ×</div>`).join('');
 }
 function removePlayer(n) { memoryState.playerNames=memoryState.playerNames.filter(p=>p.name!==n); renderPalette(); renderActivePlayers(); checkStartButton(); }
 function checkStartButton() { 
-    const b=document.getElementById('start-btn'); if(b){b.disabled=memoryState.playerNames.length===0; b.innerText=b.disabled?"VOEG SPELER TOE...":"START SPEL ▶️";}
+    const b=document.getElementById('start-btn'); if(b){b.disabled=memoryState.playerNames.length===0; b.innerText=b.disabled?"Kies bemanningslid...":"LANCEER MISSIE 🚀";}
 }
 
-// --- GAME LOGIC ---
-
+// --- SMART LAYOUT CALCULATION ---
 function updateCardSize() {
     const board = document.getElementById('game-board');
     const grid = document.getElementById('memory-grid');
@@ -160,47 +155,59 @@ function updateCardSize() {
 
     const windowH = window.innerHeight;
     const windowW = window.innerWidth;
+    const scoreHeight = scoreBoard ? scoreBoard.offsetHeight : 70;
+
+    // MARGE: We reserveren nu HARD 80px verticaal en 40px horizontaal
+    // Dit zorgt ervoor dat de kaarten nooit tegen de rand plakken.
+    const availableH = windowH - scoreHeight - 80;
+    const availableW = windowW - 40;
+    const gap = 8;
+
+    // We hebben 30 kaarten. Mogelijke roosters: 
+    // Optie A: 6 kolommen x 5 rijen
+    // Optie B: 5 kolommen x 6 rijen
     
-    // Fallback voor scorebord hoogte
-    const scoreHeight = scoreBoard ? scoreBoard.offsetHeight : 60;
-    
-    const safetyFactor = 0.95;
+    // Bereken grootte kaartje voor Optie A (6x5)
+    const sizeA_W = (availableW - (5 * gap)) / 6;
+    const sizeA_H = (availableH - (4 * gap)) / 5;
+    const sizeA = Math.floor(Math.min(sizeA_W, sizeA_H));
 
-    const availableHeight = (windowH - scoreHeight - 50) * safetyFactor;
-    const availableWidth = (windowW - 40) * safetyFactor;
+    // Bereken grootte kaartje voor Optie B (5x6)
+    const sizeB_W = (availableW - (4 * gap)) / 5;
+    const sizeB_H = (availableH - (5 * gap)) / 6;
+    const sizeB = Math.floor(Math.min(sizeB_W, sizeB_H));
 
-    let cols = 6, rows = 5;
-    if (availableHeight > availableWidth) { cols = 5; rows = 6; } // Portret
+    let finalSize, finalCols;
 
-    const gap = 4;
-    const gapTotalW = (cols - 1) * gap;
-    const gapTotalH = (rows - 1) * gap;
-
-    const maxW = (availableWidth - gapTotalW) / cols;
-    const maxH = (availableHeight - gapTotalH) / rows;
-
-    const finalSize = Math.floor(Math.min(maxW, maxH));
+    // KIES DE GROOTSTE
+    if (sizeA >= sizeB) {
+        finalSize = sizeA;
+        finalCols = 6;
+    } else {
+        finalSize = sizeB;
+        finalCols = 5;
+    }
 
     grid.style.setProperty('--card-size', `${finalSize}px`);
-    grid.style.setProperty('--grid-cols', cols);
+    grid.style.setProperty('--grid-cols', finalCols);
     grid.style.gap = `${gap}px`;
 }
 
 function startMemoryGame() {
     if(typeof playSound === 'function') playSound('win');
     const board = document.getElementById('game-board');
-    memoryState.gridSize = 30; // Vast
+    memoryState.gridSize = 30; 
 
+    // Reset scores
     memoryState.scores = {};
-    memoryState.playerNames.forEach(p => {
-        memoryState.scores[p.name] = 0;
-    });
+    memoryState.playerNames.forEach(p => { memoryState.scores[p.name] = 0; });
 
+    // HUD Scorebord
     let scoreHTML = `<div class="score-board">
         ${memoryState.playerNames.map((p, i) => `
-            <div class="player-badge" id="badge-${i}" style="border-color:${p.color}">
+            <div class="player-badge" id="badge-${i}" style="border-color:${p.color}; color:${p.color}; box-shadow: 0 0 5px ${p.color}">
                 <div class="score-fill" id="fill-${i}" style="background-color:${p.color}; width:0%;"></div>
-                <span class="badge-content" style="color:${p.color}">
+                <span class="badge-content">
                     ${p.name}: <span id="score-${i}">0</span>
                 </span>
             </div>
@@ -209,13 +216,13 @@ function startMemoryGame() {
 
     board.innerHTML = `<div class="memory-game-container">${scoreHTML}<div class="memory-grid" id="memory-grid"></div></div>`;
     
-    setTimeout(updateCardSize, 10);
+    setTimeout(updateCardSize, 50); // Even wachten op render
     
     memoryState.matchedPairs = 0; memoryState.flippedCards = []; memoryState.lockBoard = false; memoryState.currentPlayerIndex = 0;
     updateActiveBadgeColor();
     generateCards(30);
 
-    window.onresize = () => { setTimeout(updateCardSize, 200); };
+    window.onresize = () => { setTimeout(updateCardSize, 100); };
 }
 
 function generateCards(totalCards) {
@@ -252,17 +259,13 @@ function flipCard() {
         const [c1, c2] = memoryState.flippedCards;
         
         if (c1.dataset.value === c2.dataset.value) {
-            // MATCH!
+            // MATCH
             let p = memoryState.playerNames[memoryState.currentPlayerIndex];
-            
-            if (typeof memoryState.scores[p.name] === 'undefined' || isNaN(memoryState.scores[p.name])) {
-                memoryState.scores[p.name] = 0;
-            }
+            if (typeof memoryState.scores[p.name] === 'undefined') memoryState.scores[p.name] = 0;
 
             memoryState.scores[p.name]++; 
             document.getElementById(`score-${memoryState.currentPlayerIndex}`).innerText = memoryState.scores[p.name];
             
-            // Progress Bar
             const totalPairs = memoryState.gridSize / 2;
             const percentage = (memoryState.scores[p.name] / totalPairs) * 100;
             const fillBar = document.getElementById(`fill-${memoryState.currentPlayerIndex}`);
@@ -270,20 +273,23 @@ function flipCard() {
             
             memoryState.matchedPairs++; 
             c1.classList.add('matched'); c2.classList.add('matched');
+            
+            // In space theme: glow effect in player color
             c1.querySelector('.card-back').style.borderColor = p.color; 
+            c1.querySelector('.card-back').style.boxShadow = `0 0 15px ${p.color}`;
             c2.querySelector('.card-back').style.borderColor = p.color;
+            c2.querySelector('.card-back').style.boxShadow = `0 0 15px ${p.color}`;
             
             memoryState.flippedCards = []; memoryState.lockBoard = false;
             
             if(typeof playSound === 'function') playSound('win');
             
-            // WINNAAR!
             if (memoryState.matchedPairs === 15) {
-                fireConfetti(); // VUURWERK!
+                fireConfetti();
                 setTimeout(() => { 
                     let lb = memoryState.playerNames.map(pn => ({name:pn.name, score:memoryState.scores[pn.name]})).sort((a,b)=>b.score-a.score); 
                     showWinnerModal(lb[0].name, lb); 
-                }, 1500); // Iets langer wachten om van confetti te genieten
+                }, 1500);
             }
         } else {
             setTimeout(() => { 
@@ -302,8 +308,9 @@ function updateActiveBadgeColor() {
         if(b) { 
             const active = i === memoryState.currentPlayerIndex; 
             b.classList.toggle('active', active); 
-            if(active) { b.style.boxShadow = `0 0 10px ${p.color}`; } 
-            else { b.style.boxShadow = "none"; }
+            // In space mode: extra felle glow
+            if(active) { b.style.boxShadow = `0 0 25px ${p.color}, inset 0 0 10px ${p.color}`; } 
+            else { b.style.boxShadow = `0 0 5px ${p.color}`; }
         } 
     }); 
 }
