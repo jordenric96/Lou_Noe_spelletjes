@@ -57,3 +57,43 @@ h1 { color: white; text-transform: uppercase; text-shadow: 2px 2px 0 rgba(0,0,0,
 @media (max-width: 600px) {
     .game-card { width: 100%; height: 100px; flex-direction: row; gap: 20px; }
 }
+
+
+/* TOEVOEGEN AAN css/style.css - OPLOSSING VOOR ONZICHTBARE KLEUREN */
+
+.color-row { 
+    display: flex; 
+    gap: 15px; 
+    margin: 15px 0; 
+    justify-content: center; 
+    flex-wrap: wrap; 
+    min-height: 50px; /* Zorg dat de rij altijd ruimte inneemt */
+}
+
+.color-dot { 
+    width: 45px;      /* Breedte is nodig om hem te zien! */
+    height: 45px;     /* Hoogte is nodig! */
+    border-radius: 50%; /* Maakt het een rondje */
+    border: 3px solid white; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); 
+    cursor: pointer; 
+    transition: transform 0.2s; 
+    flex-shrink: 0;   /* Zorgt dat ze niet platgedrukt worden */
+}
+
+.color-dot:hover { 
+    transform: scale(1.1); 
+}
+
+/* Voor de actieve spelers namen (die verschijnen na kiezen) */
+.active-player-tag {
+    display: inline-block;
+    padding: 8px 15px;
+    margin: 5px;
+    border-radius: 20px;
+    color: white;
+    font-weight: bold;
+    font-family: 'Fredoka One', cursive;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    cursor: pointer;
+}
