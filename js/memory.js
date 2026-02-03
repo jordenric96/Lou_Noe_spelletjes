@@ -22,8 +22,8 @@ const themes = {
     'studio100': { locked: false, extension: 'png', path: 'assets/images/memory/studio100/' },
     'marvel':    { locked: false, extension: 'png', path: 'assets/images/memory/marvel/' },
     'dino':      { locked: false, extension: 'png', path: 'assets/images/memory/dino/' },
-    'Sonic':    { locked: false, extension: 'png', path: 'assets/images/memory/natuur/' },
-    'beroepen':  { locked: false, extension: 'png', path: 'assets/images/memory/beroepen/' }
+    'sonic':    { locked: false, extension: 'png', path: 'assets/images/memory/natuur/' },
+    'cars':  { locked: false, extension: 'png', path: 'assets/images/memory/beroepen/' }
 };
 
 // --- SETUP ---
