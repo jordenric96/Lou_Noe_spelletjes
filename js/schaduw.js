@@ -1,5 +1,5 @@
-// SCHADUW.JS - WIE IS HET? (FIXED: MEMTHEMES)
-console.log("Schaduw.js geladen...");
+// SCHADUW.JS - ALLES MOET EEN UITKNIPSEL ZIJN
+console.log("Schaduw.js geladen (Strict Mode)...");
 
 let shadowState = {
     currentImg: null,
@@ -8,9 +8,8 @@ let shadowState = {
     processing: false 
 };
 
-// --- HIER ZAT DE FOUT ---
 function getShadowImages() {
-    // Check nu 'memThemes' in plaats van 'themes'
+    // Check 'memThemes' (uit memory.js)
     if(typeof memThemes !== 'undefined') {
         let pool = [];
         Object.values(memThemes).forEach(t => {
@@ -20,11 +19,11 @@ function getShadowImages() {
         });
         return pool;
     }
-    console.warn("Geen thema's gevonden voor schaduwspel!");
+    console.warn("Geen thema's gevonden! (Check memory.js)");
     return [];
 }
 
-// ... (checkIfCutout blijft hetzelfde) ...
+// Functie: is dit een figuur (true) of een rechthoek (false)?
 function checkIfCutout(src) {
     return new Promise((resolve) => {
         const img = new Image();
@@ -36,14 +35,16 @@ function checkIfCutout(src) {
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0);
             try {
+                // Check 4 hoeken
                 const corners = [
                     ctx.getImageData(0, 0, 1, 1).data[3],
                     ctx.getImageData(img.width-1, 0, 1, 1).data[3],
                     ctx.getImageData(0, img.height-1, 1, 1).data[3],
                     ctx.getImageData(img.width-1, img.height-1, 1, 1).data[3]
                 ];
+                // Als alle hoeken zichtbaar zijn (>200 alpha), is het een rechthoek
                 const isRectangle = corners.every(alpha => alpha > 200); 
-                resolve(!isRectangle);
+                resolve(!isRectangle); // Return TRUE als het GEEN rechthoek is
             } catch (e) { resolve(true); }
         };
         img.onerror = () => resolve(false);
@@ -74,6 +75,22 @@ function startShadowGame() {
     nextShadowRound();
 }
 
+// HULPFUNCTIE: Zoek een willekeurig GOED plaatje
+async function findRandomCutout(pool, excludeList = []) {
+    // Probeer maximaal 20 keer een willekeurige te pakken die goed is
+    for(let i=0; i<20; i++) {
+        const randomSrc = pool[Math.floor(Math.random() * pool.length)];
+        
+        // Mag niet in de exclude lijst staan (zodat we geen dubbele hebben)
+        if(excludeList.includes(randomSrc)) continue;
+
+        // Check of het een cutout is
+        const isGood = await checkIfCutout(randomSrc);
+        if(isGood) return randomSrc;
+    }
+    return null; // Niks gevonden na 20 pogingen
+}
+
 async function nextShadowRound() {
     if(shadowState.processing) return;
     shadowState.processing = true;
@@ -90,32 +107,38 @@ async function nextShadowRound() {
     txtEl.innerText = "Zoeken...";
     optContainer.innerHTML = ''; 
 
-    // OPHALEN
     let pool = getShadowImages();
-    
-    // CHECK
     if(pool.length < 3) { 
-        txtEl.innerText = "Niet genoeg plaatjes!";
-        alert("Niet genoeg plaatjes gevonden! (Check of memory.js geladen is)"); 
-        shadowState.processing = false;
+        txtEl.innerText = "Te weinig plaatjes!"; 
+        shadowState.processing = false; 
         return; 
     }
     
-    pool.sort(() => 0.5 - Math.random());
-    let correctImg = null;
-
-    for(let i=0; i<Math.min(pool.length, 10); i++) {
-        let candidate = pool[i];
-        let isGood = await checkIfCutout(candidate);
-        if(isGood) { correctImg = candidate; break; }
+    // STAP 1: Zoek het goede antwoord (Mysterie)
+    const correctImg = await findRandomCutout(pool, []);
+    
+    if(!correctImg) {
+        txtEl.innerText = "Geen geschikt plaatje gevonden...";
+        shadowState.processing = false;
+        return;
     }
-    if(!correctImg) correctImg = pool[0];
+
     shadowState.currentImg = correctImg;
 
-    let wrong1 = correctImg; 
-    while(wrong1 === correctImg) wrong1 = pool[Math.floor(Math.random() * pool.length)];
-    let wrong2 = correctImg;
-    while(wrong2 === correctImg || wrong2 === wrong1) wrong2 = pool[Math.floor(Math.random() * pool.length)];
+    // STAP 2: Zoek 2 FOUTE antwoorden die OOK cutouts zijn
+    // We geven [correctImg] mee zodat hij die niet kiest
+    const wrong1 = await findRandomCutout(pool, [correctImg]);
+    
+    // We geven [correctImg, wrong1] mee zodat hij die niet kiest
+    const wrong2 = await findRandomCutout(pool, [correctImg, wrong1]);
+
+    // Als we geen goede opties konden vinden (zeldzaam), stop dan even
+    if(!wrong1 || !wrong2) {
+        txtEl.innerText = "Even opnieuw proberen...";
+        shadowState.processing = false;
+        setTimeout(nextShadowRound, 100);
+        return;
+    }
 
     let options = [correctImg, wrong1, wrong2];
     options.sort(() => 0.5 - Math.random());
