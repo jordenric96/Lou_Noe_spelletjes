@@ -23,7 +23,7 @@ const themes = {
     'marvel':    { locked: false, extension: 'png', path: 'assets/images/memory/marvel/' },
     'dino':      { locked: false, extension: 'png', path: 'assets/images/memory/dino/' },
     'Sonic':    { locked: false, extension: 'png', path: 'assets/images/memory/natuur/' },
-    'beroepen':  { locked: true, extension: 'jpg', path: 'assets/images/memory/beroepen/' }
+    'beroepen':  { locked: false, extension: 'png', path: 'assets/images/memory/beroepen/' }
 };
 
 // --- SETUP ---
