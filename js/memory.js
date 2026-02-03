@@ -1,5 +1,5 @@
-// MEMORY.JS - COMPLEET (SETUP + GAME)
-console.log("Memory.js geladen (Full Version)...");
+// MEMORY.JS - FINAL TOUCH
+console.log("Memory.js geladen (Final)...");
 
 let memoryState = { 
     theme: 'boerderij', 
@@ -17,7 +17,7 @@ let memoryState = {
 // 12 KLEUREN
 const memPalette = ['#F44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#00BCD4', '#009688', '#4CAF50', '#8BC34A', '#FFC107', '#FF9800'];
 
-// THEMA'S (Wordt ook door Puzzel, Schaduw & Tellen gebruikt)
+// THEMA'S
 const memThemes = {
     'boerderij': { locked: false, extension: 'png', path: 'assets/images/memory/boerderij/' },
     'mario':     { locked: false, extension: 'png', path: 'assets/images/memory/mario/' },
@@ -29,6 +29,9 @@ const memThemes = {
     'cars':      { locked: false, extension: 'png', path: 'assets/images/memory/beroepen/' },
     'mix':       { locked: false, extension: 'png', path: '', isMix: true }
 };
+
+// DATA URI VOOR MIX COVER (Vraagteken Icoon) - Werkt altijd!
+const mixCoverIcon = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23FF9800' stroke='white' stroke-width='5'/%3E%3Ctext x='50' y='70' font-family='Arial' font-size='60' font-weight='bold' fill='white' text-anchor='middle'%3E?%3C/text%3E%3C/svg%3E";
 
 // --- CONFETTI ---
 function memFireConfetti() {
@@ -47,16 +50,16 @@ function memFireConfetti() {
     }
 }
 
-// --- DEEL 1: SETUP SCHERM (COMPACT) ---
+// --- SETUP SCHERM ---
 function startMemorySetup() {
     const board = document.getElementById('game-board');
     if (!board) return;
 
-    // Thema's genereren (compact)
     let themeBtns = Object.keys(memThemes).map(key => {
         const t = memThemes[key];
         const selected = memoryState.theme === key ? 'selected' : '';
-        let imgTag = t.isMix ? `<div style="font-size:2rem;">🔀</div>` : `<img src="${t.path}cover.png" onerror="this.src='assets/images/icon.png'">`;
+        // Gebruik de Data URI voor Mix icoon
+        let imgTag = t.isMix ? `<img src="${mixCoverIcon}">` : `<img src="${t.path}cover.png" onerror="this.src='assets/images/icon.png'">`;
 
         return `
             <div class="theme-card-btn ${t.locked ? 'locked' : ''} ${selected}" onclick="memSetTheme('${key}', this)">
@@ -68,34 +71,33 @@ function startMemorySetup() {
     board.innerHTML = `
         <div class="memory-setup">
             <div class="setup-group">
-                <h3>1. Wie speelt er mee?</h3>
-                
+                <h3>1. Spelers</h3>
                 <div class="name-row">
                     <button class="player-btn" onclick="memSelectPerson('Lou', this)">👦🏼 Lou</button>
                     <button class="player-btn" onclick="memSelectPerson('Noé', this)">👶🏼 Noé</button>
                     <button class="player-btn" onclick="memSelectPerson('Mama', this)">👩🏻 Mama</button>
                     <button class="player-btn" onclick="memSelectPerson('Papa', this)">👨🏻 Papa</button>
                 </div>
-
-                <div style="display:flex; gap:5px; margin-top:10px;">
-                    <input type="text" id="mem-custom-name" placeholder="Naam..." style="width:80px; padding:5px; border-radius:10px; border:1px solid #ccc;">
-                    <button class="add-btn" onclick="memAddCustomPerson()" style="padding:5px 10px; border-radius:10px; background:#4CAF50; color:white; border:none;">OK</button>
+                
+                <div style="display:flex; gap:5px; margin-top:10px; justify-content:center;">
+                    <input type="text" id="mem-custom-name" placeholder="Naam..." style="width:100px; padding:8px; border-radius:10px; border:1px solid #ccc;">
+                    <button class="add-btn" onclick="memAddCustomPerson()" style="padding:8px 15px; border-radius:10px; background:#4CAF50; color:white; border:none;">OK</button>
                 </div>
 
-                <div class="color-scroll-container" id="mem-color-palette"></div>
+                <div class="color-grid-6" id="mem-color-palette"></div>
                 <div id="mem-active-players"></div>
             </div>
 
             <div class="setup-group">
-                <h3>2. Kies een Thema</h3>
-                <div class="theme-scroll-wrapper">
+                <h3>2. Thema</h3>
+                <div class="theme-grid-wrapper">
                     ${themeBtns}
                 </div>
             </div>
 
             <div class="bottom-actions">
                 <button id="mem-start-btn" class="start-btn" onclick="startMemoryGame()" disabled>Eerst spelers kiezen...</button>
-                <button class="tool-btn" onclick="location.reload()">⬅ Menu</button>
+                <button class="tool-btn" onclick="location.reload()">⬅ Terug naar Menu</button>
             </div>
         </div>`;
     
@@ -146,7 +148,7 @@ function memCheckStartButton() {
     if(b){ b.disabled=memoryState.playerNames.length===0; b.innerText=b.disabled?"SPELERS KIEZEN...":"START SPEL ▶️"; }
 }
 
-// --- DEEL 2: HET SPEL STARTEN ---
+// --- GAME LOGIC ---
 function startMemoryGame() {
     if(typeof playSound === 'function') playSound('win');
     const board = document.getElementById('game-board');
@@ -154,10 +156,9 @@ function startMemoryGame() {
     memoryState.scores = {};
     memoryState.playerNames.forEach(p => { memoryState.scores[p.name] = 0; });
     
-    // HEADER HTML
+    // NIEUWE HEADER: Alleen Scorebord (Terug knop is nu footer)
     let headerHTML = `
     <div class="memory-header-row">
-        <button class="back-btn" onclick="startMemorySetup()">⬅ Terug</button>
         <div class="score-board">
             ${memoryState.playerNames.map((p, i) => `
                 <div class="player-badge" id="badge-${i}" style="border-color:${p.color}">
@@ -167,7 +168,13 @@ function startMemoryGame() {
         </div>
     </div>`;
 
-    board.innerHTML = `<div class="memory-game-container">${headerHTML}<div class="memory-grid" id="memory-grid"></div></div>`;
+    // TERUG KNOP (FOOTER)
+    let footerHTML = `
+    <div class="memory-footer">
+        <button class="mini-back-btn" onclick="startMemorySetup()">⬅ Terug</button>
+    </div>`;
+
+    board.innerHTML = `<div class="memory-game-container">${headerHTML}<div class="memory-grid" id="memory-grid"></div>${footerHTML}</div>`;
     
     setTimeout(memUpdateCardSize, 20); 
     
@@ -186,11 +193,12 @@ function memUpdateCardSize() {
     
     const windowH = window.innerHeight;
     const windowW = window.innerWidth;
-    const headerH = header ? header.offsetHeight : 60;
-    const availableH = windowH - headerH - 20; 
+    const headerH = header ? header.offsetHeight : 50;
+    const footerH = 40; // Ruimte voor kleine knop beneden
+    const availableH = windowH - headerH - footerH - 20; 
     const availableW = windowW - 20;
     
-    const gap = 8;
+    const gap = 6;
     const sizeA_W = (availableW - (5 * gap)) / 6;
     const sizeA_H = (availableH - (4 * gap)) / 5;
     const sizeA = Math.floor(Math.min(sizeA_W, sizeA_H));
@@ -212,7 +220,8 @@ function memGenerateCards(totalCards) {
     let selectedImages = [];
     const isMix = memThemes[memoryState.theme].isMix;
 
-    const mixCover = 'assets/images/icon.png'; 
+    // GEBRUIK ONZE SVG ICON ALS COVER VOOR MIX
+    const mixCover = mixCoverIcon;
 
     if(isMix) {
         let allPool = [];
