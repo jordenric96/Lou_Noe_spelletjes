@@ -1,99 +1,51 @@
-/* STYLE.CSS - ALGEMENE BASIS (FULL SCREEN FIX) */
+/* AANPASSINGEN VOOR COMPACTHEID & KLEUREN */
 
-body, html {
-    margin: 0; padding: 0; 
-    width: 100%; height: 100%;
-    /* Voorkom scrollen en stuiteren op iPad/iPhone */
-    overflow: hidden; 
-    overscroll-behavior: none;
-    touch-action: none;
-    font-family: 'Fredoka One', cursive;
-    background-color: #29B6F6; /* Fallback kleur */
+/* De rij met kleuren */
+.color-row {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px; /* Iets minder ruimte tussen bollen */
+    padding: 5px;
+    margin-bottom: 10px;
 }
 
-/* DE CONTAINER WAARIN ALLE SPELLEN LADEN */
-#game-board {
-    position: absolute; 
-    top: 0; left: 0; 
-    width: 100%; height: 100%;
-    
-    /* BELANGRIJK: Alles op 0 zetten */
-    padding: 0; margin: 0;
-    border: none;
-    
-    /* Zorg dat dit bovenop het menu komt als het actief is */
-    z-index: 20;
-    display: none; /* Standaard verborgen tot je een spel kiest */
+/* De kleurenbollen zelf */
+.color-dot {
+    width: 35px !important;  /* Iets kleiner voor mobiel */
+    height: 35px !important;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: transform 0.2s;
 }
 
-/* HET HOOFDMENU (Mag wel scrollen) */
-#main-menu {
-    position: absolute; top: 0; left: 0; 
-    width: 100%; height: 100%;
-    overflow-y: auto; -webkit-overflow-scrolling: touch;
-    z-index: 10;
-    
-    /* Vrolijke achtergrond voor het menu */
-    background: linear-gradient(-45deg, #FFEB3B, #4CAF50, #2196F3, #9C27B0);
-    background-size: 400% 400%;
-    animation: gradientBG 15s ease infinite;
-    
-    display: flex; flex-direction: column; align-items: center;
-    padding: 20px; box-sizing: border-box;
-}
+.color-dot:hover { transform: scale(1.1); }
 
-@keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-h1 { color: white; text-transform: uppercase; text-shadow: 2px 2px 0 rgba(0,0,0,0.2); margin-bottom: 30px; font-size: 3rem; text-align: center; }
-.game-selection { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; width: 100%; max-width: 800px; padding-bottom: 50px; }
-.game-card { background: white; border-radius: 25px; width: 200px; height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.15); color: #0097A7; }
-.game-icon { font-size: 4rem; margin-bottom: 10px; }
-.game-title { font-size: 1.5rem; }
-
-@media (max-width: 600px) {
-    .game-card { width: 100%; height: 100px; flex-direction: row; gap: 20px; }
-}
-
-
-/* TOEVOEGEN AAN css/style.css - OPLOSSING VOOR ONZICHTBARE KLEUREN */
-
-.color-row { 
-    display: flex; 
-    gap: 15px; 
-    margin: 15px 0; 
-    justify-content: center; 
-    flex-wrap: wrap; 
-    min-height: 50px; /* Zorg dat de rij altijd ruimte inneemt */
-}
-
-.color-dot { 
-    width: 45px;      /* Breedte is nodig om hem te zien! */
-    height: 45px;     /* Hoogte is nodig! */
-    border-radius: 50%; /* Maakt het een rondje */
-    border: 3px solid white; 
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2); 
-    cursor: pointer; 
-    transition: transform 0.2s; 
-    flex-shrink: 0;   /* Zorgt dat ze niet platgedrukt worden */
-}
-
-.color-dot:hover { 
-    transform: scale(1.1); 
-}
-
-/* Voor de actieve spelers namen (die verschijnen na kiezen) */
+/* Actieve speler tags (compacter) */
 .active-player-tag {
     display: inline-block;
-    padding: 8px 15px;
-    margin: 5px;
-    border-radius: 20px;
-    color: white;
-    font-weight: bold;
-    font-family: 'Fredoka One', cursive;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    padding: 5px 12px;
+    margin: 3px;
+    font-size: 0.9rem;
+    border-radius: 15px;
+    color: white; font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     cursor: pointer;
+}
+
+/* Zorg dat de setup kolommen op mobiel onder elkaar staan en niet te breed zijn */
+@media (max-width: 600px) {
+    .memory-setup { padding: 10px; }
+    .setup-group { padding: 10px; margin-bottom: 10px; }
+    h3 { margin: 5px 0 10px 0; font-size: 1.1rem; }
+    
+    /* Maak de thema knoppen iets kleiner */
+    .theme-grid { 
+        grid-template-columns: repeat(3, 1fr); /* 3 naast elkaar op mobiel */
+        gap: 8px;
+    }
+    .theme-card-btn { height: 80px; }
+    .btn-label { font-size: 0.7rem; padding: 3px; }
 }
