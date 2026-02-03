@@ -1,0 +1,88 @@
+/* REKENEN.CSS - TELLEN & TIKKEN */
+
+.math-game-container {
+    display: flex; flex-direction: column;
+    width: 100%; height: 100%;
+    padding: 10px; box-sizing: border-box;
+    font-family: 'Fredoka One', cursive;
+    /* Geen wit kader */
+    background: transparent;
+}
+
+/* HEADER */
+.math-header {
+    display: flex; justify-content: space-between; align-items: center;
+    height: 60px; flex-shrink: 0;
+}
+
+.math-score-box {
+    background: white; padding: 5px 20px; border-radius: 20px;
+    font-size: 1.5rem; color: #FF9800;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+}
+
+/* HET SPEELVELD (Waar plaatjes komen) */
+.math-play-area {
+    flex: 1; /* Vul de ruimte */
+    position: relative;
+    border-radius: 20px;
+    margin: 10px 0;
+    /* Een wolkje of cirkel waar de items in verschijnen */
+    background: rgba(255,255,255,0.6);
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+    display: flex; justify-content: center; align-items: center;
+    flex-wrap: wrap; /* Laat items omlopen */
+    align-content: center; /* Centreer verticaal */
+    gap: 10px;
+    overflow: hidden;
+}
+
+/* De items die geteld moeten worden */
+.count-item {
+    width: 80px; height: 80px;
+    object-fit: contain;
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2));
+}
+
+@keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+
+/* De Vraag (Optioneel icoon) */
+.math-question-icon {
+    position: absolute; top: 10px; left: 10px;
+    font-size: 2rem; opacity: 0.5;
+}
+
+/* HET TOETSENBORD (1-10) */
+.math-numpad {
+    height: auto; flex-shrink: 0;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* 5 op een rij */
+    gap: 10px;
+    padding: 10px;
+    background: rgba(255,255,255,0.8);
+    border-radius: 20px;
+}
+
+.num-btn {
+    background: white; border: none;
+    aspect-ratio: 1/1; /* Vierkant */
+    border-radius: 15px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 2rem; color: #0097A7;
+    box-shadow: 0 6px 0 #B2EBF2;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.num-btn:active { transform: translateY(6px); box-shadow: none; }
+.num-btn.correct { background: #4CAF50; color: white; box-shadow: 0 6px 0 #2E7D32; }
+.num-btn.wrong { background: #F44336; color: white; box-shadow: 0 6px 0 #B71C1C; animation: shake 0.4s; }
+
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+/* Voor kleine schermpjes: Items kleiner */
+@media (max-width: 600px) {
+    .count-item { width: 50px; height: 50px; }
+    .num-btn { font-size: 1.5rem; }
+}
