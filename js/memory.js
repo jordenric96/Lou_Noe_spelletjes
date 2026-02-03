@@ -1,9 +1,9 @@
-// MEMORY.JS - TABLET SAFE FIT (95% Factor)
-console.log("Memory.js geladen (Tablet Safe Fit)...");
+// MEMORY.JS - KIDS FUN EDITION (Confetti & Visuals)
+console.log("Memory.js geladen (Kids Edition)...");
 
 let memoryState = { 
     theme: 'boerderij', 
-    gridSize: 30, // VAST OP 30
+    gridSize: 30, 
     playerNames: [], 
     currentPlayerIndex: 0, 
     scores: {}, 
@@ -15,6 +15,7 @@ let memoryState = {
 };
 
 const palette = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#4CAF50', '#FFEB3B', '#FF9800'];
+
 const themes = {
     'boerderij': { locked: false, extension: 'png', path: 'assets/images/memory/boerderij/' },
     'mario':     { locked: false, extension: 'png', path: 'assets/images/memory/mario/' },
@@ -22,9 +23,42 @@ const themes = {
     'studio100': { locked: false, extension: 'png', path: 'assets/images/memory/studio100/' },
     'marvel':    { locked: false, extension: 'png', path: 'assets/images/memory/marvel/' },
     'dino':      { locked: false, extension: 'png', path: 'assets/images/memory/dino/' },
-    'sonic':    { locked: false, extension: 'png', path: 'assets/images/memory/natuur/' },
-    'cars':  { locked: false, extension: 'png', path: 'assets/images/memory/beroepen/' }
+    'sonic':     { locked: false, extension: 'png', path: 'assets/images/memory/natuur/' },
+    'cars':      { locked: false, extension: 'png', path: 'assets/images/memory/beroepen/' }
 };
+
+// --- CONFETTI FUNCTIE (NIEUW) ---
+function fireConfetti() {
+    const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'];
+    const container = document.body;
+    
+    for(let i=0; i<100; i++) {
+        const conf = document.createElement('div');
+        conf.style.position = 'fixed';
+        conf.style.width = '10px'; conf.style.height = '10px';
+        conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        conf.style.left = Math.random() * 100 + 'vw';
+        conf.style.top = '-10px';
+        conf.style.zIndex = '9999';
+        conf.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+        conf.style.transform = `rotate(${Math.random() * 360}deg)`;
+        
+        // Willekeurige val snelheid
+        const duration = Math.random() * 2 + 1; 
+        conf.style.transition = `top ${duration}s linear, transform ${duration}s linear`;
+        
+        container.appendChild(conf);
+        
+        // Start animatie
+        setTimeout(() => {
+            conf.style.top = '110vh';
+            conf.style.transform = `rotate(${Math.random() * 720}deg)`;
+        }, 100);
+
+        // Opruimen
+        setTimeout(() => conf.remove(), duration * 1000);
+    }
+}
 
 // --- SETUP ---
 function startMemorySetup() {
@@ -127,16 +161,11 @@ function updateCardSize() {
     const windowH = window.innerHeight;
     const windowW = window.innerWidth;
     
-    // Fallback als scorebord nog niet getekend is: neem aan 60px
+    // Fallback voor scorebord hoogte
     const scoreHeight = scoreBoard ? scoreBoard.offsetHeight : 60;
     
-    // --- VEILIGHEIDSFACTOR ---
-    // We gebruiken slechts 95% van de beschikbare ruimte. 
-    // Dit zorgt dat randen van tablets (safe areas) niet overlappen.
     const safetyFactor = 0.95;
 
-    // Trek scorebord eraf en vermenigvuldig met veiligheidsfactor
-    // Trek ook nog eens harde pixels af voor extra marge (50px boven/onder, 40px zijkant)
     const availableHeight = (windowH - scoreHeight - 50) * safetyFactor;
     const availableWidth = (windowW - 40) * safetyFactor;
 
@@ -150,7 +179,6 @@ function updateCardSize() {
     const maxW = (availableWidth - gapTotalW) / cols;
     const maxH = (availableHeight - gapTotalH) / rows;
 
-    // Rond naar beneden af om halve pixels te voorkomen
     const finalSize = Math.floor(Math.min(maxW, maxH));
 
     grid.style.setProperty('--card-size', `${finalSize}px`);
@@ -163,13 +191,11 @@ function startMemoryGame() {
     const board = document.getElementById('game-board');
     memoryState.gridSize = 30; // Vast
 
-    // Reset scores
     memoryState.scores = {};
     memoryState.playerNames.forEach(p => {
         memoryState.scores[p.name] = 0;
     });
 
-    // Scorebord HTML met PROGRESS BAR
     let scoreHTML = `<div class="score-board">
         ${memoryState.playerNames.map((p, i) => `
             <div class="player-badge" id="badge-${i}" style="border-color:${p.color}">
@@ -183,14 +209,12 @@ function startMemoryGame() {
 
     board.innerHTML = `<div class="memory-game-container">${scoreHTML}<div class="memory-grid" id="memory-grid"></div></div>`;
     
-    // Wacht heel even met berekenen zodat de browser klaar is met renderen
     setTimeout(updateCardSize, 10);
     
     memoryState.matchedPairs = 0; memoryState.flippedCards = []; memoryState.lockBoard = false; memoryState.currentPlayerIndex = 0;
     updateActiveBadgeColor();
     generateCards(30);
 
-    // Bij draaien scherm: opnieuw berekenen met vertraging
     window.onresize = () => { setTimeout(updateCardSize, 200); };
 }
 
@@ -238,12 +262,11 @@ function flipCard() {
             memoryState.scores[p.name]++; 
             document.getElementById(`score-${memoryState.currentPlayerIndex}`).innerText = memoryState.scores[p.name];
             
-            // --- UPDATE PROGRESS BAR ---
+            // Progress Bar
             const totalPairs = memoryState.gridSize / 2;
             const percentage = (memoryState.scores[p.name] / totalPairs) * 100;
             const fillBar = document.getElementById(`fill-${memoryState.currentPlayerIndex}`);
             if(fillBar) fillBar.style.width = `${percentage}%`;
-            // ---------------------------
             
             memoryState.matchedPairs++; 
             c1.classList.add('matched'); c2.classList.add('matched');
@@ -254,11 +277,13 @@ function flipCard() {
             
             if(typeof playSound === 'function') playSound('win');
             
+            // WINNAAR!
             if (memoryState.matchedPairs === 15) {
+                fireConfetti(); // VUURWERK!
                 setTimeout(() => { 
                     let lb = memoryState.playerNames.map(pn => ({name:pn.name, score:memoryState.scores[pn.name]})).sort((a,b)=>b.score-a.score); 
                     showWinnerModal(lb[0].name, lb); 
-                }, 500);
+                }, 1500); // Iets langer wachten om van confetti te genieten
             }
         } else {
             setTimeout(() => { 
