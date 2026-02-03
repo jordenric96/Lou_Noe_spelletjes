@@ -12,11 +12,12 @@
     <link rel="stylesheet" href="css/puzzel.css">
     <link rel="stylesheet" href="css/stickers.css">
     <link rel="stylesheet" href="css/tekenen.css">
-    <link rel="stylesheet" href="css/rekenen.css"> </head>
+    <link rel="stylesheet" href="css/rekenen.css">
+    <link rel="stylesheet" href="css/schaduw.css"> </head>
 <body>
 
     <div id="main-menu">
-        <h1>🎈 Kids Zone</h1>
+        <h1>🚀 Kids Zone</h1>
         
         <div class="game-selection">
             <div class="game-card" onclick="loadGame('memory')">
@@ -25,6 +26,11 @@
             <div class="game-card" onclick="loadGame('puzzel')">
                 <div class="game-icon">🧩</div><div class="game-title">Puzzel</div>
             </div>
+            
+            <div class="game-card" onclick="loadGame('schaduw')">
+                <div class="game-icon">🌑</div><div class="game-title">Wie is het?</div>
+            </div>
+
             <div class="game-card" onclick="loadGame('tekenen')">
                 <div class="game-icon">🎨</div><div class="game-title">Tekenen</div>
             </div>
@@ -39,10 +45,12 @@
 
     <div id="game-board"></div>
 
-    <script src="js/stickers.js"></script> <script src="js/memory.js"></script>
+    <script src="js/stickers.js"></script>
+    <script src="js/memory.js"></script>
     <script src="js/puzzel.js"></script>
     <script src="js/tekenen.js"></script>
-    <script src="js/rekenen.js"></script> <script>
+    <script src="js/rekenen.js"></script>
+    <script src="js/schaduw.js"></script> <script>
         function loadGame(gameType) {
             document.getElementById('main-menu').style.display = 'none';
             document.getElementById('game-board').style.display = 'block';
@@ -51,12 +59,11 @@
             else if(gameType === 'puzzel') startPuzzleGame();
             else if(gameType === 'stickers') openStickerBook();
             else if(gameType === 'tekenen') startDrawingGame();
-            else if(gameType === 'rekenen') startMathGame(); // NIEUW
+            else if(gameType === 'rekenen') startMathGame();
+            else if(gameType === 'schaduw') startShadowGame(); // NIEUW
         }
         
-        // Simpel geluidssysteem (kan je later uitbreiden met echte mp3's)
         function playSound(type) {
-            // Als je later geluiden toevoegt: new Audio('sound.mp3').play();
             console.log("Audio:", type); 
         }
     </script>
