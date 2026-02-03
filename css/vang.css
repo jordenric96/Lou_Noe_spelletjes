@@ -1,0 +1,89 @@
+/* VANG.CSS - MEP SPEL (Whack-a-Mole stijl) */
+
+.whack-game-container {
+    display: flex; flex-direction: column;
+    width: 100%; height: 100%;
+    padding: 10px; box-sizing: border-box;
+    font-family: 'Fredoka One', cursive;
+    overflow: hidden;
+    touch-action: manipulation; /* Voorkomt vertraging bij tikken */
+}
+
+/* HEADER */
+.whack-header {
+    display: flex; justify-content: space-between; align-items: center;
+    height: 60px; flex-shrink: 0; margin-bottom: 10px;
+}
+
+.whack-score-box {
+    background: white; padding: 5px 20px; border-radius: 20px;
+    font-size: 1.2rem; color: #D32F2F; border: 2px solid #D32F2F;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+}
+
+/* HET RASTER (De gaten) */
+.whack-grid-container {
+    flex: 1;
+    display: flex; justify-content: center; align-items: center;
+    overflow-y: auto;
+}
+
+.whack-grid {
+    display: grid;
+    gap: 15px;
+    padding: 10px;
+    width: 100%; max-width: 600px;
+}
+
+/* Verschillende moeilijkheidsgraden rasters */
+.grid-easy { grid-template-columns: repeat(2, 1fr); }   /* 2x2 = 4 */
+.grid-medium { grid-template-columns: repeat(3, 1fr); } /* 3x3 = 9 */
+.grid-hard { grid-template-columns: repeat(3, 1fr); }   /* 3x4 = 12 */
+
+/* HET GAT */
+.whack-hole {
+    position: relative;
+    background: #3E2723; /* Donkerbruin aarde */
+    border-radius: 50%;
+    aspect-ratio: 1/1; /* Altijd rond */
+    border: 4px solid #5D4037;
+    box-shadow: inset 0 10px 20px rgba(0,0,0,0.5), 0 5px 0 rgba(255,255,255,0.2);
+    overflow: hidden; /* Zodat mannetje erin kan zakken */
+    cursor: pointer;
+}
+
+/* HET MANNETJE */
+.whack-character {
+    position: absolute;
+    width: 80%; height: 80%;
+    left: 10%; bottom: -100%; /* Start verstopt onderin */
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    transition: bottom 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    /* Voor de bom en drol (tekst) */
+    display: flex; justify-content: center; align-items: center;
+    font-size: 3rem; 
+}
+
+/* Als hij omhoog komt */
+.whack-hole.up .whack-character {
+    bottom: 0; /* Zichtbaar */
+}
+
+/* Als je hem raakt */
+.whack-hole.whacked .whack-character {
+    transform: scale(0.9) rotate(10deg);
+    filter: brightness(0.5) sepia(1) hue-rotate(-50deg) saturate(5); /* Rood effect */
+}
+
+/* Bom & Drol Effecten */
+.trap-bomb .whack-character { font-size: 3.5rem; }
+.trap-poop .whack-character { font-size: 3.5rem; }
+
+/* Mobiele aanpassingen */
+@media (max-width: 600px) {
+    .whack-grid { gap: 10px; }
+    .grid-hard { grid-template-columns: repeat(3, 1fr); } 
+}
