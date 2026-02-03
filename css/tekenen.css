@@ -1,0 +1,130 @@
+/* TEKENEN.CSS - KIDS STUDIO */
+
+.drawing-game-container {
+    display: flex; flex-direction: column;
+    width: 100%; height: 100%;
+    padding: 10px; box-sizing: border-box;
+    /* Voorkom scrollen tijdens tekenen */
+    touch-action: none; 
+    overflow: hidden;
+    font-family: 'Fredoka One', cursive;
+}
+
+/* HEADER: Terugknop en Titel */
+.drawing-header {
+    display: flex; justify-content: space-between; align-items: center;
+    height: 60px; flex-shrink: 0; margin-bottom: 10px;
+}
+
+.drawing-title {
+    color: white; font-size: 1.5rem; 
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+    background: rgba(255,255,255,0.2);
+    padding: 5px 20px; border-radius: 20px;
+}
+
+/* HET TEKENVEL (CANVAS) */
+.canvas-wrapper {
+    flex: 1; /* Vul de rest van de ruimte */
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 0 rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+    border: 4px solid white;
+    cursor: crosshair;
+}
+
+canvas {
+    display: block; /* Voorkomt rare marges */
+    touch-action: none; /* ESSENTIEEL VOOR TABLET: Blokkeert scrollen */
+}
+
+/* TOOLS BALK ONDERAAN */
+.drawing-tools {
+    height: 80px; flex-shrink: 0;
+    margin-top: 10px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 15px; gap: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* KLEUREN KIEZER */
+.color-picker-scroll {
+    display: flex; gap: 8px; 
+    overflow-x: auto; padding: 5px;
+    max-width: 40%;
+    scrollbar-width: none; /* Firefox hide scrollbar */
+}
+.color-picker-scroll::-webkit-scrollbar { display: none; } /* Chrome hide */
+
+.paint-btn {
+    width: 35px; height: 35px; flex-shrink: 0;
+    border-radius: 50%; border: 3px solid white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: transform 0.2s; cursor: pointer;
+}
+.paint-btn.active { transform: scale(1.2); border-color: #333; }
+
+/* DIKTE KIEZER */
+.size-picker {
+    display: flex; gap: 5px; align-items: center;
+    background: #eee; padding: 5px 10px; border-radius: 15px;
+}
+
+.size-btn {
+    background: #ccc; border-radius: 50%; border: none;
+    cursor: pointer; display: flex; justify-content: center; align-items: center;
+    width: 30px; height: 30px;
+}
+.size-btn.active { background: #4CAF50; }
+
+/* De stip in de knop die de dikte aangeeft */
+.size-dot { background: black; border-radius: 50%; display: block; }
+
+/* ACTIE KNOPPEN (Wissen, Opslaan) */
+.action-buttons {
+    display: flex; gap: 10px;
+}
+
+.action-btn {
+    background: #FF9800; color: white; border: none;
+    padding: 8px 12px; border-radius: 10px;
+    font-family: 'Fredoka One'; cursor: pointer;
+    box-shadow: 0 4px 0 #E65100; font-size: 0.9rem;
+}
+.action-btn:active { transform: translateY(4px); box-shadow: none; }
+.btn-save { background: #2196F3; box-shadow: 0 4px 0 #0D47A1; }
+.btn-gallery { background: #9C27B0; box-shadow: 0 4px 0 #4A148C; }
+.btn-clear { background: #F44336; box-shadow: 0 4px 0 #B71C1C; }
+
+/* GALERIJ MODAL (Pop-up) */
+.gallery-modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); z-index: 1000;
+    display: flex; flex-direction: column; align-items: center; padding: 20px;
+    box-sizing: border-box;
+}
+
+.gallery-content {
+    background: #fff; width: 100%; max-width: 600px; flex: 1;
+    border-radius: 20px; padding: 15px; overflow-y: auto;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+}
+
+.gallery-item {
+    border: 2px solid #ddd; border-radius: 10px; overflow: hidden;
+    position: relative; aspect-ratio: 1/1;
+}
+.gallery-item img { width: 100%; height: 100%; object-fit: cover; }
+.gallery-delete {
+    position: absolute; top: 5px; right: 5px; background: red; color: white;
+    border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;
+}
+.gallery-close {
+    margin-top: 15px; padding: 10px 30px; background: white; border: none;
+    font-size: 1.2rem; border-radius: 20px; font-weight: bold; cursor: pointer;
+}
