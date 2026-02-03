@@ -1,4 +1,4 @@
-// REKENEN.JS - TELLEN VOOR KLEUTERS
+// REKENEN.JS - TELLEN VOOR KLEUTERS (FIXED)
 console.log("Rekenen.js geladen...");
 
 let mathState = {
@@ -7,20 +7,22 @@ let mathState = {
     isAnimating: false
 };
 
-// We gebruiken de thema's uit memory.js als die geladen is. 
-// Anders een fallback lijstje voor de zekerheid.
+// --- HIER ZAT DE FOUT ---
 function getMathImages() {
-    // Probeer memory themes te vinden
-    if(typeof themes !== 'undefined') {
+    // We kijken nu naar 'memThemes' in plaats van 'themes'
+    if(typeof memThemes !== 'undefined') {
         let pool = [];
-        Object.values(themes).forEach(t => {
+        Object.values(memThemes).forEach(t => {
             if(!t.locked && !t.isMix) {
+                // Pak plaatje 1 t/m 15
                 for(let i=1; i<=15; i++) pool.push(`${t.path}${i}.${t.extension}`);
             }
         });
         if(pool.length > 0) return pool;
     }
-    // Fallback als memory niet geladen is (zou niet moeten gebeuren)
+    
+    // Fallback als memory.js nog niet geladen is
+    console.warn("Geen thema's gevonden, check volgorde scripts!");
     return ['assets/images/icon.png']; 
 }
 
@@ -60,30 +62,31 @@ function startMathGame() {
 function nextRound() {
     mathState.isAnimating = false;
     
-    // Reset knoppen
     document.querySelectorAll('.num-btn').forEach(b => {
         b.className = 'num-btn';
     });
 
-    // 1. Kies een getal tussen 1 en 10
-    // Tip: Voor hele kleintjes (Lou/Noé) is 1-10 misschien soms veel. 
-    // Je kunt dit aanpassen naar Math.ceil(Math.random() * 5) voor 1-5.
+    // 1. Kies getal (1-10)
     const targetNumber = Math.ceil(Math.random() * 10);
     mathState.currentCount = targetNumber;
 
-    // 2. Kies een willekeurig plaatje uit de collectie
+    // 2. Kies plaatje
     const images = getMathImages();
-    const randomImg = images[Math.floor(Math.random() * images.length)];
+    // Veiligheidscheck: als er toch geen images zijn, gebruik een nood-url
+    let randomImg = 'assets/images/icon.png';
+    if(images.length > 0) {
+        randomImg = images[Math.floor(Math.random() * images.length)];
+    }
 
-    // 3. Teken de plaatjes
+    // 3. Teken
     const field = document.getElementById('math-field');
-    field.innerHTML = ''; // Leegmaken
+    field.innerHTML = ''; 
 
     for(let i=0; i<targetNumber; i++) {
         const img = document.createElement('img');
         img.src = randomImg;
         img.className = 'count-item';
-        // Geef ze een beetje willekeurige vertraging in animatie
+        // Willekeurige positie of animatie vertraging
         img.style.animationDelay = `${i * 0.1}s`;
         field.appendChild(img);
     }
@@ -93,21 +96,17 @@ function checkAnswer(number, btn) {
     if(mathState.isAnimating) return;
 
     if(number === mathState.currentCount) {
-        // GOED!
         if(typeof playSound === 'function') playSound('win');
         btn.classList.add('correct');
         mathState.score++;
         document.getElementById('math-score').innerText = mathState.score;
         mathState.isAnimating = true;
 
-        // Viering
-        if(typeof fireConfetti === 'function') fireConfetti();
+        if(typeof memFireConfetti === 'function') memFireConfetti(); // Confetti van memory gebruiken
 
-        // Volgende ronde na 1.5 seconde
         setTimeout(nextRound, 1500);
 
     } else {
-        // FOUT
         if(typeof playSound === 'function') playSound('error');
         btn.classList.add('wrong');
         setTimeout(() => btn.classList.remove('wrong'), 500);
