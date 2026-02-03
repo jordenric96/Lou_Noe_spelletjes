@@ -7,7 +7,15 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="css/style.css">     <link rel="stylesheet" href="css/memory.css">    <link rel="stylesheet" href="css/puzzel.css">    <link rel="stylesheet" href="css/stickers.css">  <link rel="stylesheet" href="css/tekenen.css">   <link rel="stylesheet" href="css/rekenen.css">   <link rel="stylesheet" href="css/schaduw.css">   <link rel="stylesheet" href="css/vang.css">      </head>
+    <link rel="stylesheet" href="css/style.css">     
+    <link rel="stylesheet" href="css/memory.css">    
+    <link rel="stylesheet" href="css/puzzel.css">    
+    <link rel="stylesheet" href="css/stickers.css">  
+    <link rel="stylesheet" href="css/tekenen.css">   
+    <link rel="stylesheet" href="css/rekenen.css">   
+    <link rel="stylesheet" href="css/schaduw.css">   
+    <link rel="stylesheet" href="css/vang.css">      
+</head>
 <body>
 
     <div id="main-menu">
@@ -53,12 +61,13 @@
 
     <div id="game-board"></div>
 
-    <script src="js/stickers.js"></script> <script src="js/memory.js"></script>
-    <script src="js/puzzel.js"></script>
+    <script src="js/memory.js"></script>   <script src="js/stickers.js"></script> <script src="js/puzzel.js"></script>
     <script src="js/tekenen.js"></script>
     <script src="js/rekenen.js"></script>
     <script src="js/schaduw.js"></script>
-    <script src="js/vang.js"></script> <script>
+    <script src="js/vang.js"></script> 
+    
+    <script>
         function loadGame(gameType) {
             // Verberg menu, toon spelbord
             document.getElementById('main-menu').style.display = 'none';
@@ -84,12 +93,10 @@
                 if(typeof startShadowGame === 'function') startShadowGame();
             }
             else if(gameType === 'vang') {
-                // Let op: functie heet startWhackGame in vang.js
                 if(typeof startWhackGame === 'function') startWhackGame();
             }
         }
         
-        // Simpele geluidsfunctie (voor als we later geluid toevoegen)
         function playSound(type) {
             console.log("Audio:", type); 
         }
