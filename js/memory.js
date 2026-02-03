@@ -22,7 +22,7 @@ const themes = {
     'studio100': { locked: false, extension: 'png', path: 'assets/images/memory/studio100/' },
     'marvel':    { locked: false, extension: 'png', path: 'assets/images/memory/marvel/' },
     'dino':      { locked: false, extension: 'png', path: 'assets/images/memory/dino/' },
-    'natuur':    { locked: true, extension: 'jpg', path: 'assets/images/memory/natuur/' },
+    'Sonic':    { locked: false, extension: 'png', path: 'assets/images/memory/natuur/' },
     'beroepen':  { locked: true, extension: 'jpg', path: 'assets/images/memory/beroepen/' }
 };
 
