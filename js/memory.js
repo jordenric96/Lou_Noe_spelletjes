@@ -1,5 +1,5 @@
-// MEMORY.JS - KIDS FUN EDITION (Met Veilige Marges)
-console.log("Memory.js geladen (Kids + Safe Fit)...");
+// MEMORY.JS - MAXIMALE GROOTTE UPDATE
+console.log("Memory.js geladen (Max Size)...");
 
 let memoryState = { 
     theme: 'boerderij', 
@@ -144,7 +144,7 @@ function checkStartButton() {
     const b=document.getElementById('start-btn'); if(b){b.disabled=memoryState.playerNames.length===0; b.innerText=b.disabled?"VOEG SPELER TOE...":"START SPEL ▶️";}
 }
 
-// --- GAME LOGIC & SIZE CALCULATION ---
+// --- MAXIMALE VULLING LOGICA ---
 function updateCardSize() {
     const board = document.getElementById('game-board');
     const grid = document.getElementById('memory-grid');
@@ -154,29 +154,40 @@ function updateCardSize() {
     const windowH = window.innerHeight;
     const windowW = window.innerWidth;
     
-    // Fallback voor scorebord
+    // Hoogte van scorebord meten
     const scoreHeight = scoreBoard ? scoreBoard.offsetHeight : 60;
     
-    // VEILIGHEIDSFACTOR 95% + HARD PIXELS AFTREKKEN
-    // Dit zorgt ervoor dat kaarten niet buiten beeld vallen
-    const safetyFactor = 0.95;
-    const availableHeight = (windowH - scoreHeight - 50) * safetyFactor;
-    const availableWidth = (windowW - 40) * safetyFactor;
+    // AANPASSING: WE GEBRUIKEN BIJNA HET HELE SCHERM
+    // Slechts 10px marge aan zijkant, en iets ruimte onder scorebord.
+    const availableH = windowH - scoreHeight - 20;
+    const availableW = windowW - 20;
 
-    let cols = 6, rows = 5;
-    if (availableHeight > availableWidth) { cols = 5; rows = 6; } // Portret
+    // Minimale gap tussen kaartjes
+    const gap = 4;
 
-    const gap = 6; // Iets meer ruimte tussen kaarten voor visuele stijl
-    const gapTotalW = (cols - 1) * gap;
-    const gapTotalH = (rows - 1) * gap;
+    // Bereken optie A: 6 breed x 5 hoog
+    const sizeA_W = (availableW - (5 * gap)) / 6;
+    const sizeA_H = (availableH - (4 * gap)) / 5;
+    const sizeA = Math.floor(Math.min(sizeA_W, sizeA_H));
 
-    const maxW = (availableWidth - gapTotalW) / cols;
-    const maxH = (availableHeight - gapTotalH) / rows;
+    // Bereken optie B: 5 breed x 6 hoog
+    const sizeB_W = (availableW - (4 * gap)) / 5;
+    const sizeB_H = (availableH - (5 * gap)) / 6;
+    const sizeB = Math.floor(Math.min(sizeB_W, sizeB_H));
 
-    const finalSize = Math.floor(Math.min(maxW, maxH));
+    let finalSize, finalCols;
+
+    // Kies de optie die de grootste kaartjes geeft
+    if (sizeA >= sizeB) {
+        finalSize = sizeA;
+        finalCols = 6;
+    } else {
+        finalSize = sizeB;
+        finalCols = 5;
+    }
 
     grid.style.setProperty('--card-size', `${finalSize}px`);
-    grid.style.setProperty('--grid-cols', cols);
+    grid.style.setProperty('--grid-cols', finalCols);
     grid.style.gap = `${gap}px`;
 }
 
@@ -205,13 +216,13 @@ function startMemoryGame() {
 
     board.innerHTML = `<div class="memory-game-container">${scoreHTML}<div class="memory-grid" id="memory-grid"></div></div>`;
     
-    setTimeout(updateCardSize, 20); // Even wachten op rendering
+    setTimeout(updateCardSize, 20); 
     
     memoryState.matchedPairs = 0; memoryState.flippedCards = []; memoryState.lockBoard = false; memoryState.currentPlayerIndex = 0;
     updateActiveBadgeColor();
     generateCards(30);
 
-    window.onresize = () => { setTimeout(updateCardSize, 200); };
+    window.onresize = () => { setTimeout(updateCardSize, 100); };
 }
 
 function generateCards(totalCards) {
