@@ -1,0 +1,69 @@
+/* STICKERS.CSS - FIX IMAGE SIZES */
+
+.sticker-header {
+    font-family: 'Fredoka One', cursive;
+    color: #0097A7;
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.sticker-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-y: auto;
+    height: calc(100% - 100px); /* Ruimte overlaten voor header/knoppen */
+}
+
+/* De kaart waar de sticker in zit */
+.sticker-card {
+    width: 100px;
+    height: 100px;
+    background: white;
+    border: 3px solid #B2EBF2;
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+    overflow: hidden; /* Zorgt dat niks uitsteekt */
+}
+
+.sticker-card:hover {
+    transform: scale(1.05);
+    border-color: #00BCD4;
+}
+
+/* FIX VOOR MEGA GROTE AFBEELDINGEN */
+.sticker-card img {
+    width: 90%;       /* Niet helemaal tegen de rand */
+    height: 90%;
+    object-fit: contain; /* Zorgt dat de hele afbeelding zichtbaar blijft zonder vervorming */
+}
+
+.sticker-card.locked {
+    background: #E0F7FA;
+    font-size: 2rem;
+    color: #006064;
+    opacity: 0.7;
+}
+
+.empty-msg {
+    font-family: 'Fredoka One', cursive;
+    color: #888;
+    margin-top: 50px;
+}
+
+/* Voor kleinere schermpjes */
+@media (max-width: 600px) {
+    .sticker-card {
+        width: 80px;
+        height: 80px;
+    }
+}
