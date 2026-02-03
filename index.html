@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kids Games</title>
-    
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="css/style.css">
@@ -15,70 +14,42 @@
     <link rel="stylesheet" href="css/rekenen.css">
     <link rel="stylesheet" href="css/schaduw.css">
     <link rel="stylesheet" href="css/vang.css">
-
-    <style>
-        .color-dot {
-            width: 35px !important;
-            height: 35px !important;
-            display: inline-block !important;
-            border-radius: 50%;
-            border: 3px solid white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            margin: 5px;
-            cursor: pointer;
-        }
-        .color-row {
-            display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; padding: 5px;
-        }
-        .active-player-tag {
-            display: inline-block; padding: 5px 12px; margin: 3px; border-radius: 15px;
-            color: white; font-weight: bold; font-family: 'Fredoka One', cursive;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer;
-        }
-    </style>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4CAF50">
 </head>
 <body>
 
     <div id="main-menu">
         <h1>🚀 Kids Zone</h1>
-        
         <div class="game-selection">
-            <div class="game-card" onclick="loadGame('memory')">
-                <div class="game-icon">🧠</div><div class="game-title">Memory</div>
-            </div>
-            <div class="game-card" onclick="loadGame('puzzel')">
-                <div class="game-icon">🧩</div><div class="game-title">Puzzel</div>
-            </div>
-            <div class="game-card" onclick="loadGame('vang')">
-                <div class="game-icon">🔨</div><div class="game-title">Vang ze!</div>
-            </div>
-            <div class="game-card" onclick="loadGame('schaduw')">
-                <div class="game-icon">🌑</div><div class="game-title">Wie is het?</div>
-            </div>
-            <div class="game-card" onclick="loadGame('tekenen')">
-                <div class="game-icon">🎨</div><div class="game-title">Tekenen</div>
-            </div>
-            <div class="game-card" onclick="loadGame('rekenen')">
-                <div class="game-icon">🧮</div><div class="game-title">Tellen</div>
-            </div>
-            <div class="game-card" onclick="loadGame('stickers')">
-                <div class="game-icon">⭐</div><div class="game-title">Stickers</div>
-            </div>
+            <div class="game-card" onclick="loadGame('memory')"><div class="game-icon">🧠</div><div class="game-title">Memory</div></div>
+            <div class="game-card" onclick="loadGame('puzzel')"><div class="game-icon">🧩</div><div class="game-title">Puzzel</div></div>
+            <div class="game-card" onclick="loadGame('vang')"><div class="game-icon">🔨</div><div class="game-title">Vang ze!</div></div>
+            <div class="game-card" onclick="loadGame('schaduw')"><div class="game-icon">🌑</div><div class="game-title">Wie is het?</div></div>
+            <div class="game-card" onclick="loadGame('tekenen')"><div class="game-icon">🎨</div><div class="game-title">Tekenen</div></div>
+            <div class="game-card" onclick="loadGame('rekenen')"><div class="game-icon">🧮</div><div class="game-title">Tellen</div></div>
+            <div class="game-card" onclick="loadGame('stickers')"><div class="game-icon">⭐</div><div class="game-title">Stickers</div></div>
         </div>
     </div>
 
     <div id="game-board"></div>
 
-    <script src="js/memory.js"></script>   <script src="js/stickers.js"></script> <script src="js/puzzel.js"></script>
+    <script src="js/memory.js"></script>
+    <script src="js/stickers.js"></script>
+    <script src="js/puzzel.js"></script>
     <script src="js/tekenen.js"></script>
     <script src="js/rekenen.js"></script>
     <script src="js/schaduw.js"></script>
     <script src="js/vang.js"></script> 
     
     <script>
+        // Functie om spellen te laden
         function loadGame(gameType) {
             document.getElementById('main-menu').style.display = 'none';
             document.getElementById('game-board').style.display = 'block';
+            // Verwijder eventuele oude modals
+            const oldModal = document.querySelector('.winner-modal-overlay');
+            if(oldModal) oldModal.remove();
             
             if(gameType === 'memory' && typeof startMemorySetup === 'function') startMemorySetup();
             else if(gameType === 'puzzel' && typeof startPuzzleGame === 'function') startPuzzleGame();
@@ -88,7 +59,80 @@
             else if(gameType === 'schaduw' && typeof startShadowGame === 'function') startShadowGame();
             else if(gameType === 'vang' && typeof startWhackGame === 'function') startWhackGame();
         }
+        
+        // Geluidsfunctie (placeholder)
         function playSound(type) { console.log("Audio:", type); }
+
+        // --- NIEUW: DE CENTRALE WINNAAR MODAL FUNCTIE ---
+        // Deze functie wordt aangeroepen door ELK spel als het klaar is.
+        // winnerName: De naam van de winnaar (bv. "Lou")
+        // allScores: (Optioneel) Een lijst met alle scores voor het klassement: [{name:"Lou", score:10}, {name:"Papa", score:5}]
+        function showWinnerModal(winnerName, allScores = []) {
+            if(typeof playSound === 'function') playSound('win');
+            if(typeof memFireConfetti === 'function') memFireConfetti();
+
+            // 1. Bouw het klassement HTML (als er meerdere spelers zijn)
+            let leaderboardHTML = '';
+            if (allScores.length > 1) {
+                // Sorteer op score (hoogste eerst)
+                allScores.sort((a, b) => b.score - a.score);
+                leaderboardHTML = '<div class="leaderboard-list">';
+                allScores.forEach((player, index) => {
+                    let posClass = index === 0 ? 'pos-1' : (index === 1 ? 'pos-2' : (index === 2 ? 'pos-3' : ''));
+                    let medal = index === 0 ? '🥇' : (index === 1 ? '🥈' : (index === 2 ? '🥉' : `${index + 1}.`));
+                    leaderboardHTML += `
+                        <div class="leaderboard-item">
+                            <span class="${posClass}">${medal} ${player.name}</span>
+                            <span>${player.score} pnt</span>
+                        </div>`;
+                });
+                leaderboardHTML += '</div>';
+            }
+
+            // 2. Probeer een sticker te ontgrendelen (via stickers.js)
+            let stickerHTML = '';
+            if (typeof unlockRandomSticker === 'function') {
+                const newSticker = unlockRandomSticker();
+                if (newSticker) {
+                    // JA! Een nieuwe sticker!
+                    stickerHTML = `
+                        <div class="sticker-reward-box">
+                            <h4>✨ NIEUWE STICKER! ✨</h4>
+                            <img src="${newSticker.src}" class="new-sticker-img">
+                            <p>Je hebt de <b>${newSticker.id.split('-')[0]}</b> sticker verdiend!</p>
+                        </div>`;
+                } else {
+                    // Helaas, geen nieuwe sticker (of alles al verzameld)
+                    stickerHTML = `
+                        <div class="sticker-reward-box" style="background:#f0f0f0; border-color:#ccc;">
+                            <h4>Geen nieuwe sticker...</h4>
+                            <p>Probeer het nog eens!</p>
+                        </div>`;
+                }
+            }
+
+            // 3. Maak de volledige HTML voor de modal
+            const modalHTML = `
+                <div class="winner-modal-overlay">
+                    <div class="winner-modal-content">
+                        <span class="trophy-icon">🏆</span>
+                        <h2 class="winner-title">Goed gedaan!</h2>
+                        <div class="winner-name">${winnerName} wint!</div>
+                        
+                        ${leaderboardHTML}
+                        ${stickerHTML}
+                        
+                        <div class="modal-actions">
+                            <button class="restart-btn" onclick="location.reload()">Nog een keer!</button>
+                            <button class="menu-btn" onclick="location.reload()">Hoofdmenu</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // 4. Voeg toe aan de pagina
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
     </script>
 </body>
 </html>
