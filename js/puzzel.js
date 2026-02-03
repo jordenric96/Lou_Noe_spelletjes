@@ -1,5 +1,5 @@
-// PUZZEL.JS - FIXED NAMESPACE
-console.log("Puzzel.js geladen...");
+// PUZZEL.JS - COMPACTE MOBIELE VERSIE
+console.log("Puzzel.js geladen (Compact)...");
 
 let pState = { 
     img: '', pieces: [], rows: 3, cols: 2, 
@@ -10,98 +10,146 @@ let pState = {
 
 const puzColors = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#4CAF50', '#FFEB3B', '#FF9800'];
 
-// --- SETUP ---
+// --- SETUP SCHERM ---
 function startPuzzleGame() {
     const board = document.getElementById('game-board');
-    // We gebruiken hier de globale themes uit memory.js als die er zijn, anders assetConfig van stickers
-    const config = (typeof themes !== 'undefined') ? themes : ((typeof assetConfig !== 'undefined') ? assetConfig : {});
+    // Haal thema's op
+    const config = (typeof memThemes !== 'undefined') ? memThemes : {};
     
+    // Kies willekeurige plaatjes om te puzzelen
     let puzzleOptions = '';
     const keys = Object.keys(config);
+    
     if(keys.length > 0) {
         const usedSrcs = [];
+        // We proberen 8 opties te tonen
         for(let i=0; i<8; i++) { 
             const t = keys[Math.floor(Math.random() * keys.length)];
             const tData = config[t];
-            if(!tData.locked && !tData.isMix) {
-                const nr = Math.floor(Math.random() * 15) + 1; // 1-15
+            if(tData && !tData.locked && !tData.isMix) {
+                const nr = Math.floor(Math.random() * 15) + 1; 
                 const src = `${tData.path}${nr}.${tData.extension}`;
+                
                 if(!usedSrcs.includes(src)) {
                     usedSrcs.push(src);
+                    // We gebruiken de nieuwe theme-card-btn stijl
                     puzzleOptions += `
-                        <button class="theme-card-btn" onclick="puzSetImg('${src}', this)" style="padding:0; overflow:hidden;">
-                            <img src="${src}" style="width:100%; height:100%; object-fit:cover;">
-                        </button>`;
+                        <div class="theme-card-btn" onclick="puzSetImg('${src}', this)">
+                            <div class="theme-img-container">
+                                <img src="${src}">
+                            </div>
+                            <div class="btn-label">Kies mij!</div>
+                        </div>`;
                 }
             }
         }
     }
 
+    // HTML OPBOUW (Zelfde stijl als Memory Setup)
     board.innerHTML = `
         <div class="memory-setup">
-            <div class="setup-columns">
-                <div class="setup-group">
-                    <h3>1. Wie Puzzelt? 🧩</h3>
-                    <div class="option-grid">
-                        <button class="option-btn player-btn" onclick="puzSelectPerson('Lou', '👦🏼', this)">👦🏼 Lou</button>
-                        <button class="option-btn player-btn" onclick="puzSelectPerson('Noé', '👶🏼', this)">👶🏼 Noé</button>
-                        <button class="option-btn player-btn" onclick="puzSelectPerson('Mama', '👩🏻', this)">👩🏻 Mama</button>
-                        <button class="option-btn player-btn" onclick="puzSelectPerson('Papa', '👨🏻', this)">👨🏻 Papa</button>
-                    </div>
-                    <div class="color-row" id="puz-colors">
-                        ${puzColors.map(c => `<div class="color-dot" style="background:${c}" onclick="puzSetColor('${c}', this)"></div>`).join('')}
-                    </div>
-                    <div id="puz-active-players" class="active-players-box"></div>
+            <div class="setup-group">
+                <h3>1. Wie Puzzelt?</h3>
+                
+                <div class="name-row">
+                    <button class="player-btn" onclick="puzSelectPerson('Lou', '👦🏼', this)">👦🏼 Lou</button>
+                    <button class="player-btn" onclick="puzSelectPerson('Noé', '👶🏼', this)">👶🏼 Noé</button>
+                    <button class="player-btn" onclick="puzSelectPerson('Mama', '👩🏻', this)">👩🏻 Mama</button>
+                    <button class="player-btn" onclick="puzSelectPerson('Papa', '👨🏻', this)">👨🏻 Papa</button>
                 </div>
-                <div class="setup-group">
-                    <h3>2. Kies Plaatje</h3>
-                    <div class="theme-grid" style="max-height: 200px; overflow-y: auto;">${puzzleOptions}</div>
+
+                <div class="color-scroll-container" id="puz-colors">
+                    ${puzColors.map(c => `<div class="color-dot" style="background:${c}" onclick="puzSetColor('${c}', this)"></div>`).join('')}
                 </div>
-                <div class="setup-group">
-                    <h3>3. Niveau</h3>
-                    <div class="option-grid">
-                        <button class="option-btn diff-btn selected" onclick="puzSetDiff('easy', this)"><span>🟢</span><span class="btn-label">6</span></button>
-                        <button class="option-btn diff-btn" onclick="puzSetDiff('medium', this)"><span>🟠</span><span class="btn-label">20</span></button>
-                        <button class="option-btn diff-btn" onclick="puzSetDiff('hard', this)"><span>🔴</span><span class="btn-label">30</span></button>
-                    </div>
+                
+                <div id="puz-active-players" style="margin-top:5px; min-height:30px;"></div>
+            </div>
+
+            <div class="setup-group">
+                <h3>2. Kies een Plaatje</h3>
+                <div class="theme-scroll-wrapper">
+                    ${puzzleOptions}
                 </div>
             </div>
-            <button id="puz-start-btn" class="start-btn" onclick="initPuzzle()" disabled>Kies eerst een plaatje...</button>
+
+            <div class="setup-group">
+                <h3>3. Niveau</h3>
+                <div class="name-row">
+                    <button class="player-btn selected-pending" onclick="puzSetDiff('easy', this)">🟢 6 Stukjes</button>
+                    <button class="player-btn" onclick="puzSetDiff('medium', this)">🟠 20 Stukjes</button>
+                    <button class="player-btn" onclick="puzSetDiff('hard', this)">🔴 30 Stukjes</button>
+                </div>
+            </div>
+
+            <div class="bottom-actions">
+                <button id="puz-start-btn" class="start-btn" onclick="initPuzzle()" disabled>Kies eerst een plaatje...</button>
+                <button class="tool-btn" onclick="location.reload()">⬅ Menu</button>
+            </div>
         </div>
     `;
     pState.playerNames = []; pState.img = ''; pState.difficulty = 'easy';
 }
 
+// --- SETUP FUNCTIES ---
 function puzSelectPerson(name, icon, btn) {
     if(typeof playSound === 'function') playSound('click');
     document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending'));
-    btn.classList.add('selected-pending'); pState.pendingName = name; pState.pendingIcon = icon;
-    const c=document.getElementById('puz-colors'); c.style.animation="shake 0.5s"; setTimeout(()=>c.style.animation="",500);
+    // Let op: niveau knoppen gebruiken ook player-btn, dus die niet resetten als we op een naam klikken
+    // We doen dit simpel: reset alleen de namen in de eerste rij
+    btn.parentElement.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending'));
+    
+    btn.classList.add('selected-pending'); 
+    pState.pendingName = name; pState.pendingIcon = icon;
+    
+    // Animatie op kleuren
+    const c=document.getElementById('puz-colors'); 
+    c.style.animation="shake 0.5s"; setTimeout(()=>c.style.animation="",500);
 }
+
 function puzSetColor(color, btn) {
     if(!pState.pendingName) { alert("Klik eerst op een naam!"); return; }
     if(typeof playSound === 'function') playSound('pop');
+    
+    // Puzzel is meestal 1 speler, dus we overschrijven gewoon de vorige
     pState.playerNames = [{ name: pState.pendingName, icon: pState.pendingIcon, color: color }];
     pState.pendingName = null;
-    document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending'));
-    document.getElementById('puz-active-players').innerHTML = pState.playerNames.map(p => `<div class="active-player-tag" style="background:${p.color}"><span>${p.icon} ${p.name}</span></div>`).join('');
+    
+    // Reset naam selectie visueel
+    const nameRow = document.querySelector('.setup-group .name-row');
+    if(nameRow) nameRow.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending'));
+
+    // Toon actieve speler
+    document.getElementById('puz-active-players').innerHTML = pState.playerNames.map(p => 
+        `<div class="active-player-tag" style="background:${p.color}"><span>${p.icon} ${p.name}</span></div>`
+    ).join('');
+    
     puzCheckStart();
 }
+
 function puzSetImg(src, btn) {
-    if(typeof playSound === 'function') playSound('click'); pState.img = src;
-    document.querySelectorAll('.theme-card-btn').forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); puzCheckStart();
+    if(typeof playSound === 'function') playSound('click'); 
+    pState.img = src;
+    document.querySelectorAll('.theme-card-btn').forEach(b => b.classList.remove('selected')); 
+    btn.classList.add('selected'); 
+    puzCheckStart();
 }
+
 function puzSetDiff(diff, btn) {
     if(typeof playSound === 'function') playSound('click'); 
     pState.difficulty = diff;
-    btn.parentElement.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected')); btn.classList.add('selected');
-}
-function puzCheckStart() {
-    const btn = document.getElementById('puz-start-btn');
-    if (pState.playerNames.length > 0 && pState.img !== '') { btn.disabled = false; btn.innerText = "START PUZZEL ▶"; }
+    // Alleen knoppen in DEZE rij resetten
+    btn.parentElement.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending')); 
+    btn.classList.add('selected-pending');
 }
 
-// --- GAME LOGIC ---
+function puzCheckStart() {
+    const btn = document.getElementById('puz-start-btn');
+    if (pState.playerNames.length > 0 && pState.img !== '') { 
+        btn.disabled = false; btn.innerText = "START PUZZEL ▶"; 
+    }
+}
+
+// --- GAME LOGIC (De puzzel zelf) ---
 function puzUpdateSize() {
     const wrapper = document.querySelector('.puzzle-board-wrapper');
     const board = document.querySelector('.puzzle-board');
@@ -120,7 +168,8 @@ function puzUpdateSize() {
 function initPuzzle() {
     if(typeof playSound === 'function') playSound('win');
     const board = document.getElementById('game-board');
-    board.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100%;"><h2>Laden...</h2></div>';
+    board.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100%;color:white;"><h2>Even geduld...</h2></div>';
+    
     const tempImg = new Image();
     tempImg.src = pState.img;
     tempImg.onload = function() {
@@ -179,6 +228,8 @@ function puzBuildBoard(board) {
             </div>
         </div>`;
     puzUpdateSize(); window.addEventListener('resize', puzUpdateSize);
+    
+    // Help een handje: plaats het eerste stukje alvast
     setTimeout(() => {
         const starterIndex = Math.floor(Math.random() * totalPieces);
         const starterPiece = document.getElementById(`piece-${starterIndex}`);
@@ -187,6 +238,7 @@ function puzBuildBoard(board) {
     }, 100);
 }
 
+// Helpers
 function puzUpdateScore() { const el = document.getElementById('puz-score-txt'); if(el) el.innerText = pState.correctCount; }
 function puzSelectPiece(el) { if(el.parentElement.classList.contains('puzzle-slot')) return; if(typeof playSound === 'function') playSound('click'); if(pState.selectedPiece) pState.selectedPiece.classList.remove('selected'); pState.selectedPiece = el; el.classList.add('selected'); }
 function puzPlacePiece(slot) {
