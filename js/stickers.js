@@ -7,10 +7,10 @@ const assetConfig = {
     'pokemon':   { count: 15, ext: 'png', locked: false },
     'studio100': { count: 15, ext: 'png', locked: false },
     'boerderij': { count: 15, ext: 'png', locked: false },
-    'dino':      { count: 15, ext: 'jpg', locked: true },
+    'dino':      { count: 15, ext: 'png', locked: true },
     'marvel':    { count: 15, ext: 'png', locked: false },
-    'natuur':    { count: 15, ext: 'jpg', locked: true },
-    'beroepen':  { count: 15, ext: 'jpg', locked: true }
+    'sonic':    { count: 15, ext: 'png', locked: true },
+    'cars':  { count: 15, ext: 'png', locked: true }
 };
 
 function generateAllStickers() {
