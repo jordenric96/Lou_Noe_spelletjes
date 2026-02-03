@@ -1,5 +1,5 @@
-// MEMORY.JS - VEILIGE MARGES
-console.log("Memory.js geladen (Safe Margins)...");
+// MEMORY.JS - TABLET SAFE FIT (95% Factor)
+console.log("Memory.js geladen (Tablet Safe Fit)...");
 
 let memoryState = { 
     theme: 'boerderij', 
@@ -20,7 +20,7 @@ const themes = {
     'mario':     { locked: false, extension: 'png', path: 'assets/images/memory/mario/' },
     'pokemon':   { locked: false, extension: 'png', path: 'assets/images/memory/pokemon/' },
     'studio100': { locked: false, extension: 'png', path: 'assets/images/memory/studio100/' },
-    'marvel':    { locked: false, extension: 'png', path: 'assets/images/memory/marvel/' },
+    'marvel':    { locked: false, extension: 'jpg', path: 'assets/images/memory/marvel/' },
     'dino':      { locked: true, extension: 'jpg', path: 'assets/images/memory/dino/' },
     'natuur':    { locked: true, extension: 'jpg', path: 'assets/images/memory/natuur/' },
     'beroepen':  { locked: true, extension: 'jpg', path: 'assets/images/memory/beroepen/' }
@@ -126,14 +126,19 @@ function updateCardSize() {
 
     const windowH = window.innerHeight;
     const windowW = window.innerWidth;
+    
+    // Fallback als scorebord nog niet getekend is: neem aan 60px
     const scoreHeight = scoreBoard ? scoreBoard.offsetHeight : 60;
     
-    // --- HIER IS DE AANPASSING ---
-    // We trekken nu 30px van de hoogte af en 40px van de breedte.
-    // Dit zorgt voor een veilige marge aan alle kanten.
-    const availableHeight = windowH - scoreHeight - 30; 
-    const availableWidth = windowW - 40; 
-    // -----------------------------
+    // --- VEILIGHEIDSFACTOR ---
+    // We gebruiken slechts 95% van de beschikbare ruimte. 
+    // Dit zorgt dat randen van tablets (safe areas) niet overlappen.
+    const safetyFactor = 0.95;
+
+    // Trek scorebord eraf en vermenigvuldig met veiligheidsfactor
+    // Trek ook nog eens harde pixels af voor extra marge (50px boven/onder, 40px zijkant)
+    const availableHeight = (windowH - scoreHeight - 50) * safetyFactor;
+    const availableWidth = (windowW - 40) * safetyFactor;
 
     let cols = 6, rows = 5;
     if (availableHeight > availableWidth) { cols = 5; rows = 6; } // Portret
@@ -145,6 +150,7 @@ function updateCardSize() {
     const maxW = (availableWidth - gapTotalW) / cols;
     const maxH = (availableHeight - gapTotalH) / rows;
 
+    // Rond naar beneden af om halve pixels te voorkomen
     const finalSize = Math.floor(Math.min(maxW, maxH));
 
     grid.style.setProperty('--card-size', `${finalSize}px`);
@@ -177,13 +183,15 @@ function startMemoryGame() {
 
     board.innerHTML = `<div class="memory-game-container">${scoreHTML}<div class="memory-grid" id="memory-grid"></div></div>`;
     
-    updateCardSize();
+    // Wacht heel even met berekenen zodat de browser klaar is met renderen
+    setTimeout(updateCardSize, 10);
+    
     memoryState.matchedPairs = 0; memoryState.flippedCards = []; memoryState.lockBoard = false; memoryState.currentPlayerIndex = 0;
     updateActiveBadgeColor();
     generateCards(30);
 
-    window.onresize = () => { setTimeout(updateCardSize, 50); };
-    setTimeout(updateCardSize, 100);
+    // Bij draaien scherm: opnieuw berekenen met vertraging
+    window.onresize = () => { setTimeout(updateCardSize, 200); };
 }
 
 function generateCards(totalCards) {
@@ -235,6 +243,7 @@ function flipCard() {
             const percentage = (memoryState.scores[p.name] / totalPairs) * 100;
             const fillBar = document.getElementById(`fill-${memoryState.currentPlayerIndex}`);
             if(fillBar) fillBar.style.width = `${percentage}%`;
+            // ---------------------------
             
             memoryState.matchedPairs++; 
             c1.classList.add('matched'); c2.classList.add('matched');
