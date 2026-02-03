@@ -1,150 +1,57 @@
-/* STYLE.CSS - HOOFDMENU MAKE-OVER */
-
-/* 1. ALGEMENE BASIS & ACHTERGROND */
-body, html {
-    margin: 0; padding: 0; 
-    width: 100%; height: 100%;
-    font-family: 'Fredoka One', cursive;
-    overflow: hidden; /* Voorkomt dubbele scrollbalken */
-    
-    /* DE REGENBOOG ANIMATIE */
-    background: linear-gradient(-45deg, #FFEB3B, #8BC34A, #4CAF50, #00BCD4, #2196F3, #9C27B0, #E91E63, #FF9800);
-    background-size: 400% 400%;
-    animation: gradientBG 20s ease infinite;
+/* --- NIEUW: WINNAAR MODAL (POP-UP) --- */
+.winner-modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8); z-index: 1000;
+    display: flex; justify-content: center; align-items: center;
+    animation: fadeIn 0.3s ease-out;
 }
 
-@keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-/* 2. HOOFDMENU CONTAINER */
-#main-menu {
-    position: absolute; top: 0; left: 0; 
-    width: 100%; height: 100%;
-    overflow-y: auto; /* Zorgt dat je kunt scrollen in het menu */
-    -webkit-overflow-scrolling: touch;
-    
-    display: flex; flex-direction: column; align-items: center;
-    padding: 20px 15px; 
-    box-sizing: border-box;
-}
-
-/* 3. DE TITEL (KIDS ZONE) */
-h1 { 
-    color: white; 
-    font-size: 3rem; 
-    margin: 20px 0 30px 0; 
+.winner-modal-content {
+    background: white;
+    width: 90%; max-width: 400px;
+    border-radius: 25px;
+    padding: 25px;
     text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    
-    /* Dikke schaduw voor leesbaarheid */
-    text-shadow: 4px 4px 0px rgba(0,0,0,0.2), 0 0 20px rgba(255,255,255,0.4);
-    
-    /* Stuiter animatie */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border: 5px solid #FFD700; /* Gouden rand */
+    animation: popUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    max-height: 90vh; overflow-y: auto; /* Voor kleine schermpjes */
+}
+
+.trophy-icon { font-size: 5rem; margin-bottom: 10px; display: block; }
+.winner-title { font-size: 2rem; color: #333; margin: 10px 0; }
+.winner-name { color: #4CAF50; font-size: 2.5rem; font-weight: bold; }
+
+/* Klassement lijst */
+.leaderboard-list {
+    margin: 20px 0; padding: 15px; background: #f5f5f5; border-radius: 15px;
+    text-align: left;
+}
+.leaderboard-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; border-bottom: 2px solid #eee; font-size: 1.1rem;
+}
+.leaderboard-item:last-child { border-bottom: none; }
+.pos-1 { color: #FFD700; font-weight: bold; } /* Goud */
+.pos-2 { color: #C0C0C0; font-weight: bold; } /* Zilver */
+.pos-3 { color: #CD7F32; font-weight: bold; } /* Brons */
+
+/* Sticker beloning sectie */
+.sticker-reward-box {
+    margin: 20px 0; padding: 15px;
+    background: #E3F2FD; border: 3px dashed #2196F3; border-radius: 15px;
+}
+.sticker-reward-box h4 { margin: 0 0 10px 0; color: #1565C0; }
+.new-sticker-img { 
+    width: 100px; height: 100px; object-fit: contain; 
+    filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2));
     animation: floatTitle 3s ease-in-out infinite;
 }
 
-@keyframes floatTitle {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-}
+/* Knoppen */
+.modal-actions { display: flex; gap: 10px; justify-content: center; margin-top: 25px; }
+.restart-btn { flex: 1; padding: 12px; border-radius: 15px; border: none; background: #4CAF50; color: white; font-family: 'Fredoka One'; font-size: 1.1rem; cursor: pointer; }
+.menu-btn { flex: 1; padding: 12px; border-radius: 15px; border: none; background: #FF9800; color: white; font-family: 'Fredoka One'; font-size: 1.1rem; cursor: pointer; }
 
-/* 4. HET GRID (De Knoppenlijst) */
-.game-selection { 
-    display: grid;
-    /* Automatisch 2 of 3 naast elkaar, afhankelijk van schermbreedte */
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 20px; 
-    
-    width: 100%; 
-    max-width: 600px; /* Niet te breed op desktop */
-    padding-bottom: 50px; /* Ruimte onderaan om te scrollen */
-}
-
-/* 5. DE GAME CARDS (Knoppen) */
-.game-card { 
-    background: white; 
-    border-radius: 25px; 
-    aspect-ratio: 1 / 1; /* Maakt ze perfect vierkant */
-    display: flex; flex-direction: column; 
-    align-items: center; justify-content: center; 
-    
-    /* Schaduw en Diepte */
-    box-shadow: 0 10px 0 rgba(0,0,0,0.1), 0 10px 20px rgba(0,0,0,0.15);
-    cursor: pointer; 
-    transition: transform 0.2s, box-shadow 0.2s;
-    position: relative;
-    overflow: hidden;
-    
-    /* Pop-in animatie bij laden */
-    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
-}
-
-/* Iedere kaart komt iets later binnen vliegen */
-.game-card:nth-child(1) { animation-delay: 0.1s; }
-.game-card:nth-child(2) { animation-delay: 0.2s; }
-.game-card:nth-child(3) { animation-delay: 0.3s; }
-.game-card:nth-child(4) { animation-delay: 0.4s; }
-.game-card:nth-child(5) { animation-delay: 0.5s; }
-.game-card:nth-child(6) { animation-delay: 0.6s; }
-.game-card:nth-child(7) { animation-delay: 0.7s; }
-
-/* Klik effect */
-.game-card:active { 
-    transform: translateY(6px); 
-    box-shadow: 0 4px 0 rgba(0,0,0,0.1); 
-}
-
-/* Icoon in de kaart */
-.game-icon { 
-    font-size: 3.5rem; 
-    margin-bottom: 10px; 
-    filter: drop-shadow(0 4px 2px rgba(0,0,0,0.1));
-    transition: transform 0.2s;
-}
-
-.game-card:hover .game-icon {
-    transform: scale(1.1) rotate(5deg);
-}
-
-/* Tekst in de kaart */
-.game-title { 
-    font-size: 1.2rem; 
-    color: #444; 
-    font-weight: bold;
-    text-align: center;
-    width: 100%;
-}
-
-@keyframes popIn {
-    0% { opacity: 0; transform: scale(0.5) translateY(50px); }
-    100% { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-/* 6. SPEL BORD CONTAINER (Verborgen tot spel start) */
-#game-board {
-    position: absolute; 
-    top: 0; left: 0; 
-    width: 100%; height: 100%;
-    padding: 0; margin: 0;
-    z-index: 20;
-    display: none; 
-    /* Zorg dat de spellen zelf hun achtergrond regelen */
-}
-
-/* NOODOPLOSSING KLEUREN (Die we eerder hadden) */
-/* Dit mag hier ook in, dan is je style.css compleet */
-.color-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
-.color-dot { width: 35px; height: 35px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer; }
-.active-player-tag { display: inline-block; padding: 5px 12px; margin: 3px; border-radius: 15px; color: white; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-
-/* MOBIELE AANPASSINGEN */
-@media (max-width: 400px) {
-    h1 { font-size: 2.2rem; margin: 15px 0; }
-    .game-selection { gap: 15px; }
-    .game-icon { font-size: 3rem; }
-    .game-title { font-size: 1rem; }
-}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes popUp { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
