@@ -1,56 +1,24 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kids Games</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/memory.css">
-    <link rel="stylesheet" href="css/puzzel.css">
-    <link rel="stylesheet" href="css/stickers.css">
-    <link rel="stylesheet" href="css/tekenen.css">
-    <link rel="stylesheet" href="css/rekenen.css">
-    <link rel="stylesheet" href="css/schaduw.css"> </head>
+    <link rel="stylesheet" href="css/vang.css"> </head>
 <body>
 
     <div id="main-menu">
-        <h1>🚀 Kids Zone</h1>
-        
-        <div class="game-selection">
-            <div class="game-card" onclick="loadGame('memory')">
-                <div class="game-icon">🧠</div><div class="game-title">Memory</div>
-            </div>
-            <div class="game-card" onclick="loadGame('puzzel')">
-                <div class="game-icon">🧩</div><div class="game-title">Puzzel</div>
-            </div>
-            
-            <div class="game-card" onclick="loadGame('schaduw')">
-                <div class="game-icon">🌑</div><div class="game-title">Wie is het?</div>
-            </div>
-
-            <div class="game-card" onclick="loadGame('tekenen')">
-                <div class="game-icon">🎨</div><div class="game-title">Tekenen</div>
-            </div>
-            <div class="game-card" onclick="loadGame('rekenen')">
-                <div class="game-icon">🧮</div><div class="game-title">Tellen</div>
-            </div>
-            <div class="game-card" onclick="loadGame('stickers')">
-                <div class="game-icon">⭐</div><div class="game-title">Stickers</div>
-            </div>
+        <div class="game-card" onclick="loadGame('vang')">
+            <div class="game-icon">🔨</div><div class="game-title">Vang ze!</div>
         </div>
-    </div>
 
-    <div id="game-board"></div>
+        </div>
 
     <script src="js/stickers.js"></script>
     <script src="js/memory.js"></script>
     <script src="js/puzzel.js"></script>
     <script src="js/tekenen.js"></script>
     <script src="js/rekenen.js"></script>
-    <script src="js/schaduw.js"></script> <script>
+    <script src="js/schaduw.js"></script>
+    
+    <script src="js/vang.js"></script> <script>
         function loadGame(gameType) {
             document.getElementById('main-menu').style.display = 'none';
             document.getElementById('game-board').style.display = 'block';
@@ -60,13 +28,10 @@
             else if(gameType === 'stickers') openStickerBook();
             else if(gameType === 'tekenen') startDrawingGame();
             else if(gameType === 'rekenen') startMathGame();
-            else if(gameType === 'schaduw') startShadowGame(); // NIEUW
+            else if(gameType === 'schaduw') startShadowGame();
+            else if(gameType === 'vang') startWhackGame(); // AANGEPAST
         }
-        
-        function playSound(type) {
-            console.log("Audio:", type); 
-        }
+        // ...
     </script>
-
 </body>
 </html>
