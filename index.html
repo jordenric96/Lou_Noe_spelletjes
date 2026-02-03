@@ -7,14 +7,35 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="css/style.css">     
-    <link rel="stylesheet" href="css/memory.css">    
-    <link rel="stylesheet" href="css/puzzel.css">    
-    <link rel="stylesheet" href="css/stickers.css">  
-    <link rel="stylesheet" href="css/tekenen.css">   
-    <link rel="stylesheet" href="css/rekenen.css">   
-    <link rel="stylesheet" href="css/schaduw.css">   
-    <link rel="stylesheet" href="css/vang.css">      
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/memory.css">
+    <link rel="stylesheet" href="css/puzzel.css">
+    <link rel="stylesheet" href="css/stickers.css">
+    <link rel="stylesheet" href="css/tekenen.css">
+    <link rel="stylesheet" href="css/rekenen.css">
+    <link rel="stylesheet" href="css/schaduw.css">
+    <link rel="stylesheet" href="css/vang.css">
+
+    <style>
+        .color-dot {
+            width: 35px !important;
+            height: 35px !important;
+            display: inline-block !important;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            margin: 5px;
+            cursor: pointer;
+        }
+        .color-row {
+            display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; padding: 5px;
+        }
+        .active-player-tag {
+            display: inline-block; padding: 5px 12px; margin: 3px; border-radius: 15px;
+            color: white; font-weight: bold; font-family: 'Fredoka One', cursive;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer;
+        }
+    </style>
 </head>
 <body>
 
@@ -23,38 +44,25 @@
         
         <div class="game-selection">
             <div class="game-card" onclick="loadGame('memory')">
-                <div class="game-icon">🧠</div>
-                <div class="game-title">Memory</div>
+                <div class="game-icon">🧠</div><div class="game-title">Memory</div>
             </div>
-
             <div class="game-card" onclick="loadGame('puzzel')">
-                <div class="game-icon">🧩</div>
-                <div class="game-title">Puzzel</div>
+                <div class="game-icon">🧩</div><div class="game-title">Puzzel</div>
             </div>
-            
             <div class="game-card" onclick="loadGame('vang')">
-                <div class="game-icon">🔨</div>
-                <div class="game-title">Vang ze!</div>
+                <div class="game-icon">🔨</div><div class="game-title">Vang ze!</div>
             </div>
-
             <div class="game-card" onclick="loadGame('schaduw')">
-                <div class="game-icon">🌑</div>
-                <div class="game-title">Wie is het?</div>
+                <div class="game-icon">🌑</div><div class="game-title">Wie is het?</div>
             </div>
-
             <div class="game-card" onclick="loadGame('tekenen')">
-                <div class="game-icon">🎨</div>
-                <div class="game-title">Tekenen</div>
+                <div class="game-icon">🎨</div><div class="game-title">Tekenen</div>
             </div>
-
             <div class="game-card" onclick="loadGame('rekenen')">
-                <div class="game-icon">🧮</div>
-                <div class="game-title">Tellen</div>
+                <div class="game-icon">🧮</div><div class="game-title">Tellen</div>
             </div>
-
             <div class="game-card" onclick="loadGame('stickers')">
-                <div class="game-icon">⭐</div>
-                <div class="game-title">Stickers</div>
+                <div class="game-icon">⭐</div><div class="game-title">Stickers</div>
             </div>
         </div>
     </div>
@@ -69,38 +77,18 @@
     
     <script>
         function loadGame(gameType) {
-            // Verberg menu, toon spelbord
             document.getElementById('main-menu').style.display = 'none';
             document.getElementById('game-board').style.display = 'block';
             
-            // Start het juiste spel
-            if(gameType === 'memory') {
-                if(typeof startMemorySetup === 'function') startMemorySetup();
-            } 
-            else if(gameType === 'puzzel') {
-                if(typeof startPuzzleGame === 'function') startPuzzleGame();
-            } 
-            else if(gameType === 'stickers') {
-                if(typeof openStickerBook === 'function') openStickerBook();
-            } 
-            else if(gameType === 'tekenen') {
-                if(typeof startDrawingGame === 'function') startDrawingGame();
-            } 
-            else if(gameType === 'rekenen') {
-                if(typeof startMathGame === 'function') startMathGame();
-            } 
-            else if(gameType === 'schaduw') {
-                if(typeof startShadowGame === 'function') startShadowGame();
-            }
-            else if(gameType === 'vang') {
-                if(typeof startWhackGame === 'function') startWhackGame();
-            }
+            if(gameType === 'memory' && typeof startMemorySetup === 'function') startMemorySetup();
+            else if(gameType === 'puzzel' && typeof startPuzzleGame === 'function') startPuzzleGame();
+            else if(gameType === 'stickers' && typeof openStickerBook === 'function') openStickerBook();
+            else if(gameType === 'tekenen' && typeof startDrawingGame === 'function') startDrawingGame();
+            else if(gameType === 'rekenen' && typeof startMathGame === 'function') startMathGame();
+            else if(gameType === 'schaduw' && typeof startShadowGame === 'function') startShadowGame();
+            else if(gameType === 'vang' && typeof startWhackGame === 'function') startWhackGame();
         }
-        
-        function playSound(type) {
-            console.log("Audio:", type); 
-        }
+        function playSound(type) { console.log("Audio:", type); }
     </script>
-
 </body>
 </html>
