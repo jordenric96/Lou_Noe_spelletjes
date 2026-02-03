@@ -1,15 +1,15 @@
-// SCHADUW.JS - MET PROGRESSIE SYSTEEM
-console.log("Schaduw.js geladen (Stars Mode)...");
+// SCHADUW.JS - STRENGE FILTER + STERREN + WINNER MODAL
+console.log("Schaduw.js geladen (Final Fix)...");
 
 let shadowState = {
     currentImg: null,
-    stars: 0,           // Aantal sterren
-    maxStars: 5,        // Doel
+    stars: 0,
+    maxStars: 5,
     isLocked: false,
     processing: false 
 };
 
-// ... (getShadowImages en checkIfCutout blijven hetzelfde als voorheen) ...
+// 1. OPHALEN PLAATJES (Uit Memory Thema's)
 function getShadowImages() {
     if(typeof memThemes !== 'undefined') {
         let pool = [];
@@ -23,32 +23,67 @@ function getShadowImages() {
     return [];
 }
 
+// 2. DE FILTER: IS DIT EEN UITKNIPSEL?
+// (Checkt de 4 hoeken: als ze allemaal gekleurd zijn = rechthoek = FOUT)
 function checkIfCutout(src) {
     return new Promise((resolve) => {
-        const img = new Image(); img.src = src; img.crossOrigin = "Anonymous"; 
+        const img = new Image();
+        img.src = src;
+        img.crossOrigin = "Anonymous"; 
+        
         img.onload = () => {
-            const canvas = document.createElement('canvas'); canvas.width = img.width; canvas.height = img.height;
-            const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0);
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width; canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+
             try {
+                // Pak de 4 hoekpixels
                 const corners = [
-                    ctx.getImageData(0, 0, 1, 1).data[3], ctx.getImageData(img.width-1, 0, 1, 1).data[3],
-                    ctx.getImageData(0, img.height-1, 1, 1).data[3], ctx.getImageData(img.width-1, img.height-1, 1, 1).data[3]
+                    ctx.getImageData(0, 0, 1, 1).data[3],                  // Links-boven
+                    ctx.getImageData(img.width-1, 0, 1, 1).data[3],        // Rechts-boven
+                    ctx.getImageData(0, img.height-1, 1, 1).data[3],       // Links-onder
+                    ctx.getImageData(img.width-1, img.height-1, 1, 1).data[3] // Rechts-onder
                 ];
-                resolve(corners.some(alpha => alpha < 200)); 
-            } catch (e) { resolve(true); }
+
+                // Als ALLE hoeken zichtbaar zijn (>200 alpha), is het een rechthoek.
+                // Wij willen GEEN rechthoek.
+                const isRectangle = corners.every(alpha => alpha > 200); 
+                resolve(!isRectangle); // Return TRUE als het een cutout is
+
+            } catch (e) {
+                // Bij twijfel (security error), negeer plaatje voor de zekerheid
+                resolve(false); 
+            }
         };
+        // Als plaatje niet laadt, is het zeker fout
         img.onerror = () => resolve(false);
     });
+}
+
+// 3. ZOEKER: BLIJF ZOEKEN TOT JE EEN GOEIE HEBT
+async function findRandomCutout(pool, excludeList = []) {
+    // Probeer maximaal 30 keer een goede te vinden
+    for(let i=0; i<30; i++) {
+        const randomSrc = pool[Math.floor(Math.random() * pool.length)];
+        
+        // Mag niet al gebruikt zijn in deze ronde
+        if(excludeList.includes(randomSrc)) continue;
+
+        // CHECK DE FILTER
+        const isGood = await checkIfCutout(randomSrc);
+        if(isGood) return randomSrc;
+    }
+    return null; // Niks gevonden
 }
 
 // --- START GAME ---
 function startShadowGame() {
     const board = document.getElementById('game-board');
-    shadowState.stars = 0; // Reset sterren bij start
+    shadowState.stars = 0; 
     shadowState.isLocked = false;
     shadowState.processing = false;
 
-    // We bouwen de HTML met de sterrenbalk
     board.innerHTML = `
         <div class="shadow-game-container">
             <div class="shadow-header">
@@ -68,7 +103,7 @@ function startShadowGame() {
                 <div class="mystery-card">
                     <img id="mystery-img" class="mystery-img" src="" style="opacity:0">
                 </div>
-                <div class="shadow-question" id="shadow-txt">Wie is dit?</div>
+                <div class="shadow-question" id="shadow-txt">Zoeken...</div>
             </div>
             
             <div class="shadow-options" id="shadow-options"></div>
@@ -83,7 +118,7 @@ async function nextShadowRound() {
     shadowState.processing = true;
     shadowState.isLocked = false;
 
-    // UPDATE STERREN UI
+    // UI Updates
     for(let i=1; i<=5; i++) {
         const star = document.getElementById(`star-${i}`);
         if(star) {
@@ -100,34 +135,39 @@ async function nextShadowRound() {
     
     // Reset view
     imgEl.style.opacity = '0.3'; 
-    imgEl.className = 'mystery-img'; // Weer zwart maken!
-    txtEl.innerText = "Zoeken...";
+    imgEl.className = 'mystery-img'; 
+    txtEl.innerText = "Plaatje zoeken...";
     optContainer.innerHTML = ''; 
 
-    // OPHALEN
     let pool = getShadowImages();
     if(pool.length < 3) { alert("Te weinig plaatjes!"); return; }
     
-    // We zoeken een 'cutout' (transparante achtergrond)
-    pool.sort(() => 0.5 - Math.random());
-    let correctImg = null;
-    for(let i=0; i<Math.min(pool.length, 10); i++) {
-        let isGood = await checkIfCutout(pool[i]);
-        if(isGood) { correctImg = pool[i]; break; }
+    // STAP 1: Zoek het goede antwoord (MOET cutout zijn)
+    const correctImg = await findRandomCutout(pool, []);
+    
+    if(!correctImg) {
+        txtEl.innerText = "Geen geschikt plaatje...";
+        // Probeer het over 1 seconde nog eens (misschien pech gehad)
+        setTimeout(() => { shadowState.processing = false; nextShadowRound(); }, 1000);
+        return;
     }
-    if(!correctImg) correctImg = pool[0]; // Fallback
 
     shadowState.currentImg = correctImg;
 
-    // Foute antwoorden
-    let wrong1 = correctImg; 
-    while(wrong1 === correctImg) wrong1 = pool[Math.floor(Math.random() * pool.length)];
-    let wrong2 = correctImg;
-    while(wrong2 === correctImg || wrong2 === wrong1) wrong2 = pool[Math.floor(Math.random() * pool.length)];
+    // STAP 2: Zoek 2 foute antwoorden (MOETEN OOK cutouts zijn)
+    const wrong1 = await findRandomCutout(pool, [correctImg]);
+    const wrong2 = await findRandomCutout(pool, [correctImg, wrong1]);
+
+    if(!wrong1 || !wrong2) {
+        // Als we geen foute opties kunnen vinden die cutouts zijn, herstart
+        setTimeout(() => { shadowState.processing = false; nextShadowRound(); }, 500);
+        return;
+    }
 
     let options = [correctImg, wrong1, wrong2];
     options.sort(() => 0.5 - Math.random());
 
+    // Renderen
     imgEl.src = correctImg;
     imgEl.onload = () => { imgEl.style.opacity = '1'; }; 
     txtEl.innerText = "Wie is dit?";
@@ -143,33 +183,38 @@ function checkShadow(src, card) {
     if(shadowState.isLocked || shadowState.processing) return;
 
     if(src === shadowState.currentImg) {
-        // GOED ANTWOORD!
+        // GOED!
         if(typeof playSound === 'function') playSound('win');
         card.classList.add('correct');
         
-        // 1. Onthul plaatje
+        // Onthul en update tekst
         document.getElementById('mystery-img').classList.add('revealed');
         document.getElementById('shadow-txt').innerText = "Ja! Goed zo!";
         
         shadowState.isLocked = true;
-        
-        // 2. Ster erbij!
         shadowState.stars++;
         
-        // Update direct de ster (visueel)
+        // Visuele ster update
         const starEl = document.getElementById(`star-${shadowState.stars}`);
         if(starEl) {
             starEl.classList.add('earned');
-            starEl.style.transform = "scale(1.5)"; // Even ploppen
+            starEl.style.transform = "scale(1.5)"; 
             setTimeout(() => starEl.style.transform = "scale(1.3)", 300);
         }
 
-        // 3. Hebben we er 5? -> GROOT FEEST
+        // GEWONNEN? (5 Sterren)
         if(shadowState.stars >= shadowState.maxStars) {
-            if(typeof memFireConfetti === 'function') memFireConfetti();
-            setTimeout(showRewardModal, 1000); // Toon beloning na 1 sec
+            setTimeout(() => {
+                // ROEP HET NIEUWE CENTRALE WINNAARS SCHERM AAN
+                if(typeof showWinnerModal === 'function') {
+                    showWinnerModal("Jij");
+                } else {
+                    alert("Gewonnen!");
+                    location.reload();
+                }
+            }, 1000);
         } else {
-            // Gewoon volgende ronde
+            // Volgende ronde
             setTimeout(nextShadowRound, 1500);
         }
 
@@ -178,36 +223,4 @@ function checkShadow(src, card) {
         if(typeof playSound === 'function') playSound('error');
         card.classList.add('wrong');
     }
-}
-
-// De Beloning Scherm
-function showRewardModal() {
-    const board = document.getElementById('game-board');
-    
-    // Maak een overlay
-    const modal = document.createElement('div');
-    modal.className = 'reward-modal';
-    modal.innerHTML = `
-        <div class="reward-content">
-            <div class="reward-emoji">🎁✨</div>
-            <h2>Cadeautje Open!</h2>
-            <p>Wat goed! Je hebt ze alle 5 geraden!</p>
-            <button class="reward-btn" onclick="resetShadowGame()">Nog een keer!</button>
-        </div>
-    `;
-    board.appendChild(modal);
-    
-    if(typeof playSound === 'function') playSound('win');
-}
-
-function resetShadowGame() {
-    // Verwijder modal en begin opnieuw
-    const modal = document.querySelector('.reward-modal');
-    if(modal) modal.remove();
-    
-    shadowState.stars = 0;
-    // Visueel resetten sterren
-    document.querySelectorAll('.star-icon').forEach(s => s.classList.remove('earned'));
-    
-    nextShadowRound();
 }
