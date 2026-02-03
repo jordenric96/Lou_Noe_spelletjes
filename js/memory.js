@@ -1,5 +1,5 @@
-// MEMORY.JS - FIXED NAMESPACE
-console.log("Memory.js geladen...");
+// MEMORY.JS - UPDATED (10 Kleuren, Mix Fix, Back Button)
+console.log("Memory.js geladen (Update)...");
 
 let memoryState = { 
     theme: 'boerderij', 
@@ -14,8 +14,22 @@ let memoryState = {
     pendingPlayer: null 
 };
 
-// ... (Palette en Themes blijven hetzelfde, die conflicteren niet door const/let) ...
-const memPalette = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#4CAF50', '#FFEB3B', '#FF9800'];
+// 1. MEER KLEUREN (12 stuks)
+const memPalette = [
+    '#F44336', // Rood
+    '#E91E63', // Roze
+    '#9C27B0', // Paars
+    '#673AB7', // Diep Paars
+    '#3F51B5', // Indigo
+    '#2196F3', // Blauw
+    '#00BCD4', // Cyaan
+    '#009688', // Teal
+    '#4CAF50', // Groen
+    '#8BC34A', // Lichtgroen
+    '#FFC107', // Amber
+    '#FF9800'  // Oranje
+];
+
 const memThemes = {
     'boerderij': { locked: false, extension: 'png', path: 'assets/images/memory/boerderij/' },
     'mario':     { locked: false, extension: 'png', path: 'assets/images/memory/mario/' },
@@ -28,7 +42,7 @@ const memThemes = {
     'mix':       { locked: false, extension: 'png', path: '', isMix: true }
 };
 
-// --- CONFETTI ---
+// ... (memFireConfetti functie blijft hetzelfde) ...
 function memFireConfetti() {
     const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'];
     const container = document.body;
@@ -53,7 +67,7 @@ function memFireConfetti() {
     }
 }
 
-// --- SETUP (Let op de 'mem' voor elke functie!) ---
+// ... (startMemorySetup, memSetTheme, memSelectPerson, memAddCustomPerson blijven hetzelfde) ...
 function startMemorySetup() {
     const board = document.getElementById('game-board');
     if (!board) return;
@@ -61,7 +75,7 @@ function startMemorySetup() {
     let themeBtns = Object.keys(memThemes).map(key => {
         const t = memThemes[key];
         const selected = memoryState.theme === key ? 'selected' : '';
-        let imgTag = t.isMix ? `<div style="width:100%; height:100%; background:#333; display:flex; justify-content:center; align-items:center; font-size:3rem;">🔀</div>` : `<img src="${t.path}cover.png" onerror="this.src='assets/images/icon.png'">`;
+        let imgTag = t.isMix ? `<div style="width:100%; height:100%; background:#333; display:flex; justify-content:center; align-items:center; font-size:2.5rem;">🔀</div>` : `<img src="${t.path}cover.png" onerror="this.src='assets/images/icon.png'">`;
 
         return `
             <button class="theme-card-btn ${t.locked ? 'locked' : ''} ${selected}" onclick="memSetTheme('${key}', this)">
@@ -82,23 +96,25 @@ function startMemorySetup() {
                         <button class="option-btn player-btn" onclick="memSelectPerson('Papa', this)">👨🏻 Papa</button>
                     </div>
                     <div class="custom-name-container">
-                        <input type="text" id="mem-custom-name" placeholder="Of typ naam...">
+                        <input type="text" id="mem-custom-name" placeholder="Naam..." style="width:100px;">
                         <button class="add-btn" onclick="memAddCustomPerson()">OK</button>
                     </div>
                     <div class="color-row" id="mem-color-palette"></div>
-                    <div id="mem-active-players"></div>
+                    <div id="mem-active-players" style="min-height:30px;"></div>
                 </div>
                 <div class="setup-group">
                     <h3>2. Thema</h3>
-                    <div class="theme-grid">${themeBtns}</div>
+                    <div class="theme-grid" style="overflow-y:auto; max-height:250px;">${themeBtns}</div>
                 </div>
             </div>
-            <button id="mem-start-btn" class="start-btn" onclick="startMemoryGame()" disabled>Voeg speler toe...</button>
+            <button id="mem-start-btn" class="start-btn" onclick="startMemoryGame()" disabled>Speler toevoegen...</button>
+            <button class="tool-btn" onclick="location.reload()" style="margin-top:10px; width:100%; background:#ccc; color:#333;">⬅ Terug naar Menu</button>
         </div>`;
     
     memRenderPalette(); memRenderActivePlayers(); memCheckStartButton();
 }
 
+// ... (Helpers: memSetTheme, memSelectPerson, memAddCustomPerson) ...
 function memSetTheme(name, btn) {
     if(memThemes[name].locked) return;
     if(typeof playSound === 'function') playSound('click');
@@ -106,7 +122,6 @@ function memSetTheme(name, btn) {
     document.querySelectorAll('.theme-card-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
 }
-
 function memSelectPerson(name, btn) {
     if(typeof playSound === 'function') playSound('click');
     document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending'));
@@ -115,76 +130,74 @@ function memSelectPerson(name, btn) {
     const p = document.getElementById('mem-color-palette'); 
     if(p) { p.style.animation="shake 0.5s"; setTimeout(()=>p.style.animation="",500); }
 }
-
 function memAddCustomPerson() {
     const i = document.getElementById('mem-custom-name'); const n = i.value.trim();
     if(n){ 
         if(typeof playSound==='function') playSound('click'); 
         memoryState.pendingPlayer=n; 
         document.querySelectorAll('.player-btn').forEach(b=>b.classList.remove('selected-pending')); 
-        i.value=''; i.placeholder=n+" gekozen!"; 
+        i.value=''; i.placeholder="Gekozen!"; 
         const p=document.getElementById('mem-color-palette'); 
         if(p){ p.style.animation="shake 0.5s"; setTimeout(()=>p.style.animation="",500); } 
     }
 }
-
 function memRenderPalette() {
     const cp = document.getElementById('mem-color-palette'); if(!cp)return;
     const used = memoryState.playerNames.map(p => p.color);
     cp.innerHTML = memPalette.map(c => {
         const u = used.includes(c);
-        // HIER ZAT DE FOUT: Nu roepen we specifiek memSelectColor aan
         return `<div class="color-dot" style="background:${c}; opacity:${u?0.2:1}" onclick="${u?'':`memSelectColor('${c}')`}"></div>`;
     }).join('');
 }
-
+// ... (memSelectColor, memRenderActivePlayers, memRemovePlayer, memCheckStartButton blijven hetzelfde) ...
 function memSelectColor(c) {
     if(!memoryState.pendingPlayer) return alert("Kies eerst een naam!");
     if(typeof playSound==='function') playSound('pop');
     memoryState.playerNames = memoryState.playerNames.filter(p=>p.name!==memoryState.pendingPlayer);
     memoryState.playerNames.push({name:memoryState.pendingPlayer, color:c});
     memoryState.pendingPlayer=null; 
-    const inp = document.getElementById('mem-custom-name'); if(inp) inp.placeholder="Typ naam...";
+    const inp = document.getElementById('mem-custom-name'); if(inp) inp.placeholder="Naam...";
     memRenderPalette(); memRenderActivePlayers(); memCheckStartButton();
 }
-
 function memRenderActivePlayers() {
     document.getElementById('mem-active-players').innerHTML = memoryState.playerNames.map(p=>`<div class="active-player-tag" style="background:${p.color}" onclick="memRemovePlayer('${p.name}')">${p.name} ×</div>`).join('');
 }
-
 function memRemovePlayer(n) { 
     memoryState.playerNames=memoryState.playerNames.filter(p=>p.name!==n); 
     memRenderPalette(); memRenderActivePlayers(); memCheckStartButton(); 
 }
-
 function memCheckStartButton() { 
     const b=document.getElementById('mem-start-btn'); 
     if(b){
         b.disabled=memoryState.playerNames.length===0; 
-        b.innerText=b.disabled?"VOEG SPELER TOE...":"START SPEL ▶️";
+        b.innerText=b.disabled?"SPELER TOEVOEGEN...":"START SPEL ▶️";
     }
 }
-
-// --- GAME LOGIC ---
 function memUpdateCardSize() {
+    // ... (Zelfde logica als voorheen voor grootte) ...
     const board = document.getElementById('game-board');
     const grid = document.getElementById('memory-grid');
-    const scoreBoard = document.querySelector('.score-board');
+    const header = document.querySelector('.memory-header-row'); // Nieuwe header
     if (!board || !grid) return;
     const windowH = window.innerHeight;
     const windowW = window.innerWidth;
-    const scoreHeight = scoreBoard ? scoreBoard.offsetHeight : 60;
-    const availableH = windowH - scoreHeight - 20;
+    const headerH = header ? header.offsetHeight : 60;
+    const availableH = windowH - headerH - 20;
     const availableW = windowW - 20;
     const gap = 4;
+    
+    // Probeer 6x5 of 5x6
     const sizeA_W = (availableW - (5 * gap)) / 6;
     const sizeA_H = (availableH - (4 * gap)) / 5;
     const sizeA = Math.floor(Math.min(sizeA_W, sizeA_H));
+    
     const sizeB_W = (availableW - (4 * gap)) / 5;
     const sizeB_H = (availableH - (5 * gap)) / 6;
     const sizeB = Math.floor(Math.min(sizeB_W, sizeB_H));
+    
     let finalSize, finalCols;
     if (sizeA >= sizeB) { finalSize = sizeA; finalCols = 6; } else { finalSize = sizeB; finalCols = 5; }
+    
     grid.style.setProperty('--card-size', `${finalSize}px`);
     grid.style.setProperty('--grid-cols', finalCols);
     grid.style.gap = `${gap}px`;
@@ -197,13 +210,18 @@ function startMemoryGame() {
     memoryState.scores = {};
     memoryState.playerNames.forEach(p => { memoryState.scores[p.name] = 0; });
     
-    let scoreHTML = `<div class="score-board">
-        ${memoryState.playerNames.map((p, i) => `
-            <div class="player-badge" id="badge-${i}" style="border-color:${p.color}">
-                <div class="score-fill" id="fill-${i}" style="background-color:${p.color}; width:0%;"></div>
-                <span class="badge-content" style="color:${p.color}">${p.name}: <span id="score-${i}">0</span></span>
-            </div>
-        `).join('')}
+    // 2. HEADER MET TERUG KNOP
+    let scoreHTML = `
+    <div class="memory-header-row" style="display:flex; justify-content:space-between; align-items:center; padding:5px; background:rgba(255,255,255,0.8); border-bottom-left-radius:15px; border-bottom-right-radius:15px;">
+        <button onclick="startMemorySetup()" style="background:#FF9800; border:none; color:white; padding:5px 15px; border-radius:20px; font-weight:bold; cursor:pointer;">⬅ Terug</button>
+        <div class="score-board" style="display:flex; gap:10px; background:transparent; box-shadow:none; margin:0;">
+            ${memoryState.playerNames.map((p, i) => `
+                <div class="player-badge" id="badge-${i}" style="border-color:${p.color}; min-width:60px; font-size:0.8rem;">
+                    <div class="score-fill" id="fill-${i}" style="background-color:${p.color}; width:0%;"></div>
+                    <span class="badge-content" style="color:${p.color}">${p.name}: <span id="score-${i}">0</span></span>
+                </div>
+            `).join('')}
+        </div>
     </div>`;
 
     board.innerHTML = `<div class="memory-game-container">${scoreHTML}<div class="memory-grid" id="memory-grid"></div></div>`;
@@ -221,14 +239,22 @@ function memGenerateCards(totalCards) {
     const grid = document.getElementById('memory-grid');
     const pairsNeeded = totalCards / 2;
     let selectedImages = [];
+    const isMix = memThemes[memoryState.theme].isMix;
 
-    if(memThemes[memoryState.theme].isMix) {
+    // 3. MIX LOGICA & EERLIJKE COVER
+    // We gebruiken een generieke cover voor mix, of de thema cover voor normaal
+    const mixCover = 'assets/images/icon.png'; // Zorg dat dit plaatje bestaat! Of gebruik een SVG data-url
+
+    if(isMix) {
         let allPool = [];
         Object.keys(memThemes).forEach(tName => {
             const tData = memThemes[tName];
             if(!tData.locked && !tData.isMix) {
                 for(let i=1; i<=15; i++) {
-                    allPool.push({ src: `${tData.path}${i}.${tData.extension}`, cover: `${tData.path}cover.png` });
+                    allPool.push({ 
+                        src: `${tData.path}${i}.${tData.extension}`, 
+                        cover: mixCover // FORCEER DEZELFDE COVER!
+                    });
                 }
             }
         });
@@ -237,7 +263,10 @@ function memGenerateCards(totalCards) {
     } else {
         const tData = memThemes[memoryState.theme];
         for(let i=1; i<=pairsNeeded; i++) {
-            selectedImages.push({ src: `${tData.path}${i}.${tData.extension}`, cover: `${tData.path}cover.png` });
+            selectedImages.push({ 
+                src: `${tData.path}${i}.${tData.extension}`, 
+                cover: `${tData.path}cover.png` 
+            });
         }
         selectedImages.sort(() => 0.5 - Math.random());
     }
@@ -263,6 +292,7 @@ function memGenerateCards(totalCards) {
     });
 }
 
+// ... (memFlipCard, memSwitchPlayer, memUpdateActiveBadgeColor blijven hetzelfde) ...
 function memFlipCard() {
     if (memoryState.lockBoard || this.classList.contains('flipped')) return;
     if(typeof playSound === 'function') playSound('pop');
