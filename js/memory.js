@@ -15,7 +15,8 @@ const memThemes = {
     'dino':      { locked: false, extension: 'png', path: 'assets/images/memory/dino/' },
     'sonic':     { locked: false, extension: 'png', path: 'assets/images/memory/natuur/' },
     'cars':      { locked: false, extension: 'png', path: 'assets/images/memory/beroepen/' },
-    'mix':       { locked: false, extension: 'png', path: '', isMix: true }
+    'toystory':      { locked: false, extension: 'png', path: 'assets/images/memory/toystory/' },
+    'mix'       { locked: false, extension: 'png', path: '', isMix: true }
 };
 const mixCoverIcon = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23FF9800' stroke='white' stroke-width='5'/%3E%3Ctext x='50' y='70' font-family='Arial' font-size='60' font-weight='bold' fill='white' text-anchor='middle'%3E?%3C/text%3E%3C/svg%3E";
 
