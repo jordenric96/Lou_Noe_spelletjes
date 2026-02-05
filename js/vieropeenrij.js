@@ -1,5 +1,5 @@
-// VIEROPEENRIJ.JS - FIXED CHIP PERSISTENCE
-console.log("4-op-een-rij geladen (Fixed Drops)...");
+// VIEROPEENRIJ.JS - FINAL FIXES
+console.log("4-op-een-rij geladen (Sheep Fix)...");
 
 let c4State = {
     step: 0, winsNeeded: 3,
@@ -94,7 +94,7 @@ function renderSetup() {
     `;
 }
 
-// UPDATE FUNCTIES
+// SETUP ACTIONS (Geen refresh)
 function c4UpdateVs() {
     document.getElementById('prev-p1-name').innerText = c4State.p1.name || 'Speler 1';
     document.getElementById('prev-p1-chip').style.background = c4State.p1.color;
@@ -136,11 +136,14 @@ function renderBoard() {
     const makeDots = (wins) => { let h=''; for(let i=0; i<c4State.winsNeeded; i++) h+=`<div class="win-dot ${i<wins?'filled':''}"></div>`; return h; };
 
     let gridHTML = '';
+    // Let op: id is c-r
     for(let r=ROWS-1; r>=0; r--) { 
         for(let c=0; c<COLS; c++) {
             gridHTML += `<div class="c4-cell" id="cell-${c}-${r}"></div>`;
         }
     }
+    
+    // Klik kolommen (left wordt in resize gezet)
     let colHTML = '';
     for(let c=0; c<COLS; c++) colHTML += `<div class="c4-column" id="col-${c}" onclick="c4Drop(${c})"></div>`;
 
@@ -167,27 +170,40 @@ function renderBoard() {
     `;
 
     setTimeout(c4Resize, 10);
-    setTimeout(c4Resize, 200); // Dubbele check
+    setTimeout(c4Resize, 200);
     window.addEventListener('resize', c4Resize);
 }
 
 function c4Resize() {
     const wrapper = document.getElementById('board-visual');
     if(!wrapper) return;
-    const w = wrapper.clientWidth;
-    const totalGap = 30; const padding = 20; 
-    const cellSize = Math.floor((w - padding - totalGap) / 7);
-    wrapper.style.setProperty('--cell-size', `${cellSize}px`);
-    for(let c=0; c<COLS; c++) {
-        const colDiv = document.getElementById(`col-${c}`);
-        if(colDiv) {
-            const left = 10 + (cellSize + 5) * c;
-            colDiv.style.left = `${left}px`;
+    
+    // We meten nu een echte cel in het grid
+    const cellRef = document.querySelector('.c4-cell');
+    if(cellRef) {
+        const cellSize = cellRef.clientWidth; // De werkelijke breedte in de browser
+        
+        // Update CSS variabele
+        wrapper.style.setProperty('--cell-size', `${cellSize}px`);
+        
+        // Update kolommen
+        const gap = wrapper.clientWidth * 0.01; // 1% gap uit CSS
+        const padding = 10;
+        
+        for(let c=0; c<COLS; c++) {
+            const colDiv = document.getElementById(`col-${c}`);
+            if(colDiv) {
+                // Bereken exact waar de cel staat
+                const cell = document.getElementById(`cell-${c}-0`);
+                if(cell) {
+                    colDiv.style.left = cell.offsetLeft + 'px';
+                    colDiv.style.width = cell.clientWidth + 'px';
+                }
+            }
         }
     }
 }
 
-// --- DROP LOGICA (MET PERSISTENCE FIX) ---
 function c4Drop(col) {
     if(!c4State.gameActive || c4State.isDropping) return;
 
@@ -206,46 +222,51 @@ function c4Drop(col) {
     chip.style.background = p.color;
     chip.innerHTML = `<img src="${p.img}">`;
 
-    const wrapper = document.getElementById('board-visual');
-    const cellSize = parseFloat(wrapper.style.getPropertyValue('--cell-size')) || 40;
-    const leftPos = 10 + (cellSize + 5) * col;
+    // Positie ophalen
+    const targetCell = document.getElementById(`cell-${col}-${row}`);
+    const startCell = document.getElementById(`cell-${col}-${ROWS-1}`); // Bovenste cel voor X positie
     
-    chip.style.left = `${leftPos}px`;
-    chip.style.width = `${cellSize}px`;
-    chip.style.height = `${cellSize}px`;
-    
-    const targetTop = 10 + (5 - row) * (cellSize + 5);
-    
-    const animName = `bounce-${col}-${row}`;
-    const keyframes = `@keyframes ${animName} { 0% { top: -80px; } 60% { top: ${targetTop}px; } 75% { top: ${targetTop - 15}px; } 100% { top: ${targetTop}px; } }`;
-    const styleSheet = document.createElement("style");
-    styleSheet.innerText = keyframes;
-    document.head.appendChild(styleSheet);
-    
-    chip.style.animation = `${animName} 0.5s ease-in forwards`;
-    document.getElementById('chips-layer').appendChild(chip);
-    
-    setTimeout(() => { if(typeof playSound==='function') playSound('click'); }, 300);
+    if(targetCell && startCell) {
+        chip.style.left = startCell.offsetLeft + 'px';
+        chip.style.width = startCell.clientWidth + 'px';
+        chip.style.height = startCell.clientHeight + 'px';
+        
+        // Bereken target top (relatief aan board-wrapper)
+        const targetTop = targetCell.offsetTop;
+        
+        // Animatie
+        const animName = `bounce-${col}-${row}-${Date.now()}`; // Unique name
+        const keyframes = `@keyframes ${animName} { 
+            0% { top: -80px; } 
+            60% { top: ${targetTop}px; } 
+            75% { top: ${targetTop - 15}px; } 
+            100% { top: ${targetTop}px; } 
+        }`;
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = keyframes;
+        document.head.appendChild(styleSheet);
+        
+        chip.style.animation = `${animName} 0.5s ease-in forwards`;
+        document.getElementById('chips-layer').appendChild(chip);
+        
+        setTimeout(() => { if(typeof playSound==='function') playSound('click'); }, 300);
 
-    setTimeout(() => {
-        c4State.isDropping = false;
-        
-        // --- DE BELANGRIJKE FIX: ---
-        // 1. Zet de chip 'hard' op zijn plek
-        chip.style.top = `${targetTop}px`;
-        // 2. Verwijder de animatie klasse
-        chip.style.animation = 'none';
-        chip.classList.remove('chip-falling');
-        // 3. Ruim de keyframes op
-        document.head.removeChild(styleSheet);
-        
-        if (c4CheckWin(col, row)) c4Win();
-        else if (c4CheckDraw()) { alert("Gelijkspel!"); c4InitGame(); }
-        else {
-            c4State.currentPlayer = c4State.currentPlayer===1?2:1;
-            c4InitGameHeader(); 
-        }
-    }, 550);
+        setTimeout(() => {
+            c4State.isDropping = false;
+            // PERSISTENCE FIX
+            chip.style.top = targetTop + 'px';
+            chip.style.animation = 'none';
+            chip.classList.remove('chip-falling');
+            document.head.removeChild(styleSheet);
+            
+            if (c4CheckWin(col, row)) c4Win();
+            else if (c4CheckDraw()) { alert("Gelijkspel!"); c4InitGame(); }
+            else {
+                c4State.currentPlayer = c4State.currentPlayer===1?2:1;
+                c4InitGameHeader(); 
+            }
+        }, 550);
+    }
 }
 
 function c4InitGameHeader() { renderBoard(); }
