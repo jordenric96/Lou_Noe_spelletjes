@@ -1,4 +1,4 @@
-/* VANG.CSS - VOLLEDIG (SETUP + GAME + FIXES) */
+/* VANG.CSS - MET STERREN TRACKER */
 
 /* --- 1. SETUP SCHERM --- */
 .memory-setup {
@@ -18,9 +18,8 @@
 
 h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
 
-/* SPELERS & KNOPPEN */
+/* KNOPPEN & KLEUREN */
 .name-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; }
-
 .player-btn {
     flex: 1; min-width: 80px;
     background: #f0f0f0; border: 2px solid #ddd;
@@ -29,18 +28,15 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
     transition: all 0.2s; white-space: nowrap;
     opacity: 0.7; font-size: 1rem; position: relative;
 }
-
 .player-btn.selected-pending {
     background: #4CAF50 !important; border-color: #2E7D32 !important; color: white !important;
-    transform: scale(1.05); box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
-    opacity: 1; font-weight: bold;
+    transform: scale(1.05); box-shadow: 0 4px 10px rgba(0,0,0,0.3); opacity: 1; font-weight: bold;
 }
 .player-btn.selected-pending::after {
     content: '✅'; position: absolute; top: -8px; right: -8px; font-size: 1.2rem;
     filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
 }
 
-/* KLEUREN GRID */
 .color-grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 10px; width: 100%; }
 .color-dot {
     width: 100% !important; max-width: 55px; aspect-ratio: 1 / 1; height: auto !important;
@@ -52,7 +48,6 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
 /* FOOTER */
 #vang-active-players { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 10px; min-height: 30px; }
 .active-player-tag { display: inline-block; padding: 5px 12px; margin: 3px; border-radius: 15px; color: white; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2); border: 2px solid white; }
-
 .bottom-actions { margin-top: auto; display: flex; flex-direction: column; gap: 8px; padding-top: 20px; }
 .start-btn { width: 100%; padding: 15px; font-size: 1.2rem; border-radius: 15px; background: #4CAF50; color: white; border: none; font-family: 'Fredoka One'; box-shadow: 0 4px 0 #2E7D32; transition: 0.3s; }
 .start-btn:disabled { background: #ccc; box-shadow: none; color: #666; }
@@ -68,21 +63,33 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
     user-select: none; -webkit-tap-highlight-color: transparent;
 }
 
+/* HEADER AANGEPAST VOOR STERREN */
 .whack-header {
     width: 100%; max-width: 600px;
-    display: flex; justify-content: space-between; align-items: center;
+    display: flex; flex-direction: column; /* Onder elkaar voor ruimte */
+    gap: 5px;
+    align-items: center;
     margin-bottom: 10px;
-    background: rgba(255,255,255,0.9); padding: 5px 15px; border-radius: 20px;
+    background: rgba(255,255,255,0.9); padding: 8px 15px; border-radius: 20px;
     box-shadow: 0 4px 0 rgba(0,0,0,0.1);
 }
 
-.whack-score-box {
-    display: flex; align-items: center; gap: 10px;
-    font-size: 1.2rem; font-weight: bold; color: #333;
-}
-.player-icon-display { font-size: 1.5rem; }
+/* De bovenste rij met knop en speler */
+.header-top { width: 100%; display: flex; justify-content: space-between; align-items: center; }
 
-/* HET SPELBORD */
+/* De Sterrenbalk (Nieuw!) */
+.star-tracker {
+    background: #EFEBE9; border-radius: 20px;
+    padding: 5px 10px; display: flex; gap: 2px;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+    margin-top: 5px;
+}
+.star-icon { font-size: 1.5rem; color: #CCC; transition: 0.3s; transform: scale(0.9); }
+.star-icon.active { color: #FFD700; transform: scale(1.2); filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); }
+
+.player-icon-display { font-size: 1.5rem; text-shadow: 2px 2px 0 rgba(0,0,0,0.2); }
+
+/* ROOSTER */
 .whack-grid {
     display: grid; gap: 10px;
     width: 100%; max-width: 500px;
@@ -92,7 +99,7 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
 .whack-grid.medium { grid-template-columns: repeat(3, 1fr); }
 .whack-grid.hard { grid-template-columns: repeat(3, 1fr); } 
 
-/* HET GAT */
+/* GAT & PLAATJE */
 .hole {
     aspect-ratio: 1 / 1;
     background: #5D4037;
@@ -103,14 +110,11 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
     cursor: pointer; touch-action: manipulation;
 }
 
-/* HET PLAATJE */
 .mole-img {
     width: 80%; height: 80%;
     position: absolute; bottom: -120%; left: 10%;
     transition: bottom 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     object-fit: contain; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
-    
-    /* BELANGRIJK: Zorgt dat klikken ALTIJD werkt */
     pointer-events: none !important; 
 }
 
