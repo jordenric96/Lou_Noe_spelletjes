@@ -1,17 +1,18 @@
-// VIEROPEENRIJ.JS - FINAL STABLE & VISUALS
-console.log("4-op-een-rij geladen (Stable Fix)...");
+// VIEROPEENRIJ.JS - STATE BASED (NO DISAPPEAR)
+console.log("4-op-een-rij geladen (State Based)...");
 
 let c4State = {
     step: 0, winsNeeded: 3,
     p1: { name: '', img: '', color: '#F44336', wins: 0 },
     p2: { name: '', img: '', color: '#2196F3', wins: 0 },
-    board: [], currentPlayer: 1, gameActive: false, isDropping: false
+    board: [], // 0=leeg, 1=p1, 2=p2
+    currentPlayer: 1, gameActive: false, isDropping: false
 };
 
 const ROWS = 6; const COLS = 7;
 const c4Colors = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#00BCD4', '#4CAF50', '#FFEB3B', '#FF9800'];
 
-// --- SETUP ---
+// --- SETUP (Ongewijzigd, werkt goed) ---
 function startConnect4() {
     c4State.step = 0; c4State.p1.wins = 0; c4State.p2.wins = 0;
     c4State.p1.name = ''; c4State.p1.img = ''; c4State.p1.color = '#F44336';
@@ -64,7 +65,6 @@ function renderWizardStep() {
             <div class="c4-step-box">
                 ${goalSection}
                 <div class="c4-title" style="color:${currPlayer.color}">${title}</div>
-                
                 <div class="c4-subtitle">Naam:</div>
                 <div class="preset-row">
                     <button class="preset-btn ${currPlayer.name==='Lou'?'active':''}" onclick="c4SetName('Lou')">👦🏼<br>Lou</button>
@@ -74,11 +74,9 @@ function renderWizardStep() {
                 </div>
                 <input type="text" class="custom-name-input" placeholder="Of typ zelf..." value="${currPlayer.name}" 
                     oninput="c4UpdateName(this.value)" onclick="this.select()">
-
                 <div class="c4-subtitle">Kleur & Chip:</div>
                 <div class="color-picker-row">${colorsHTML}</div>
                 <div class="chip-grid" id="c4-chip-grid">${chipsHTML}</div>
-
                 <button class="confirm-action-btn ${isReady ? 'ready' : ''}" onclick="c4NextStep()">${btnText}</button>
             </div>
             <button class="tool-btn" onclick="location.reload()">Terug naar Menu</button>
@@ -86,7 +84,6 @@ function renderWizardStep() {
     `;
 }
 
-// Setup Helpers
 function c4UpdateBtn() {
     const curr = c4State.step === 0 ? c4State.p1 : c4State.p2;
     const btn = document.querySelector('.confirm-action-btn');
@@ -99,37 +96,13 @@ function c4UpdateBtn() {
     }
 }
 function c4SetGoal(n) { if(typeof playSound==='function') playSound('click'); c4State.winsNeeded = n; renderWizardStep(); }
-function c4SetName(n) {
-    if(typeof playSound==='function') playSound('click');
-    const p = c4State.step === 0 ? c4State.p1 : c4State.p2; p.name = n;
-    document.querySelector('.custom-name-input').value = n;
-    document.querySelectorAll('.preset-btn').forEach(b => {
-        if(b.innerText.includes(n)) b.classList.add('active'); else b.classList.remove('active');
-    });
-    c4UpdateBtn();
-}
-function c4UpdateName(val) { const p = c4State.step === 0 ? c4State.p1 : c4State.p2; p.name = val; document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active')); c4UpdateBtn(); }
-function c4SetColor(c) {
-    if(typeof playSound==='function') playSound('click');
-    const p = c4State.step === 0 ? c4State.p1 : c4State.p2; p.color = c;
-    renderWizardStep(); 
-}
-function c4SetChip(src) {
-    if(typeof playSound==='function') playSound('pop');
-    const p = c4State.step === 0 ? c4State.p1 : c4State.p2; p.img = src;
-    document.querySelectorAll('.chip-option').forEach(el => el.classList.remove('selected'));
-    const allChips = document.querySelectorAll('.chip-option img');
-    allChips.forEach(img => { if(img.getAttribute('src') === src) img.parentElement.classList.add('selected'); });
-    c4UpdateBtn();
-}
-function c4NextStep() {
-    const curr = c4State.step === 0 ? c4State.p1 : c4State.p2;
-    if (!curr.name || !curr.img) { if(typeof playSound==='function') playSound('error'); return; }
-    if(typeof playSound==='function') playSound('win');
-    if (c4State.step === 0) { c4State.step = 1; renderWizardStep(); } else { c4InitGame(); }
-}
+function c4SetName(n) { if(typeof playSound==='function') playSound('click'); const p = c4State.step===0?c4State.p1:c4State.p2; p.name=n; document.querySelector('.custom-name-input').value=n; document.querySelectorAll('.preset-btn').forEach(b=>{if(b.innerText.includes(n))b.classList.add('active');else b.classList.remove('active');}); c4UpdateBtn(); }
+function c4UpdateName(val) { const p = c4State.step===0?c4State.p1:c4State.p2; p.name=val; document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active')); c4UpdateBtn(); }
+function c4SetColor(c) { if(typeof playSound==='function') playSound('click'); const p = c4State.step===0?c4State.p1:c4State.p2; p.color=c; renderWizardStep(); }
+function c4SetChip(src) { if(typeof playSound==='function') playSound('pop'); const p = c4State.step===0?c4State.p1:c4State.p2; p.img=src; document.querySelectorAll('.chip-option').forEach(el=>el.classList.remove('selected')); const allChips=document.querySelectorAll('.chip-option img'); allChips.forEach(img=>{if(img.getAttribute('src')===src)img.parentElement.classList.add('selected');}); c4UpdateBtn(); }
+function c4NextStep() { const curr=c4State.step===0?c4State.p1:c4State.p2; if(!curr.name||!curr.img){if(typeof playSound==='function')playSound('error');return;} if(typeof playSound==='function')playSound('win'); if(c4State.step===0){c4State.step=1;renderWizardStep();}else{c4InitGame();} }
 
-// --- GAME ---
+// --- GAME LOGIC (VERBETERD) ---
 function c4InitGame() {
     c4State.board = Array(COLS).fill(null).map(() => Array(ROWS).fill(0));
     c4State.gameActive = true; c4State.isDropping = false; c4State.currentPlayer = 1;
@@ -137,39 +110,64 @@ function c4InitGame() {
 }
 
 function renderGame() {
-    const board = document.getElementById('game-board');
+    const boardDiv = document.getElementById('game-board');
     
-    // Helper voor Score Chips (Nieuw!)
-    const makeScoreChips = (p) => {
-        let h = '<div class="score-chips-row">';
+    // 1. Maak Score Chips HTML (80% transparant)
+    const makeScore = (p) => {
+        let h = '<div class="psc-chips-row">';
         for(let i=0; i<c4State.winsNeeded; i++) {
-            // Als i kleiner is dan wins, is hij gewonnen (zichtbaar). Anders doorzichtig.
-            const cls = i < p.wins ? 'score-chip won' : 'score-chip';
+            // Als i < wins: zichtbaar. Anders: doorzichtig
+            const cls = i < p.wins ? 'score-token earned' : 'score-token';
+            // Zorg dat de achtergrondkleur altijd correct is
             h += `<div class="${cls}" style="background:${p.color}"><img src="${p.img}"></div>`;
         }
         h += '</div>';
         return h;
     };
 
-    // Masker Grid & Klik Grid
-    const maskCells = Array(ROWS*COLS).fill('<div class="c4-hole"></div>').join('');
-    const clickCols = Array(COLS).fill(0).map((_,i) => `<div class="c4-col-click" onclick="c4Drop(${i})"></div>`).join('');
+    // 2. Bouw het Grid op (Op basis van DATA, niet pixels)
+    // We bouwen de grid cellen van boven naar beneden (r=ROWS-1 is boven? Nee, visueel 0 is boven)
+    // CSS Grid: rij 1 is boven.
+    // Array: rij 0 is onder.
+    // Dus we loopen r van 5 naar 0 voor de visuele grid.
+    let gridHTML = '';
+    for(let r=ROWS-1; r>=0; r--) {
+        for(let c=0; c<COLS; c++) {
+            const val = c4State.board[c][r]; // 0, 1 of 2
+            let content = '';
+            if (val === 1) content = `<img src="${c4State.p1.img}" class="slotted-chip" style="background:${c4State.p1.color}">`;
+            if (val === 2) content = `<img src="${c4State.p2.img}" class="slotted-chip" style="background:${c4State.p2.color}">`;
+            
+            // Elk vakje krijgt een ID zodat we de positie kunnen meten voor animatie
+            gridHTML += `<div class="c4-slot" id="slot-${c}-${r}">${content}</div>`;
+        }
+    }
 
-    board.innerHTML = `
+    // Klik kolommen
+    let clicksHTML = '';
+    for(let c=0; c<COLS; c++) {
+        // Left percentage voor klikzone
+        const leftPct = c * 14.28;
+        clicksHTML += `<div class="column-clicker" style="left:${leftPct}%" onclick="c4Drop(${c})"></div>`;
+    }
+
+    boardDiv.innerHTML = `
         <div class="c4-game-container">
-            <div class="player-zone top ${c4State.currentPlayer===1?'active-turn':''}">
+            <div class="player-score-card top ${c4State.currentPlayer===1?'active-turn':''}">
                 <div class="pz-name" style="color:${c4State.p1.color}">${c4State.p1.name}</div>
-                ${makeScoreChips(c4State.p1)}
+                ${makeScore(c4State.p1)}
             </div>
 
             <div class="board-area">
-                <div class="board-wrapper" id="board-visual">
-                    <div class="c4-grid-mask">${maskCells}</div> <div class="click-layer">${clickCols}</div> </div>
-                <button class="tool-btn" style="width:auto; margin-top:5px; padding:5px 20px; font-size:0.8rem;" onclick="startConnect4()">Stoppen</button>
+                <div class="c4-grid-table" id="visual-grid">
+                    ${gridHTML}
+                    ${clicksHTML}
+                </div>
+                <button class="tool-btn" style="width:auto; margin-top:10px;" onclick="startConnect4()">Stoppen</button>
             </div>
 
-            <div class="player-zone bottom ${c4State.currentPlayer===2?'active-turn':''}">
-                ${makeScoreChips(c4State.p2)}
+            <div class="player-score-card bottom ${c4State.currentPlayer===2?'active-turn':''}">
+                ${makeScore(c4State.p2)}
                 <div class="pz-name" style="color:${c4State.p2.color}">${c4State.p2.name}</div>
             </div>
         </div>
@@ -178,60 +176,73 @@ function renderGame() {
 
 function c4Drop(col) {
     if(!c4State.gameActive || c4State.isDropping) return;
-    
-    // Zoek rij
+
+    // Zoek eerste vrije rij (van onder naar boven)
     let row = -1;
     for(let r=0; r<ROWS; r++) { if(c4State.board[col][r] === 0) { row = r; break; } }
     if(row === -1) { if(typeof playSound==='function') playSound('error'); return; }
 
     c4State.isDropping = true;
-    c4State.board[col][row] = c4State.currentPlayer;
     
+    // 1. BEREKEN ANIMATIE COORDINATEN
+    // Startpunt: Boven de gekozen kolom
+    // Eindpunt: Het slot element in het grid
+    const targetSlot = document.getElementById(`slot-${col}-${row}`);
+    const gridRect = document.getElementById('visual-grid').getBoundingClientRect();
+    const slotRect = targetSlot.getBoundingClientRect();
+
+    // Positie relatief aan grid
+    const endTop = slotRect.top - gridRect.top;
+    const endLeft = slotRect.left - gridRect.left;
+    const startTop = -60; // Boven het bord
+
+    // 2. MAAK VALLENDE CHIP
     const p = c4State.currentPlayer === 1 ? c4State.p1 : c4State.p2;
+    const animChip = document.createElement('div');
+    animChip.className = 'anim-chip';
+    animChip.style.width = slotRect.width + 'px';
+    animChip.style.height = slotRect.height + 'px';
+    animChip.style.left = endLeft + 'px'; // X is vast
+    animChip.style.background = p.color;
+    animChip.innerHTML = `<img src="${p.img}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+    
+    // Animeer
+    const keyframes = [
+        { top: startTop + 'px' },
+        { top: endTop + 'px' }
+    ];
+    // Gebruik Web Animations API (gladder)
+    const animation = animChip.animate(keyframes, {
+        duration: 400,
+        easing: 'cubic-bezier(0.5, 0, 0.75, 0)' // Versnellen (zwaartekracht)
+    });
 
-    // 1. Bereken Dimensies (Direct op de wrapper)
-    const boardEl = document.getElementById('board-visual');
-    const boardRect = boardEl.getBoundingClientRect();
-    
-    const cellW = boardRect.width / 7;
-    const cellH = boardRect.height / 6;
-    const chipSize = cellW * 0.92;
-    const margin = (cellW - chipSize) / 2; 
-    
-    const finalLeft = (col * cellW) + margin;
-    const finalTop = ((5 - row) * cellH) + margin;
+    document.getElementById('visual-grid').appendChild(animChip);
 
-    // 2. Maak Chip
-    const chip = document.createElement('div');
-    chip.className = 'game-chip';
-    // Z-index 5 is gedefinieerd in CSS, lager dan het masker (10)
-    chip.style.width = `${chipSize}px`;
-    chip.style.height = `${chipSize}px`;
-    chip.style.left = `${finalLeft}px`;
-    chip.style.background = p.color;
-    chip.innerHTML = `<img src="${p.img}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
-    
-    chip.style.setProperty('--final-top', `${finalTop}px`);
-    chip.style.animation = `dropBounce 0.5s cubic-bezier(0.5, 0.05, 1, 0.5) forwards`;
-    
-    // CRUCIAAL: Voeg direct toe aan de wrapper
-    boardEl.appendChild(chip);
-    
-    setTimeout(() => { if(typeof playSound==='function') playSound('click'); }, 350);
-
-    setTimeout(() => {
-        c4State.isDropping = false;
-        // HARD POSITION LOCK
-        chip.style.top = `${finalTop}px`;
-        chip.style.animation = 'none'; 
+    // 3. WANNEER GELAND:
+    animation.onfinish = () => {
+        if(typeof playSound==='function') playSound('click');
         
-        if (c4CheckWin(col, row)) c4Win();
-        else if (c4CheckDraw()) { alert("Gelijkspel!"); c4InitGame(); }
-        else {
-            c4State.currentPlayer = c4State.currentPlayer===1?2:1;
-            renderGame(); 
+        // Verwijder animatie chip
+        animChip.remove();
+        
+        // UPDATE DE DATA & HERTEKEN BORD (Dit zorgt dat hij 'vast' staat)
+        c4State.board[col][row] = c4State.currentPlayer;
+        
+        // Check winst VOORDAT we wisselen
+        if (c4CheckWin(col, row)) {
+            renderGame(); // Laat laatste chip zien
+            c4Win();
+        } else if (c4CheckDraw()) {
+            renderGame();
+            alert("Gelijkspel!"); setTimeout(c4InitGame, 1000);
+        } else {
+            // Wissel beurt
+            c4State.currentPlayer = c4State.currentPlayer === 1 ? 2 : 1;
+            renderGame(); // Dit tekent de chip in het vakje
+            c4State.isDropping = false;
         }
-    }, 550);
+    };
 }
 
 function c4CheckWin(c, r) {
@@ -255,9 +266,17 @@ function c4Win() {
     const p = c4State.currentPlayer === 1 ? c4State.p1 : c4State.p2;
     p.wins++;
     renderGame(); // Update score chips
+    
+    // Stop dropping state even om dubbelklik te voorkomen, maar game is klaar
+    c4State.isDropping = true; 
+
     if(p.wins >= c4State.winsNeeded) {
         setTimeout(() => { if(typeof showWinnerModal==='function') showWinnerModal(p.name); }, 1000);
     } else {
-        setTimeout(() => { c4InitGame(); }, 1500);
+        setTimeout(() => { 
+            c4State.gameActive = true; 
+            c4State.isDropping = false; 
+            c4InitGame(); 
+        }, 1500);
     }
 }
