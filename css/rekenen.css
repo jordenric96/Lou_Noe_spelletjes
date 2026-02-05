@@ -1,88 +1,96 @@
-/* REKENEN.CSS - TELLEN & TIKKEN */
+/* REKENEN.CSS - SOMMEN TOT 10 */
 
 .math-game-container {
-    display: flex; flex-direction: column;
+    display: flex; flex-direction: column; align-items: center;
     width: 100%; height: 100%;
+    /* Frisse blauwe/wolkjes achtergrond */
+    background: linear-gradient(180deg, #E3F2FD 0%, #BBDEFB 100%);
     padding: 10px; box-sizing: border-box;
-    font-family: 'Fredoka One', cursive;
-    /* Geen wit kader */
-    background: transparent;
+    overflow-y: auto;
 }
 
-/* HEADER */
+/* HEADER: Terugknop + Sterrenbalk */
 .math-header {
+    width: 100%; max-width: 600px;
     display: flex; justify-content: space-between; align-items: center;
-    height: 60px; flex-shrink: 0;
+    margin-bottom: 10px;
 }
 
-.math-score-box {
-    background: white; padding: 5px 20px; border-radius: 20px;
-    font-size: 1.5rem; color: #FF9800;
+.star-tracker {
+    background: white; border-radius: 20px;
+    padding: 5px 15px; display: flex; gap: 5px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+}
+.star-icon { font-size: 1.5rem; color: #ddd; transition: 0.3s; }
+.star-icon.active { color: #FFD700; transform: scale(1.2); }
+
+/* HET SOMMEN VELD */
+.math-play-area {
+    flex: 1; width: 100%; max-width: 500px;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    gap: 15px; margin-bottom: 15px;
+}
+
+/* De groepen met plaatjes (bubbels) */
+.bubble-group {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+    background: rgba(255,255,255,0.6);
+    padding: 15px; border-radius: 25px;
+    min-width: 150px; min-height: 80px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.math-item {
+    width: 50px; height: 50px;
+    object-fit: cover;
+    border-radius: 50%; /* CIRKELS! */
+    border: 3px solid white;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+}
+
+/* Operator (+ of -) */
+.operator-sign {
+    font-size: 3rem; font-weight: bold; color: #1565C0;
+    text-shadow: 2px 2px 0px white;
+    background: white; width: 50px; height: 50px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
     box-shadow: 0 4px 0 rgba(0,0,0,0.1);
 }
 
-/* HET SPEELVELD (Waar plaatjes komen) */
-.math-play-area {
-    flex: 1; /* Vul de ruimte */
-    position: relative;
-    border-radius: 20px;
-    margin: 10px 0;
-    /* Een wolkje of cirkel waar de items in verschijnen */
-    background: rgba(255,255,255,0.6);
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
-    display: flex; justify-content: center; align-items: center;
-    flex-wrap: wrap; /* Laat items omlopen */
-    align-content: center; /* Centreer verticaal */
-    gap: 10px;
-    overflow: hidden;
-}
-
-/* De items die geteld moeten worden */
-.count-item {
-    width: 80px; height: 80px;
-    object-fit: contain;
-    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2));
-}
-
-@keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
-
-/* De Vraag (Optioneel icoon) */
-.math-question-icon {
-    position: absolute; top: 10px; left: 10px;
-    font-size: 2rem; opacity: 0.5;
-}
-
-/* HET TOETSENBORD (1-10) */
+/* ANTWOORD KNOPPEN MET STIPPEN */
 .math-numpad {
-    height: auto; flex-shrink: 0;
-    display: grid;
+    display: grid; 
     grid-template-columns: repeat(5, 1fr); /* 5 op een rij */
-    gap: 10px;
-    padding: 10px;
-    background: rgba(255,255,255,0.8);
-    border-radius: 20px;
+    gap: 8px; width: 100%; max-width: 600px;
 }
 
 .num-btn {
     background: white; border: none;
-    aspect-ratio: 1/1; /* Vierkant */
-    border-radius: 15px;
-    font-family: 'Fredoka One', cursive;
-    font-size: 2rem; color: #0097A7;
-    box-shadow: 0 6px 0 #B2EBF2;
-    cursor: pointer;
+    border-radius: 15px; padding: 5px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; position: relative;
+    box-shadow: 0 4px 0 #90A4AE;
     transition: transform 0.1s;
+    height: 80px; /* Hoog genoeg voor cijfer + stippen */
 }
 
-.num-btn:active { transform: translateY(6px); box-shadow: none; }
-.num-btn.correct { background: #4CAF50; color: white; box-shadow: 0 6px 0 #2E7D32; }
-.num-btn.wrong { background: #F44336; color: white; box-shadow: 0 6px 0 #B71C1C; animation: shake 0.4s; }
+.num-btn:active { transform: translateY(4px); box-shadow: none; }
+.num-btn.correct { background: #4CAF50; color: white; box-shadow: 0 4px 0 #2E7D32; }
+.num-btn.wrong { background: #F44336; color: white; box-shadow: 0 4px 0 #C62828; }
 
-@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+.btn-number { font-size: 1.8rem; font-weight: bold; color: #333; font-family: 'Fredoka One'; }
+.num-btn.correct .btn-number, .num-btn.wrong .btn-number { color: white; }
 
-/* Voor kleine schermpjes: Items kleiner */
-@media (max-width: 600px) {
-    .count-item { width: 50px; height: 50px; }
-    .num-btn { font-size: 1.5rem; }
+/* De mini bolletjes onder het getal */
+.btn-dots {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 3px;
+    margin-top: 5px; max-width: 40px;
 }
+.mini-dot {
+    width: 6px; height: 6px; background: #333; border-radius: 50%; opacity: 0.5;
+}
+.num-btn.correct .mini-dot, .num-btn.wrong .mini-dot { background: white; opacity: 0.8; }
+
+@keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
