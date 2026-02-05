@@ -1,5 +1,5 @@
-// TEKENEN.JS - MET SMART PALETTE & SETUP
-console.log("Tekenen.js geladen (Smart Colors)...");
+// TEKENEN.JS - MET ZWART/WIT + 10 SLIMME KLEUREN
+console.log("Tekenen.js geladen (Smart Palette 2.0)...");
 
 let drawState = {
     isDrawing: false,
@@ -8,10 +8,11 @@ let drawState = {
     lastX: 0, lastY: 0,
     player: null,
     bgImage: null,
-    smartPalette: [] // Hier komen de 12 kleuren
+    smartPalette: []
 };
 
-const defaultPalette = ['#000000', '#F44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#03A9F4', '#00BCD4', '#009688', '#4CAF50', '#8BC34A', '#CDDC39', '#FFC107', '#FF9800', '#FF5722', '#795548', '#9E9E9E', '#FFFFFF'];
+// Standaard palet voor als er geen plaatje is
+const defaultPalette = ['#000000', '#FFFFFF', '#F44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#00BCD4', '#009688', '#4CAF50', '#FFC107', '#FF9800', '#795548'];
 
 // --- 1. SLIMME KLEUREN EXTRAHEREN ---
 function extractColors(imgSrc) {
@@ -19,10 +20,9 @@ function extractColors(imgSrc) {
         const img = new Image(); img.src = imgSrc; img.crossOrigin = "Anonymous";
         
         img.onload = () => {
-            // Maak een mini canvas om pixels te lezen
             const c = document.createElement('canvas');
             const ctx = c.getContext('2d');
-            // We verkleinen het plaatje voor snelheid (max 100px)
+            // Schaal naar max 100px voor snelheid
             const scale = Math.min(1, 100 / Math.max(img.width, img.height));
             c.width = img.width * scale; c.height = img.height * scale;
             ctx.drawImage(img, 0, 0, c.width, c.height);
@@ -34,28 +34,42 @@ function extractColors(imgSrc) {
                 // Scan pixels
                 for (let i = 0; i < data.length; i += 4) {
                     const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
-                    // Negeer transparant & wit
-                    if (a < 128 || (r > 240 && g > 240 && b > 240)) continue;
+                    // Negeer transparant & bijna-wit (want wit voegen we sowieso toe)
+                    if (a < 128 || (r > 245 && g > 245 && b > 245)) continue;
                     
                     const rgb = `${r},${g},${b}`;
                     colorCounts[rgb] = (colorCounts[rgb] || 0) + 1;
                 }
                 
                 // Sorteer op meest voorkomend
-                let sorted = Object.keys(colorCounts).sort((a, b) => colorCounts[b] - colorCounts[a]);
+                let sortedRGB = Object.keys(colorCounts).sort((a, b) => colorCounts[b] - colorCounts[a]);
                 
-                // Pak top 12 en zet om naar Hex
-                let palette = sorted.slice(0, 12).map(rgb => {
+                // Converteer de top 20 naar Hex-code
+                let extractedHex = sortedRGB.slice(0, 20).map(rgb => {
                     const [r,g,b] = rgb.split(',').map(Number);
+                    // Slimme truc om RGB naar HEX te zetten
                     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
                 });
+
+                // --- HET NIEUWE GEDEELTE ---
+                // 1. Begin met Zwart en Wit
+                const mandatoryColors = ['#000000', '#FFFFFF'];
                 
-                // Als we te weinig kleuren vinden, vul aan met zwart/rood/blauw
-                if(palette.length < 5) palette = palette.concat(['#000000', '#FF0000', '#0000FF']);
+                // 2. Filter de geëxtraheerde lijst: Haal zwart en wit eruit als ze erin zitten (voorkom dubbelen)
+                let filteredTop10 = extractedHex.filter(color => !mandatoryColors.includes(color));
                 
-                resolve(palette);
+                // 3. Pak de top 10 van de overgebleven kleuren
+                filteredTop10 = filteredTop10.slice(0, 10);
+                
+                // 4. Combineer: Zwart, Wit + 10 Plaatjeskleuren
+                let finalPalette = mandatoryColors.concat(filteredTop10);
+                
+                // Fallback als het plaatje heel saai was
+                if(finalPalette.length < 6) finalPalette = defaultPalette.slice(0,12);
+
+                resolve(finalPalette);
             } catch (e) {
-                console.log("Kleur extractie fout (waarschijnlijk security):", e);
+                console.log("Fout bij kleurextractie:", e);
                 resolve(defaultPalette.slice(0, 12)); // Fallback
             }
         };
@@ -71,10 +85,9 @@ function startDrawingGame() {
 function startDrawingSetup() {
     const board = document.getElementById('game-board');
     
-    // Thema's ophalen
     let themeOptions = `
         <div class="theme-card-btn selected" onclick="drawSelectTheme('blank', this)">
-            <div class="theme-img-container" style="background:white;"></div>
+            <div class="theme-img-container" style="background:white; border:1px solid #eee;"></div>
             <div class="btn-label">Wit Blad 📄</div>
         </div>`;
         
@@ -144,38 +157,34 @@ function checkDrawStart() {
 // --- 3. INIT GAME ---
 async function initDrawing() {
     const board = document.getElementById('game-board');
-    
-    // Kleuren bepalen
-    let palette = defaultPalette;
+    let palette = defaultPalette.slice(0,12); // Start met een basisset incl zwart/wit
     let bgHTML = '';
     
     if (drawState.bgImage !== 'blank') {
         board.innerHTML = `<div style="display:flex; height:100%; justify-content:center; align-items:center; color:white; font-size:1.5rem;">Kleuren mengen... 🎨</div>`;
         
-        // Kies willekeurig plaatje uit thema
         const t = memThemes[drawState.bgImage];
         const nr = Math.floor(Math.random() * 15) + 1;
         const src = `${t.path}${nr}.${t.extension}`;
         
-        // 1. Haal kleuren op
-        const smartColors = await extractColors(src);
-        palette = smartColors.concat(['#000000', '#FFFFFF']); // Altijd zwart/wit erbij
-        
-        // 2. Zet achtergrond
+        // Haal de slimme Zwart+Wit+10 palette op
+        palette = await extractColors(src);
         bgHTML = `<img src="${src}" class="tracing-bg">`;
     }
 
-    // Bouw Scherm
-    const paletteHTML = palette.map(c => 
-        `<div class="paint-btn" style="background:${c}" onclick="setDrawColor('${c}', this)"></div>`
-    ).join('');
+    // Bouw Palette HTML
+    const paletteHTML = palette.map(c => {
+        // Zwart krijgt standaard de 'active' class
+        const isActive = c === '#000000' ? 'active' : '';
+        return `<div class="paint-btn ${isActive}" style="background:${c}" onclick="setDrawColor('${c}', this)"></div>`;
+    }).join('');
 
     board.innerHTML = `
         <div class="drawing-container">
             <div class="drawing-header">
                 <button class="tool-btn" onclick="startDrawingSetup()">⬅ Terug</button>
                 <div class="player-tag">${drawState.player}'s Kunstwerk</div>
-                <button class="action-btn" onclick="saveDrawing()">💾</button>
+                <button class="action-btn" onclick="saveDrawing()">💾 Opslaan</button>
             </div>
             
             <div class="canvas-wrapper" id="canvas-wrapper">
@@ -191,10 +200,10 @@ async function initDrawing() {
                     <div style="display:flex; gap:5px;">
                         <button class="size-btn active" onclick="setLineWidth(5, this)"><div class="size-dot" style="width:5px; height:5px;"></div></button>
                         <button class="size-btn" onclick="setLineWidth(10, this)"><div class="size-dot" style="width:10px; height:10px;"></div></button>
-                        <button class="size-btn" onclick="setLineWidth(20, this)"><div class="size-dot" style="width:15px; height:15px;"></div></button>
+                        <button class="size-btn" onclick="setLineWidth(25, this)"><div class="size-dot" style="width:18px; height:18px;"></div></button>
                     </div>
                     <div style="display:flex; gap:5px;">
-                        <button class="action-btn eraser-btn" onclick="setDrawColor('#FFFFFF', this)">Gum</button>
+                        <button class="action-btn eraser-btn" onclick="setEraser(this)">Gum</button>
                         <button class="action-btn clear-btn" onclick="clearCanvas()">Wis Alles</button>
                     </div>
                 </div>
@@ -203,6 +212,9 @@ async function initDrawing() {
     `;
 
     setupCanvas();
+    // Zet standaard kleur op zwart en dikte op 5
+    drawState.color = '#000000'; 
+    drawState.lineWidth = 5;
 }
 
 // --- 4. CANVAS LOGICA ---
@@ -211,47 +223,37 @@ function setupCanvas() {
     const wrapper = document.getElementById('canvas-wrapper');
     const ctx = canvas.getContext('2d');
 
-    // Resize canvas to fit wrapper
     canvas.width = wrapper.clientWidth;
     canvas.height = wrapper.clientHeight;
     
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = drawState.color;
-    ctx.lineWidth = drawState.lineWidth;
-
-    // Mouse Events
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    
+    // Events
     canvas.addEventListener('mousedown', startPos);
     canvas.addEventListener('mouseup', endPos);
     canvas.addEventListener('mousemove', draw);
-    
-    // Touch Events
     canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startPos(e.touches[0]); }, {passive: false});
     canvas.addEventListener('touchend', (e) => { e.preventDefault(); endPos(); }, {passive: false});
     canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e.touches[0]); }, {passive: false});
 
     function startPos(e) {
         drawState.isDrawing = true;
-        draw(e); // Zet direct een punt
+        // Update context direct voor het geval instellingen gewijzigd zijn
+        ctx.strokeStyle = drawState.color;
+        ctx.lineWidth = drawState.lineWidth;
+        draw(e);
     }
-    
     function endPos() {
         drawState.isDrawing = false;
-        ctx.beginPath(); // Reset pad zodat lijnen niet verbonden blijven
+        ctx.beginPath();
     }
-    
     function draw(e) {
         if (!drawState.isDrawing) return;
-        
-        // Correctie voor canvas positie
         const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        ctx.lineTo(x, y);
+        ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
         ctx.stroke();
         ctx.beginPath();
-        ctx.moveTo(x, y);
+        ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
     }
 }
 
@@ -259,20 +261,24 @@ function setupCanvas() {
 function setDrawColor(color, btn) {
     if(typeof playSound === 'function') playSound('click');
     drawState.color = color;
-    const ctx = document.getElementById('draw-canvas').getContext('2d');
-    ctx.strokeStyle = color;
     
-    // Visuele update
     document.querySelectorAll('.paint-btn, .eraser-btn').forEach(b => b.classList.remove('active'));
     if(btn) btn.classList.add('active');
+    // Als we een kleur kiezen, zorgen dat we niet meer in 'gum modus' zitten (visueel)
+    document.querySelector('.eraser-btn').classList.remove('active-tool');
+}
+
+function setEraser(btn) {
+    if(typeof playSound === 'function') playSound('click');
+    drawState.color = '#FFFFFF'; // Gummen is wit tekenen
+    
+    document.querySelectorAll('.paint-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active-tool');
 }
 
 function setLineWidth(width, btn) {
     if(typeof playSound === 'function') playSound('click');
     drawState.lineWidth = width;
-    const ctx = document.getElementById('draw-canvas').getContext('2d');
-    ctx.lineWidth = width;
-    
     document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 }
@@ -290,26 +296,20 @@ function saveDrawing() {
     if(typeof playSound === 'function') playSound('victory');
     const canvas = document.getElementById('draw-canvas');
     const link = document.createElement('a');
-    link.download = `Tekening-${drawState.player}.png`;
+    link.download = `Tekening-${drawState.player || 'Kids'}.png`;
     
-    // We moeten de achtergrond en de tekening samenvoegen voor de download
-    // (Anders download je alleen de lijnen)
     const composite = document.createElement('canvas');
     composite.width = canvas.width; composite.height = canvas.height;
     const cCtx = composite.getContext('2d');
     
-    // 1. Witte achtergrond
+    // Witte achtergrond
     cCtx.fillStyle = "#FFFFFF";
     cCtx.fillRect(0, 0, composite.width, composite.height);
     
-    // 2. (Optioneel) De kleurplaat eronder tekenen? 
-    // Als we dat doen, wordt het een echte kleurplaat. 
-    // Laten we de afbeelding ophalen
+    // Achtergrond plaatje (optioneel, lichtjes)
     const bgImg = document.querySelector('.tracing-bg');
     if(bgImg) {
-        // Teken de achtergrond vaag
-        cCtx.globalAlpha = 0.3;
-        // Schalen zoals CSS 'object-fit: contain'
+        cCtx.globalAlpha = 0.3; // Zelfde doorzichtigheid als op scherm
         const hRatio = composite.width / bgImg.naturalWidth;
         const vRatio = composite.height / bgImg.naturalHeight;
         const ratio  = Math.min( hRatio, vRatio );
@@ -319,7 +319,7 @@ function saveDrawing() {
         cCtx.globalAlpha = 1.0;
     }
 
-    // 3. De tekening zelf
+    // De tekening
     cCtx.drawImage(canvas, 0, 0);
     
     link.href = composite.toDataURL();
