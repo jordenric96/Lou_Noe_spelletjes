@@ -1,224 +1,327 @@
-// TEKENEN.JS - KIDS ART STUDIO
-console.log("Tekenen.js geladen...");
+// TEKENEN.JS - MET SMART PALETTE & SETUP
+console.log("Tekenen.js geladen (Smart Colors)...");
 
 let drawState = {
     isDrawing: false,
     color: '#000000',
     lineWidth: 5,
-    lastX: 0, 
-    lastY: 0
+    lastX: 0, lastY: 0,
+    player: null,
+    bgImage: null,
+    smartPalette: [] // Hier komen de 12 kleuren
 };
 
-const drawColors = ['#000000', '#F44336', '#E91E63', '#9C27B0', '#2196F3', '#00BCD4', '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800', '#795548', '#FFFFFF'];
-const brushSizes = [5, 10, 20, 40]; // Diktes
+const defaultPalette = ['#000000', '#F44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#03A9F4', '#00BCD4', '#009688', '#4CAF50', '#8BC34A', '#CDDC39', '#FFC107', '#FF9800', '#FF5722', '#795548', '#9E9E9E', '#FFFFFF'];
 
+// --- 1. SLIMME KLEUREN EXTRAHEREN ---
+function extractColors(imgSrc) {
+    return new Promise((resolve) => {
+        const img = new Image(); img.src = imgSrc; img.crossOrigin = "Anonymous";
+        
+        img.onload = () => {
+            // Maak een mini canvas om pixels te lezen
+            const c = document.createElement('canvas');
+            const ctx = c.getContext('2d');
+            // We verkleinen het plaatje voor snelheid (max 100px)
+            const scale = Math.min(1, 100 / Math.max(img.width, img.height));
+            c.width = img.width * scale; c.height = img.height * scale;
+            ctx.drawImage(img, 0, 0, c.width, c.height);
+            
+            try {
+                const data = ctx.getImageData(0, 0, c.width, c.height).data;
+                const colorCounts = {};
+                
+                // Scan pixels
+                for (let i = 0; i < data.length; i += 4) {
+                    const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
+                    // Negeer transparant & wit
+                    if (a < 128 || (r > 240 && g > 240 && b > 240)) continue;
+                    
+                    const rgb = `${r},${g},${b}`;
+                    colorCounts[rgb] = (colorCounts[rgb] || 0) + 1;
+                }
+                
+                // Sorteer op meest voorkomend
+                let sorted = Object.keys(colorCounts).sort((a, b) => colorCounts[b] - colorCounts[a]);
+                
+                // Pak top 12 en zet om naar Hex
+                let palette = sorted.slice(0, 12).map(rgb => {
+                    const [r,g,b] = rgb.split(',').map(Number);
+                    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+                });
+                
+                // Als we te weinig kleuren vinden, vul aan met zwart/rood/blauw
+                if(palette.length < 5) palette = palette.concat(['#000000', '#FF0000', '#0000FF']);
+                
+                resolve(palette);
+            } catch (e) {
+                console.log("Kleur extractie fout (waarschijnlijk security):", e);
+                resolve(defaultPalette.slice(0, 12)); // Fallback
+            }
+        };
+        img.onerror = () => resolve(defaultPalette.slice(0, 12));
+    });
+}
+
+// --- 2. SETUP SCHERM ---
 function startDrawingGame() {
+    startDrawingSetup();
+}
+
+function startDrawingSetup() {
     const board = document.getElementById('game-board');
     
-    // HTML Bouwen
-    let colorHTML = drawColors.map(c => 
-        `<div class="paint-btn ${c==='#000000'?'active':''}" style="background:${c}" onclick="setDrawColor('${c}', this)"></div>`
-    ).join('');
+    // Thema's ophalen
+    let themeOptions = `
+        <div class="theme-card-btn selected" onclick="drawSelectTheme('blank', this)">
+            <div class="theme-img-container" style="background:white;"></div>
+            <div class="btn-label">Wit Blad 📄</div>
+        </div>`;
+        
+    if(typeof memThemes !== 'undefined') {
+        Object.keys(memThemes).forEach(key => {
+            const t = memThemes[key];
+            if(!t.locked && !t.isMix) {
+                 themeOptions += `
+                    <div class="theme-card-btn" onclick="drawSelectTheme('${key}', this)">
+                        <div class="theme-img-container"><img src="${t.path}cover.png"></div>
+                        <div class="btn-label">${key.charAt(0).toUpperCase() + key.slice(1)}</div>
+                    </div>`;
+            }
+        });
+    }
 
-    let sizeHTML = brushSizes.map(s => 
-        `<button class="size-btn ${s===5?'active':''}" onclick="setDrawSize(${s}, this)">
-            <span class="size-dot" style="width:${s/2}px; height:${s/2}px;"></span>
-        </button>`
+    board.innerHTML = `
+        <div class="memory-setup">
+            <div class="setup-group">
+                <h3>1. Wie gaat er tekenen?</h3>
+                <div class="name-row">
+                    <button class="player-btn" onclick="drawSelectPerson('Lou', this)">👦🏼 Lou</button>
+                    <button class="player-btn" onclick="drawSelectPerson('Noé', this)">👶🏼 Noé</button>
+                    <button class="player-btn" onclick="drawSelectPerson('Mama', this)">👩🏻 Mama</button>
+                    <button class="player-btn" onclick="drawSelectPerson('Papa', this)">👨🏻 Papa</button>
+                </div>
+            </div>
+
+            <div class="setup-group">
+                <h3>2. Kies een Kleurplaat</h3>
+                <div class="theme-grid-wrapper">
+                    ${themeOptions}
+                </div>
+            </div>
+
+            <div class="bottom-actions">
+                <button id="draw-start-btn" class="start-btn" onclick="initDrawing()" disabled>Kies een speler...</button>
+                <button class="tool-btn" onclick="location.reload()">⬅ Menu</button>
+            </div>
+        </div>
+    `;
+    drawState.player = null; drawState.bgImage = 'blank';
+}
+
+function drawSelectPerson(name, btn) {
+    if(typeof playSound === 'function') playSound('click');
+    document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending'));
+    btn.classList.add('selected-pending');
+    drawState.player = name;
+    checkDrawStart();
+}
+
+function drawSelectTheme(theme, btn) {
+    if(typeof playSound === 'function') playSound('click');
+    document.querySelectorAll('.theme-card-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    drawState.bgImage = theme;
+}
+
+function checkDrawStart() {
+    const btn = document.getElementById('draw-start-btn');
+    if(drawState.player) {
+        btn.disabled = false; btn.innerText = "START TEKENEN 🎨";
+    }
+}
+
+// --- 3. INIT GAME ---
+async function initDrawing() {
+    const board = document.getElementById('game-board');
+    
+    // Kleuren bepalen
+    let palette = defaultPalette;
+    let bgHTML = '';
+    
+    if (drawState.bgImage !== 'blank') {
+        board.innerHTML = `<div style="display:flex; height:100%; justify-content:center; align-items:center; color:white; font-size:1.5rem;">Kleuren mengen... 🎨</div>`;
+        
+        // Kies willekeurig plaatje uit thema
+        const t = memThemes[drawState.bgImage];
+        const nr = Math.floor(Math.random() * 15) + 1;
+        const src = `${t.path}${nr}.${t.extension}`;
+        
+        // 1. Haal kleuren op
+        const smartColors = await extractColors(src);
+        palette = smartColors.concat(['#000000', '#FFFFFF']); // Altijd zwart/wit erbij
+        
+        // 2. Zet achtergrond
+        bgHTML = `<img src="${src}" class="tracing-bg">`;
+    }
+
+    // Bouw Scherm
+    const paletteHTML = palette.map(c => 
+        `<div class="paint-btn" style="background:${c}" onclick="setDrawColor('${c}', this)"></div>`
     ).join('');
 
     board.innerHTML = `
-        <div class="drawing-game-container">
+        <div class="drawing-container">
             <div class="drawing-header">
-                <button class="tool-btn" onclick="location.reload()">⬅ Terug</button>
-                <div class="drawing-title">🎨 Tekenstudio</div>
-                <button class="action-btn btn-gallery" onclick="openGallery()">📂 Galerij</button>
+                <button class="tool-btn" onclick="startDrawingSetup()">⬅ Terug</button>
+                <div class="player-tag">${drawState.player}'s Kunstwerk</div>
+                <button class="action-btn" onclick="saveDrawing()">💾</button>
             </div>
             
-            <div class="canvas-wrapper" id="canvas-container">
-                <canvas id="drawing-canvas"></canvas>
+            <div class="canvas-wrapper" id="canvas-wrapper">
+                ${bgHTML}
+                <canvas id="draw-canvas"></canvas>
             </div>
-            
-            <div class="drawing-tools">
-                <div class="color-picker-scroll">${colorHTML}</div>
-                <div class="size-picker">${sizeHTML}</div>
-                <div class="action-buttons">
-                    <button class="action-btn btn-clear" onclick="clearCanvas()">🗑️</button>
-                    <button class="action-btn btn-save" onclick="saveDrawing()">💾</button>
+
+            <div class="drawing-toolbar">
+                <div class="paint-row">
+                    ${paletteHTML}
+                </div>
+                <div class="tools-row">
+                    <div style="display:flex; gap:5px;">
+                        <button class="size-btn active" onclick="setLineWidth(5, this)"><div class="size-dot" style="width:5px; height:5px;"></div></button>
+                        <button class="size-btn" onclick="setLineWidth(10, this)"><div class="size-dot" style="width:10px; height:10px;"></div></button>
+                        <button class="size-btn" onclick="setLineWidth(20, this)"><div class="size-dot" style="width:15px; height:15px;"></div></button>
+                    </div>
+                    <div style="display:flex; gap:5px;">
+                        <button class="action-btn eraser-btn" onclick="setDrawColor('#FFFFFF', this)">Gum</button>
+                        <button class="action-btn clear-btn" onclick="clearCanvas()">Wis Alles</button>
+                    </div>
                 </div>
             </div>
         </div>
     `;
 
-    // Canvas Initialiseren
-    setTimeout(initCanvas, 100);
+    setupCanvas();
 }
 
-function initCanvas() {
-    const canvas = document.getElementById('drawing-canvas');
-    const container = document.getElementById('canvas-container');
-    if (!canvas || !container) return;
-
-    // Stel canvas grootte in op basis van container (Full Size)
-    canvas.width = container.offsetWidth;
-    canvas.height = container.offsetHeight;
-
+// --- 4. CANVAS LOGICA ---
+function setupCanvas() {
+    const canvas = document.getElementById('draw-canvas');
+    const wrapper = document.getElementById('canvas-wrapper');
     const ctx = canvas.getContext('2d');
+
+    // Resize canvas to fit wrapper
+    canvas.width = wrapper.clientWidth;
+    canvas.height = wrapper.clientHeight;
     
-    // Instellingen
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     ctx.strokeStyle = drawState.color;
     ctx.lineWidth = drawState.lineWidth;
 
-    // Event Listeners (Muis & Touch)
-    canvas.addEventListener('mousedown', startDraw);
+    // Mouse Events
+    canvas.addEventListener('mousedown', startPos);
+    canvas.addEventListener('mouseup', endPos);
     canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', stopDraw);
-    canvas.addEventListener('mouseout', stopDraw);
-
-    canvas.addEventListener('touchstart', startDrawTouch, {passive: false});
-    canvas.addEventListener('touchmove', drawTouch, {passive: false});
-    canvas.addEventListener('touchend', stopDraw);
-}
-
-// --- TEKEN FUNCTIES ---
-
-function startDraw(e) {
-    drawState.isDrawing = true;
-    [drawState.lastX, drawState.lastY] = [e.offsetX, e.offsetY];
-}
-
-function draw(e) {
-    if (!drawState.isDrawing) return;
-    const ctx = document.getElementById('drawing-canvas').getContext('2d');
     
-    ctx.beginPath();
-    ctx.moveTo(drawState.lastX, drawState.lastY);
-    ctx.lineTo(e.offsetX, e.offsetY);
-    ctx.stroke();
+    // Touch Events
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startPos(e.touches[0]); }, {passive: false});
+    canvas.addEventListener('touchend', (e) => { e.preventDefault(); endPos(); }, {passive: false});
+    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e.touches[0]); }, {passive: false});
+
+    function startPos(e) {
+        drawState.isDrawing = true;
+        draw(e); // Zet direct een punt
+    }
     
-    [drawState.lastX, drawState.lastY] = [e.offsetX, e.offsetY];
-}
-
-// Speciale functies voor Touch (Tablet/GSM)
-function startDrawTouch(e) {
-    e.preventDefault(); // Voorkom scrollen
-    const touch = e.touches[0];
-    const canvas = document.getElementById('drawing-canvas');
-    const rect = canvas.getBoundingClientRect();
+    function endPos() {
+        drawState.isDrawing = false;
+        ctx.beginPath(); // Reset pad zodat lijnen niet verbonden blijven
+    }
     
-    drawState.isDrawing = true;
-    drawState.lastX = touch.clientX - rect.left;
-    drawState.lastY = touch.clientY - rect.top;
+    function draw(e) {
+        if (!drawState.isDrawing) return;
+        
+        // Correctie voor canvas positie
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+    }
 }
 
-function drawTouch(e) {
-    e.preventDefault();
-    if (!drawState.isDrawing) return;
-    
-    const touch = e.touches[0];
-    const canvas = document.getElementById('drawing-canvas');
-    const ctx = canvas.getContext('2d');
-    const rect = canvas.getBoundingClientRect();
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
-
-    ctx.beginPath();
-    ctx.moveTo(drawState.lastX, drawState.lastY);
-    ctx.lineTo(x, y);
-    ctx.stroke();
-
-    drawState.lastX = x;
-    drawState.lastY = y;
-}
-
-function stopDraw() {
-    drawState.isDrawing = false;
-}
-
-// --- TOOLS ---
-
+// TOOLS
 function setDrawColor(color, btn) {
+    if(typeof playSound === 'function') playSound('click');
     drawState.color = color;
-    const ctx = document.getElementById('drawing-canvas').getContext('2d');
+    const ctx = document.getElementById('draw-canvas').getContext('2d');
     ctx.strokeStyle = color;
     
-    // Update UI
-    document.querySelectorAll('.paint-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    if(typeof playSound === 'function') playSound('click');
+    // Visuele update
+    document.querySelectorAll('.paint-btn, .eraser-btn').forEach(b => b.classList.remove('active'));
+    if(btn) btn.classList.add('active');
 }
 
-function setDrawSize(size, btn) {
-    drawState.lineWidth = size;
-    const ctx = document.getElementById('drawing-canvas').getContext('2d');
-    ctx.lineWidth = size;
-
+function setLineWidth(width, btn) {
+    if(typeof playSound === 'function') playSound('click');
+    drawState.lineWidth = width;
+    const ctx = document.getElementById('draw-canvas').getContext('2d');
+    ctx.lineWidth = width;
+    
     document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    if(typeof playSound === 'function') playSound('pop');
 }
 
 function clearCanvas() {
-    if(!confirm("Wil je alles wissen?")) return;
-    const canvas = document.getElementById('drawing-canvas');
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if(typeof playSound === 'function') playSound('trash');
+    if(confirm("Wil je echt alles wissen?")) {
+        if(typeof playSound === 'function') playSound('error');
+        const canvas = document.getElementById('draw-canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
 }
-
-// --- OPSLAAN & GALERIJ ---
 
 function saveDrawing() {
-    const canvas = document.getElementById('drawing-canvas');
-    const dataURL = canvas.toDataURL('image/png');
+    if(typeof playSound === 'function') playSound('victory');
+    const canvas = document.getElementById('draw-canvas');
+    const link = document.createElement('a');
+    link.download = `Tekening-${drawState.player}.png`;
     
-    // Haal bestaande tekeningen op
-    let gallery = JSON.parse(localStorage.getItem('myDrawings') || '[]');
-    gallery.unshift(dataURL); // Voeg nieuwe vooraan toe
-    localStorage.setItem('myDrawings', JSON.stringify(gallery));
+    // We moeten de achtergrond en de tekening samenvoegen voor de download
+    // (Anders download je alleen de lijnen)
+    const composite = document.createElement('canvas');
+    composite.width = canvas.width; composite.height = canvas.height;
+    const cCtx = composite.getContext('2d');
     
-    if(typeof playSound === 'function') playSound('win');
-    alert("Tekening opgeslagen! 🎉");
-}
+    // 1. Witte achtergrond
+    cCtx.fillStyle = "#FFFFFF";
+    cCtx.fillRect(0, 0, composite.width, composite.height);
+    
+    // 2. (Optioneel) De kleurplaat eronder tekenen? 
+    // Als we dat doen, wordt het een echte kleurplaat. 
+    // Laten we de afbeelding ophalen
+    const bgImg = document.querySelector('.tracing-bg');
+    if(bgImg) {
+        // Teken de achtergrond vaag
+        cCtx.globalAlpha = 0.3;
+        // Schalen zoals CSS 'object-fit: contain'
+        const hRatio = composite.width / bgImg.naturalWidth;
+        const vRatio = composite.height / bgImg.naturalHeight;
+        const ratio  = Math.min( hRatio, vRatio );
+        const centerShift_x = ( composite.width - bgImg.naturalWidth*ratio ) / 2;
+        const centerShift_y = ( composite.height - bgImg.naturalHeight*ratio ) / 2; 
+        cCtx.drawImage(bgImg, 0,0, bgImg.naturalWidth, bgImg.naturalHeight, centerShift_x, centerShift_y, bgImg.naturalWidth*ratio, bgImg.naturalHeight*ratio);
+        cCtx.globalAlpha = 1.0;
+    }
 
-function openGallery() {
-    const gallery = JSON.parse(localStorage.getItem('myDrawings') || '[]');
+    // 3. De tekening zelf
+    cCtx.drawImage(canvas, 0, 0);
     
-    let html = `
-        <div class="gallery-modal">
-            <h2 style="color:white; font-family:'Fredoka One'">Mijn Kunstwerken 🎨</h2>
-            <div class="gallery-content">
-                ${gallery.length === 0 ? '<p style="text-align:center; width:100%">Nog geen tekeningen...</p>' : ''}
-                ${gallery.map((img, i) => `
-                    <div class="gallery-item">
-                        <img src="${img}">
-                        <button class="gallery-delete" onclick="deleteDrawing(${i})">X</button>
-                    </div>
-                `).join('')}
-            </div>
-            <button class="gallery-close" onclick="closeGallery()">Sluiten</button>
-        </div>
-    `;
-    
-    const div = document.createElement('div');
-    div.id = 'gallery-overlay';
-    div.innerHTML = html;
-    document.body.appendChild(div);
-}
-
-function closeGallery() {
-    const el = document.getElementById('gallery-overlay');
-    if(el) el.remove();
-}
-
-function deleteDrawing(index) {
-    if(!confirm("Tekening weggooien?")) return;
-    let gallery = JSON.parse(localStorage.getItem('myDrawings') || '[]');
-    gallery.splice(index, 1);
-    localStorage.setItem('myDrawings', JSON.stringify(gallery));
-    
-    // Herlaad galerij
-    closeGallery();
-    openGallery();
+    link.href = composite.toDataURL();
+    link.click();
 }
