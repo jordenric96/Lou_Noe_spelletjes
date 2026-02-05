@@ -1,11 +1,11 @@
-/* VIEROPEENRIJ.CSS */
+/* VIEROPEENRIJ.CSS - PERFECT GRID & SETUP */
 
 /* --- SETUP SCHERM --- */
 .c4-setup-container {
     display: flex; flex-direction: column; align-items: center;
     width: 100%; height: 100%;
     background: #E3F2FD;
-    padding: 20px; box-sizing: border-box; overflow-y: auto;
+    padding: 15px; box-sizing: border-box; overflow-y: auto;
 }
 
 .c4-step-box {
@@ -17,70 +17,91 @@
 }
 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-.c4-title { font-size: 1.5rem; color: #333; margin-bottom: 15px; text-transform: uppercase; }
+.c4-title { font-size: 1.3rem; color: #333; margin-bottom: 10px; text-transform: uppercase; font-weight: bold; }
+.c4-subtitle { font-size: 0.9rem; color: #666; margin-bottom: 15px; }
 
-/* Chip Selectie Grid */
-.chip-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-    gap: 10px; max-height: 300px; overflow-y: auto; padding: 5px;
-}
-.chip-option {
-    width: 70px; height: 70px; border-radius: 50%;
-    border: 4px solid transparent; cursor: pointer;
-    box-shadow: 0 3px 5px rgba(0,0,0,0.2);
-    transition: transform 0.2s;
-    overflow: hidden; position: relative;
-}
-.chip-option img { width: 100%; height: 100%; object-fit: cover; }
-.chip-option:active { transform: scale(0.9); }
-/* 3D glans effect over de chip */
-.chip-option::after {
-    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), transparent 60%);
-    border-radius: 50%; pointer-events: none;
-}
-
-/* VS Screen */
-.vs-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 20px 0; }
-.vs-player { display: flex; flex-direction: column; align-items: center; }
-.vs-chip-big { 
-    width: 100px; height: 100px; border-radius: 50%; 
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3); border: 5px solid white;
-    margin-bottom: 5px; overflow: hidden; position: relative;
-}
-.vs-chip-big img { width: 100%; height: 100%; object-fit: cover; }
-.vs-text { font-size: 2.5rem; font-weight: 900; color: #F44336; font-style: italic; text-shadow: 2px 2px 0 #333; }
-.vs-name { font-weight: bold; font-size: 1.2rem; }
-
-/* Match Goal Knoppen */
+/* Match Goal Knoppen (Bovenaan) */
 .goal-btn-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
 .goal-btn {
-    padding: 15px 20px; background: #eee; border: none; border-radius: 15px;
-    font-family: 'Fredoka One'; font-size: 1.1rem; cursor: pointer; transition: 0.2s;
+    padding: 10px 15px; background: #eee; border: 2px solid #ddd; border-radius: 12px;
+    font-family: 'Fredoka One'; font-size: 1rem; cursor: pointer; transition: 0.2s; color: #555;
 }
-.goal-btn.selected { background: #2196F3; color: white; transform: scale(1.1); box-shadow: 0 4px 10px rgba(33, 150, 243, 0.4); }
+.goal-btn.selected { 
+    background: #2196F3; color: white; border-color: #1976D2;
+    transform: scale(1.1); box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3); 
+}
+
+/* Standaard Spelers Knoppen */
+.preset-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; }
+.preset-btn {
+    flex: 1; min-width: 70px; background: #fafafa; border: 2px solid #eee;
+    border-radius: 12px; padding: 10px 5px; cursor: pointer; transition: all 0.2s;
+}
+.preset-btn.active {
+    background: #E8F5E9; border-color: #4CAF50; transform: scale(1.05);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+/* Kleurenkiezer */
+.color-picker-row { display: flex; gap: 8px; justify-content: center; margin: 15px 0; }
+.c4-color-dot {
+    width: 35px; height: 35px; border-radius: 50%; border: 3px solid white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer; transition: transform 0.2s;
+}
+.c4-color-dot.active { transform: scale(1.2); border-color: #333; z-index: 2; }
+
+/* Chip Grid */
+.chip-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 8px; max-height: 250px; overflow-y: auto; padding: 5px;
+}
+.chip-option {
+    aspect-ratio: 1/1; border-radius: 50%;
+    border: 3px solid transparent; cursor: pointer;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+    overflow: hidden; position: relative;
+    background: white; /* Fallback */
+}
+.chip-option img { width: 100%; height: 100%; object-fit: cover; }
+.chip-option.selected { border-color: #4CAF50; transform: scale(1.05); box-shadow: 0 0 10px rgba(76, 175, 80, 0.5); }
 
 
-/* --- GAME BOARD --- */
+/* VS Screen (Dynamisch) */
+.vs-preview-box {
+    margin-top: 20px; padding-top: 20px; border-top: 2px dashed #eee;
+}
+.vs-container { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.vs-player { display: flex; flex-direction: column; align-items: center; width: 100px; }
+.vs-chip-big { 
+    width: 80px; height: 80px; border-radius: 50%; 
+    box-shadow: 0 5px 10px rgba(0,0,0,0.2); border: 4px solid white;
+    margin-bottom: 5px; overflow: hidden; background: #ccc;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 2rem; color: rgba(255,255,255,0.5);
+}
+.vs-chip-big img { width: 100%; height: 100%; object-fit: cover; }
+.vs-mid { font-size: 1.5rem; font-weight: 900; color: #F44336; font-style: italic; }
+.vs-name { font-weight: bold; font-size: 1rem; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+
+
+/* --- GAME BOARD (Fixed Alignment) --- */
 .c4-game-container {
     display: flex; flex-direction: column; align-items: center;
-    width: 100%; height: 100%; background: #37474F;
-    overflow: hidden;
+    width: 100%; height: 100%; background: #37474F; overflow: hidden;
 }
 
 .c4-header {
-    width: 100%; padding: 10px; background: white;
+    width: 100%; padding: 8px; background: white;
     display: flex; justify-content: space-between; align-items: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 20;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 50;
 }
 
-/* Score Tracker */
 .score-pill {
     display: flex; align-items: center; gap: 8px;
-    background: #f0f0f0; padding: 5px 12px; border-radius: 20px;
+    background: #f0f0f0; padding: 4px 10px; border-radius: 20px;
     border: 2px solid transparent; transition: 0.3s;
 }
-.score-pill.active-turn { border-color: #4CAF50; transform: scale(1.05); background: #E8F5E9; box-shadow: 0 0 10px #4CAF50; }
+.score-pill.active-turn { transform: scale(1.05); box-shadow: 0 0 10px rgba(255,255,255,0.5); border-color: #333; }
 .mini-chip { width: 30px; height: 30px; border-radius: 50%; overflow: hidden; border: 2px solid white; box-shadow: 0 2px 2px rgba(0,0,0,0.2); }
 .mini-chip img { width: 100%; height: 100%; object-fit: cover; }
 .wins-dots { display: flex; gap: 3px; }
@@ -89,70 +110,55 @@
 
 /* HET BORD */
 .board-wrapper {
-    position: relative; margin-top: 20px;
-    padding: 10px 10px 0 10px; /* Alleen zij en boven padding */
-    background: #1976D2; /* Het klassieke blauw */
+    position: relative; margin-top: 10px;
+    /* We gebruiken padding om het blauwe kader te maken */
+    padding: 10px; 
+    background: #1976D2; 
     border-radius: 10px 10px 0 0;
     box-shadow: inset 0 0 20px rgba(0,0,0,0.3), 0 10px 20px rgba(0,0,0,0.5);
-    /* Zorgt dat chips niet buiten het bord zichtbaar zijn tijdens vallen */
-    overflow: hidden; 
+    z-index: 10;
 }
-
-/* Poten van het bord */
-.board-legs {
-    width: 90%; height: 20px; background: #1565C0;
-    border-radius: 0 0 10px 10px; margin-bottom: 20px;
-}
+.board-legs { width: 95%; height: 30px; background: #1565C0; border-radius: 0 0 15px 15px; }
 
 .c4-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     grid-template-rows: repeat(6, 1fr);
-    gap: 8px;
+    gap: 8px; /* Ruimte tussen gaten */
 }
 
-/* Een vakje in het bord (Het blauwe deel met het gat) */
+/* De Cell met het gat */
 .c4-cell {
-    width: 45px; height: 45px; /* Aanpassen op JS resize */
+    width: var(--cell-size); height: var(--cell-size);
     position: relative;
-    background: radial-gradient(circle, transparent 65%, #1565C0 66%);
-    /* Dit zorgt ervoor dat de chip ACHTER het blauw lijkt te zitten */
-    z-index: 10; 
-    pointer-events: none; /* Klikken gaat op de kolom */
+    /* Dit maakt het gat: radiaal verloop van transparant naar blauw */
+    background: radial-gradient(circle, transparent 66%, #1565C0 67%);
+    z-index: 20; pointer-events: none;
 }
 
-/* De kolom (Klikzone) */
+/* Klikzone (Kolom) */
 .c4-column {
-    position: absolute; top: 0; bottom: 0; width: 14.28%; /* 1/7e */
-    z-index: 20; cursor: pointer;
+    position: absolute; top: 0; bottom: 0; 
+    width: var(--cell-size); 
+    z-index: 30; cursor: pointer;
 }
-.c4-column:hover { background: rgba(255,255,255,0.05); }
+.c4-column:hover { background: rgba(255,255,255,0.1); }
 
-/* De vallende chip */
+/* Chips */
 .game-chip {
     position: absolute;
-    width: 45px; height: 45px; /* Wordt overschreven door JS */
+    width: var(--cell-size); height: var(--cell-size);
     border-radius: 50%;
-    z-index: 5; /* Achter de cell laag */
-    top: -60px; /* Start boven het bord */
-    /* 3D look */
-    box-shadow: inset -2px -2px 5px rgba(0,0,0,0.3), inset 2px 2px 5px rgba(255,255,255,0.4), 0 2px 4px rgba(0,0,0,0.3);
+    z-index: 5; /* ACHTER de cell (het blauwe bord) */
+    top: -80px;
+    /* 3D effect */
+    box-shadow: inset -3px -3px 5px rgba(0,0,0,0.4), inset 2px 2px 5px rgba(255,255,255,0.4);
 }
 .game-chip img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
-/* ANIMATIES */
-/* Stuiteren: hoe dieper, hoe harder */
-@keyframes dropBounce1 { 0% { top: -50px; } 70% { top: var(--target-top); } 85% { top: calc(var(--target-top) - 5px); } 100% { top: var(--target-top); } }
-@keyframes dropBounce2 { 0% { top: -50px; } 70% { top: var(--target-top); } 85% { top: calc(var(--target-top) - 10px); } 100% { top: var(--target-top); } }
-@keyframes dropBounce3 { 0% { top: -50px; } 70% { top: var(--target-top); } 85% { top: calc(var(--target-top) - 15px); } 100% { top: var(--target-top); } }
-@keyframes dropBounce4 { 0% { top: -50px; } 70% { top: var(--target-top); } 85% { top: calc(var(--target-top) - 20px); } 100% { top: var(--target-top); } }
-@keyframes dropBounce5 { 0% { top: -50px; } 70% { top: var(--target-top); } 85% { top: calc(var(--target-top) - 25px); } 100% { top: var(--target-top); } }
-@keyframes dropBounce6 { 0% { top: -50px; } 70% { top: var(--target-top); } 85% { top: calc(var(--target-top) - 30px); } 100% { top: var(--target-top); } }
-
+/* Animatie */
 .chip-falling { animation-fill-mode: forwards; animation-timing-function: cubic-bezier(0.6, 0.04, 0.98, 0.335); }
+.winning-cell { animation: pulseWin 0.5s infinite alternate; }
+@keyframes pulseWin { from { filter: brightness(1); transform: scale(1); } to { filter: brightness(1.5); transform: scale(1.1); } }
 
-/* Winnaar lijn */
-.winning-cell {
-    animation: pulseWin 0.5s infinite alternate;
-}
-@keyframes pulseWin { from { transform: scale(1); filter: brightness(1); } to { transform: scale(1.1); filter: brightness(1.3); } }
+/* Dynamische keyframes worden via JS berekend of we gebruiken simpele transities */
