@@ -1,4 +1,4 @@
-/* VIEROPEENRIJ.CSS - FIXED SIZES & LAYOUT */
+/* VIEROPEENRIJ.CSS - KINDVRIENDELIJKE WIZARD */
 
 /* --- SETUP SCHERM --- */
 .c4-setup-container {
@@ -14,160 +14,141 @@
     padding: 20px; width: 100%; max-width: 500px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     text-align: center; margin-bottom: 20px;
-    /* Zorgt dat inhoud nooit buiten de box breekt */
     overflow: hidden; 
+    /* Subtiele animatie bij wisselen van speler */
+    animation: fadeIn 0.4s ease-out;
 }
+@keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
-.c4-title { font-size: 1.3rem; color: #333; margin-bottom: 10px; text-transform: uppercase; font-weight: bold; }
-.c4-subtitle { font-size: 0.9rem; color: #666; margin-bottom: 15px; font-weight: bold; }
+/* Header titels */
+.c4-title { font-size: 1.6rem; color: #333; margin-bottom: 15px; text-transform: uppercase; font-weight: 900; }
+.c4-subtitle { font-size: 1rem; color: #666; margin: 15px 0 10px 0; font-weight: bold; }
 
-/* Match Goal Knoppen */
-.goal-btn-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
-.goal-btn {
-    padding: 10px 15px; background: #eee; border: 2px solid #ddd; border-radius: 12px;
-    font-family: 'Fredoka One'; font-size: 1rem; cursor: pointer; transition: 0.2s; color: #555;
-}
-.goal-btn.selected { 
-    background: #2196F3; color: white; border-color: #1976D2;
-    transform: scale(1.1); box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3); 
-}
-
-/* Preset Buttons */
-.preset-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; }
+/* SPELERS KNOPPEN (Presets) */
+.preset-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; justify-content: center; }
 .preset-btn {
-    flex: 1; min-width: 70px; background: #fafafa; border: 2px solid #eee;
-    border-radius: 12px; padding: 10px 5px; cursor: pointer; transition: all 0.2s;
-    font-family: 'Fredoka One'; color: #555; white-space: nowrap;
+    flex: 1; min-width: 70px; max-width: 100px;
+    background: #fafafa; border: 3px solid #eee;
+    border-radius: 15px; padding: 15px 5px; 
+    cursor: pointer; transition: all 0.2s;
+    font-family: 'Fredoka One'; color: #555; font-size: 1.1rem;
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
 }
 .preset-btn.active {
     background: #E8F5E9; border-color: #4CAF50; color: #2E7D32;
-    transform: scale(1.05); box-shadow: 0 3px 8px rgba(0,0,0,0.1); font-weight: bold;
+    transform: scale(1.1); box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3); z-index: 2;
 }
 
-/* Kleurenkiezer */
-.color-picker-row { display: flex; gap: 8px; justify-content: center; margin: 15px 0; }
+/* INPUT VELD (Voor eigen naam) */
+.custom-name-input {
+    width: 90%; padding: 12px; border-radius: 12px; border: 2px solid #ccc;
+    font-family: 'Fredoka One'; text-align: center; font-size: 1.2rem;
+    margin-bottom: 10px; transition: 0.3s;
+}
+.custom-name-input:focus { border-color: #2196F3; outline: none; }
+
+/* KLEUREN KIEZER */
+.color-picker-row { display: flex; gap: 10px; justify-content: center; margin: 10px 0; flex-wrap: wrap;}
 .c4-color-dot {
-    width: 35px; height: 35px; border-radius: 50%; border: 3px solid white;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer; transition: transform 0.2s;
-    flex-shrink: 0; /* Mag niet pletten */
+    width: 45px; height: 45px; border-radius: 50%; border: 4px solid white;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2); cursor: pointer; transition: transform 0.2s;
 }
-.c4-color-dot.active { transform: scale(1.2); border-color: #333; z-index: 2; box-shadow: 0 0 10px rgba(0,0,0,0.3); }
+.c4-color-dot.active { transform: scale(1.2); border-color: #333; z-index: 2; box-shadow: 0 0 15px rgba(0,0,0,0.3); }
 
-/* CHIP GRID (HIER ZAT HET PROBLEEM) */
+/* CHIP GRID */
 .chip-grid {
     display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); /* Vaste minimale breedte */
-    gap: 10px; 
-    max-height: 250px; overflow-y: auto; padding: 5px;
-    width: 100%; box-sizing: border-box;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); 
+    gap: 12px; 
+    max-height: 220px; overflow-y: auto; padding: 10px;
+    background: #f9f9f9; border-radius: 15px; border: 2px solid #eee;
 }
 
 .chip-option {
-    width: 60px; height: 60px; /* HARDE GROOTTE DWINGEN */
+    width: 70px; height: 70px; 
     border-radius: 50%;
-    border: 3px solid transparent; cursor: pointer;
-    box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+    border: 4px solid transparent; cursor: pointer;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.1);
     overflow: hidden; position: relative; background: white; 
-    margin: 0 auto; /* Centreren in grid cel */
+    margin: 0 auto; transition: 0.2s;
 }
-.chip-option img { 
-    width: 100%; height: 100%; object-fit: cover; 
-    display: block; /* Voorkomt witte randjes */
-}
+.chip-option img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .chip-option.selected { 
-    border-color: #4CAF50; transform: scale(1.1); box-shadow: 0 0 10px rgba(76, 175, 80, 0.5); z-index: 5;
+    border-color: #4CAF50; transform: scale(1.15); 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 5;
+}
+/* Vinkje op geselecteerde chip */
+.chip-option.selected::after {
+    content: '✅'; position: absolute; top: 0; right: 0; background: rgba(255,255,255,0.8);
+    border-radius: 50%; padding: 2px; font-size: 1rem;
 }
 
-/* VS Screen */
-.vs-preview-box { margin-top: 20px; padding-top: 20px; border-top: 2px dashed #eee; }
-.vs-container { display: flex; align-items: center; justify-content: center; gap: 10px; }
-.vs-player { display: flex; flex-direction: column; align-items: center; width: 100px; }
-
-/* VS Bollen ook harde grootte geven */
-.vs-chip-big { 
-    width: 80px; height: 80px; /* HARDE GROOTTE */
-    border-radius: 50%; flex-shrink: 0;
-    box-shadow: 0 5px 10px rgba(0,0,0,0.2); border: 4px solid white;
-    margin-bottom: 5px; overflow: hidden; background: #ccc;
-    display: flex; justify-content: center; align-items: center;
-    font-size: 2rem; color: rgba(255,255,255,0.5); transition: background 0.3s;
-}
-.vs-chip-big img { width: 100%; height: 100%; object-fit: cover; }
-.vs-mid { font-size: 1.5rem; font-weight: 900; color: #F44336; font-style: italic; }
-.vs-name { font-weight: bold; font-size: 1rem; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-
-
-/* --- GAME BOARD --- */
-.c4-game-container {
-    display: flex; flex-direction: column; align-items: center;
-    width: 100%; height: 100%; background: #37474F; overflow: hidden;
+/* --- DE GROTE BEVESTIGINGSKNOP --- */
+.confirm-action-btn {
+    width: 100%; padding: 20px; margin-top: 20px;
+    font-size: 1.5rem; border-radius: 20px; border: none;
+    font-family: 'Fredoka One'; cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    /* Standaard (niet klaar): Grijs */
+    background: #e0e0e0; color: #999; pointer-events: none;
+    box-shadow: none; transform: scale(0.95);
 }
 
-.c4-header {
-    width: 100%; padding: 8px; background: white;
-    display: flex; justify-content: space-between; align-items: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 50; box-sizing: border-box;
+/* Als alles is ingevuld: Groen & Stuiterend */
+.confirm-action-btn.ready {
+    background: linear-gradient(to bottom, #66BB6A, #43A047);
+    color: white; pointer-events: auto;
+    box-shadow: 0 6px 0 #2E7D32, 0 10px 20px rgba(76, 175, 80, 0.4);
+    transform: scale(1);
+    animation: pulseBtn 1.5s infinite;
+}
+.confirm-action-btn.ready:active {
+    transform: translateY(4px); box-shadow: 0 2px 0 #2E7D32;
 }
 
-.score-pill {
-    display: flex; align-items: center; gap: 8px;
-    background: #f0f0f0; padding: 4px 10px; border-radius: 20px;
-    border: 2px solid transparent; transition: 0.3s;
+@keyframes pulseBtn {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
 }
+
+/* VS PREVIEW BOX (Klein en informatief) */
+.vs-preview-box { margin-top: 20px; padding-top: 15px; border-top: 2px dashed #ddd; display: flex; justify-content: center; gap: 20px; align-items: center; opacity: 0.7; }
+.vs-mini-player { display: flex; flex-direction: column; align-items: center; }
+.vs-mini-chip { width: 40px; height: 40px; border-radius: 50%; background: #ccc; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); overflow: hidden; }
+.vs-mini-chip img { width: 100%; height: 100%; object-fit: cover; }
+.vs-mini-name { font-size: 0.8rem; font-weight: bold; color: #777; margin-top: 5px; }
+.vs-mini-mid { font-weight: bold; color: #aaa; }
+
+/* Huidige speler in VS box highlighten */
+.vs-mini-player.active-setup .vs-mini-chip { border: 3px solid #2196F3; transform: scale(1.2); }
+.vs-mini-player.active-setup .vs-mini-name { color: #2196F3; font-weight: 900; }
+
+
+/* --- GAME BOARD (Zelfde als voorheen) --- */
+.c4-game-container { display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; background: #37474F; overflow: hidden; }
+.c4-header { width: 100%; padding: 8px; background: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 50; box-sizing: border-box; }
+.score-pill { display: flex; align-items: center; gap: 8px; background: #f0f0f0; padding: 4px 10px; border-radius: 20px; border: 2px solid transparent; transition: 0.3s; }
 .score-pill.active-turn { transform: scale(1.05); box-shadow: 0 0 10px rgba(255,255,255,0.5); border-color: #333; }
 .mini-chip { width: 30px; height: 30px; border-radius: 50%; overflow: hidden; border: 2px solid white; box-shadow: 0 2px 2px rgba(0,0,0,0.2); flex-shrink: 0; }
 .mini-chip img { width: 100%; height: 100%; object-fit: cover; }
 .wins-dots { display: flex; gap: 3px; }
 .win-dot { width: 8px; height: 8px; background: #ccc; border-radius: 50%; }
 .win-dot.filled { background: #FFD700; box-shadow: 0 0 5px #FFD700; }
-
-/* HET BORD (Grid fix) */
-.board-wrapper {
-    position: relative; margin-top: 10px; 
-    width: 95%; max-width: 500px; 
-    /* Dwing de verhouding af: 7 breed / 6 hoog */
-    aspect-ratio: 7 / 6; 
-    padding: 10px; box-sizing: border-box;
-    background: #1976D2; border-radius: 10px 10px 0 0;
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.3), 0 10px 20px rgba(0,0,0,0.5); 
-    z-index: 10;
-    display: flex; justify-content: center;
-}
+.board-wrapper { position: relative; margin-top: 10px; width: 95%; max-width: 500px; aspect-ratio: 7 / 6; padding: 10px; box-sizing: border-box; background: #1976D2; border-radius: 10px 10px 0 0; box-shadow: inset 0 0 20px rgba(0,0,0,0.3), 0 10px 20px rgba(0,0,0,0.5); z-index: 10; display: flex; justify-content: center; }
 .board-legs { width: 90%; max-width: 480px; height: 30px; background: #1565C0; border-radius: 0 0 15px 15px; }
-
-.c4-grid { 
-    display: grid; width: 100%; height: 100%;
-    grid-template-columns: repeat(7, 1fr); 
-    grid-template-rows: repeat(6, 1fr); 
-    gap: 1%; /* Relatieve gap */
-}
-
-/* CELLEN */
-.c4-cell {
-    width: 100%; height: 100%; 
-    position: relative;
-    background: radial-gradient(circle, transparent 64%, #1565C0 65%); 
-    z-index: 20; pointer-events: none;
-}
-
-.c4-column { 
-    position: absolute; top: 0; bottom: 0; 
-    width: 14.28%; /* 1/7e deel */
-    z-index: 30; cursor: pointer; 
-}
+.c4-grid { display: grid; width: 100%; height: 100%; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(6, 1fr); gap: 1%; }
+.c4-cell { width: 100%; height: 100%; position: relative; background: radial-gradient(circle, transparent 64%, #1565C0 65%); z-index: 20; pointer-events: none; }
+.c4-column { position: absolute; top: 0; bottom: 0; width: 14.28%; z-index: 30; cursor: pointer; }
 .c4-column:hover { background: rgba(255,255,255,0.1); }
-
-/* CHIPS (Met fallback grootte) */
-.game-chip {
-    position: absolute; 
-    width: var(--cell-size, 40px); 
-    height: var(--cell-size, 40px); 
-    border-radius: 50%;
-    z-index: 5; top: -150%; 
-    box-shadow: inset -3px -3px 5px rgba(0,0,0,0.4), inset 2px 2px 5px rgba(255,255,255,0.4);
-}
+.game-chip { position: absolute; width: var(--cell-size, 40px); height: var(--cell-size, 40px); border-radius: 50%; z-index: 5; top: -150%; box-shadow: inset -3px -3px 5px rgba(0,0,0,0.4), inset 2px 2px 5px rgba(255,255,255,0.4); }
 .game-chip img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-
 .chip-falling { animation-fill-mode: forwards; animation-timing-function: cubic-bezier(0.6, 0.04, 0.98, 0.335); }
 .winning-cell { animation: pulseWin 0.5s infinite alternate; }
 @keyframes pulseWin { from { filter: brightness(1); transform: scale(1); } to { filter: brightness(1.5); transform: scale(1.1); } }
+/* Match Goal (Simpel) */
+.goal-btn-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+.goal-btn { padding: 8px 12px; background: #eee; border: 2px solid #ddd; border-radius: 12px; font-family: 'Fredoka One'; cursor: pointer; transition: 0.2s; color: #555; }
+.goal-btn.selected { background: #2196F3; color: white; border-color: #1976D2; transform: scale(1.1); box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3); }
+.tool-btn { border: none; background: #90A4AE; color: white; padding: 10px; border-radius: 10px; font-family: 'Fredoka One'; }
