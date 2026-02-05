@@ -1,161 +1,130 @@
-// VANG.JS - WHACK-A-MOLE MET THEMA PLAATJES
-console.log("Vang.js geladen...");
+/* PUZZEL.CSS - DUIDELIJKE SELECTIE & FILTER */
 
-let whackState = {
-    score: 0,
-    lastHole: null,
-    timeUp: false,
-    scoreGoal: 15, // Aantal punten om te winnen
-    speed: 1000    // Snelheid (ms)
-};
-
-// 1. OPHALEN ALLE PLAATJES (Uit Memory Thema's)
-function getWhackPool() {
-    if(typeof memThemes !== 'undefined') {
-        let pool = [];
-        Object.values(memThemes).forEach(t => {
-            if(!t.locked && !t.isMix) {
-                // Pak plaatje 1 t/m 15 van elk thema
-                for(let i=1; i<=15; i++) pool.push(`${t.path}${i}.${t.extension}`);
-            }
-        });
-        if(pool.length > 0) return pool;
-    }
-    // Fallback als er iets mis is
-    return ['assets/images/icon.png'];
+/* --- 1. SETUP SCHERM --- */
+.memory-setup {
+    display: flex; flex-direction: column;
+    height: 100%; width: 100%;
+    padding: 15px; box-sizing: border-box;
+    background: #E3F2FD;
+    overflow-y: auto;
 }
 
-function startWhackGame() {
-    const board = document.getElementById('game-board');
-    whackState.score = 0;
-    whackState.timeUp = false;
-    whackState.speed = 1000;
-
-    // Maak 9 gaten (3x3)
-    let holesHTML = '';
-    for(let i=0; i<9; i++) {
-        holesHTML += `
-            <div class="hole" id="hole-${i}" onclick="bonk(this)">
-                <img src="" class="mole-img" id="img-${i}">
-            </div>`;
-    }
-
-    board.innerHTML = `
-        <div class="whack-game-container">
-            <div class="whack-header">
-                <button class="tool-btn" onclick="location.reload()">⬅ Stop</button>
-                <div class="whack-score">🔨 Score: <span id="whack-score">0</span> / ${whackState.scoreGoal}</div>
-            </div>
-            
-            <div class="whack-grid">
-                ${holesHTML}
-            </div>
-            
-            <div style="margin-top:20px; color:white; font-size:0.9rem;">
-                Tik op de plaatjes! Pas op voor 💣 en 💩!
-            </div>
-        </div>
-    `;
-
-    // Start het spel
-    peep();
+.setup-group {
+    background: white; border-radius: 20px;
+    padding: 15px; margin-bottom: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    width: 100%; box-sizing: border-box;
 }
 
-// 2. KIES EEN WILLEKEURIG GAT
-function randomHole(holes) {
-    const idx = Math.floor(Math.random() * holes.length);
-    const hole = holes[idx];
-    if (hole === whackState.lastHole) return randomHole(holes);
-    whackState.lastHole = hole;
-    return hole;
+h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
+
+/* NAMEN & NIVEAU KNOPPEN */
+.name-row {
+    display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px;
+}
+.player-btn {
+    flex: 1; min-width: 70px;
+    background: #f0f0f0; border: 2px solid #ddd;
+    border-radius: 12px; padding: 10px 5px;
+    font-family: 'Fredoka One'; cursor: pointer;
+    transition: all 0.2s; white-space: nowrap;
+    opacity: 0.7; /* Standaard ietsje doorzichtig */
 }
 
-// 3. LAAT IETS OMHOOG KOMEN (PEEP)
-function peep() {
-    if(whackState.timeUp) return;
-    if(whackState.score >= whackState.scoreGoal) return; // Gewonnen
-
-    const holes = document.querySelectorAll('.hole');
-    const hole = randomHole(holes);
-    const imgEl = hole.querySelector('.mole-img');
-
-    // KIES: GOED of FOUT?
-    // 30% kans op Bom/Drol, 70% kans op Leuk Plaatje
-    const isBad = Math.random() < 0.3; 
-
-    if (isBad) {
-        // BOM of DROL (Gebruik emoji als plaatje of een bestand indien je dat hebt)
-        // We gebruiken hier een DATA-URI voor een drol/bom zodat het altijd werkt
-        const isBomb = Math.random() > 0.5;
-        if(isBomb) {
-            imgEl.src = "assets/images/bomb.png"; // Zorg dat je deze hebt, of gebruik emoji hieronder
-            // Als je geen bomb.png hebt, gebruiken we een emoji truc:
-            imgEl.onerror = function(){ this.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💣</text></svg>'; };
-            imgEl.dataset.type = "bomb";
-        } else {
-            imgEl.src = "assets/images/poop.png"; 
-            imgEl.onerror = function(){ this.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💩</text></svg>'; };
-            imgEl.dataset.type = "poop";
-        }
-    } else {
-        // GOED PLAATJE (Uit de lijst)
-        const pool = getWhackPool();
-        const randomImg = pool[Math.floor(Math.random() * pool.length)];
-        imgEl.src = randomImg;
-        imgEl.dataset.type = "good";
-    }
-
-    // Omhoog!
-    hole.classList.add('up');
-
-    // Snelheid aanpassen (hoe verder, hoe sneller)
-    const time = whackState.speed; // Tussen 0.4s en 1s
-
-    setTimeout(() => {
-        hole.classList.remove('up');
-        if (!whackState.timeUp && whackState.score < whackState.scoreGoal) {
-            peep();
-        }
-    }, time);
+/* DE NIEUWE SELECTIE STIJL (NAAM & NIVEAU) */
+.player-btn.selected-pending {
+    background: #4CAF50 !important; /* Fel Groen */
+    border-color: #2E7D32 !important;
+    color: white !important;
+    transform: scale(1.1); 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    opacity: 1;
+    font-weight: bold;
 }
 
-// 4. KLIKKEN (MEPPEN)
-function bonk(hole) {
-    if(!hole.classList.contains('up')) return; // Niet spieken!
-    
-    const imgEl = hole.querySelector('.mole-img');
-    const type = imgEl.dataset.type;
-
-    if(type === "bomb" || type === "poop") {
-        // AU! FOUT!
-        if(typeof playSound === 'function') playSound('error');
-        hole.classList.remove('up'); // Direct weg
-        // Minpunt? Of gewoon niks? Laten we minpunt doen.
-        whackState.score = Math.max(0, whackState.score - 1);
-        document.getElementById('whack-score').innerText = whackState.score;
-        
-        // Rood knipperen
-        document.querySelector('.whack-game-container').style.backgroundColor = "#F44336";
-        setTimeout(()=>document.querySelector('.whack-game-container').style.backgroundColor = "", 200);
-
-    } else {
-        // GOED!
-        if(typeof playSound === 'function') playSound('pop');
-        hole.classList.remove('up'); // Weg
-        
-        whackState.score++;
-        document.getElementById('whack-score').innerText = whackState.score;
-        
-        // Iets sneller gaan
-        whackState.speed = Math.max(400, whackState.speed - 30);
-
-        // GEWONNEN?
-        if(whackState.score >= whackState.scoreGoal) {
-            whackState.timeUp = true;
-            setTimeout(() => {
-                if(typeof showWinnerModal === 'function') showWinnerModal("Jij");
-                else alert("Gewonnen!");
-            }, 500);
-        }
-    }
+/* KLEUREN GRID */
+.color-grid-6 {
+    display: grid; grid-template-columns: repeat(6, 1fr);
+    gap: 8px; margin-top: 10px; width: 100%;
 }
+.color-dot {
+    width: 100% !important; aspect-ratio: 1 / 1; height: auto !important;
+    border-radius: 50%; border: 3px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer;
+    transition: transform 0.2s; opacity: 0.6;
+}
+/* Geselecteerde Kleur */
+.color-dot.selected-color {
+    transform: scale(1.2);
+    border: 3px solid #333; /* Dikke rand */
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    opacity: 1;
+    position: relative;
+    z-index: 5;
+}
+
+/* THEMA/FOTO KIEZER GRID */
+.theme-grid-wrapper {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px;
+}
+.theme-card-btn {
+    aspect-ratio: 4/3; background: white; border: 3px solid #eee;
+    border-radius: 12px; overflow: hidden;
+    position: relative; display: flex; flex-direction: column; cursor: pointer;
+    opacity: 0.8; transition: all 0.2s;
+}
+
+/* GESELECTEERDE FOTO: DIKKE GROENE RAND + VINKJE */
+.theme-card-btn.selected {
+    border-color: #4CAF50; 
+    border-width: 4px;
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    opacity: 1;
+}
+/* Het vinkje icoon (verschijnt alleen als selected) */
+.theme-card-btn.selected::after {
+    content: '✅';
+    position: absolute; top: 5px; right: 5px;
+    font-size: 1.5rem;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
+}
+
+.theme-img-container { width: 100%; height: 75%; }
+.theme-img-container img { width: 100%; height: 100%; object-fit: cover; }
+.btn-label { height: 25%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; background: #fafafa; width: 100%; font-weight: bold; }
+.theme-card-btn.selected .btn-label { background: #4CAF50; color: white; }
+
+/* ACTIVE PLAYERS & FOOTER */
+#puz-active-players { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 10px; min-height: 30px; }
+.active-player-tag { display: inline-block; padding: 5px 12px; margin: 3px; border-radius: 15px; color: white; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2); border: 2px solid white; }
+.bottom-actions { margin-top: auto; display: flex; flex-direction: column; gap: 8px; padding-top: 20px; }
+.start-btn { width: 100%; padding: 15px; font-size: 1.2rem; border-radius: 15px; background: #4CAF50; color: white; border: none; font-family: 'Fredoka One'; box-shadow: 0 4px 0 #2E7D32; transition: 0.3s; }
+.start-btn:disabled { background: #ccc; box-shadow: none; color: #666; }
+.tool-btn { border: none; background: #90A4AE; color: white; padding: 10px; border-radius: 10px; font-family: 'Fredoka One'; }
+
+/* --- 2. HET SPEL --- */
+.puzzle-game-container { display: flex; flex-direction: column; width: 100%; height: 100%; background: #FFECB3; overflow: hidden; }
+.puzzle-header { display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 10; }
+.puzzle-score { font-size: 1.2rem; font-weight: bold; border: 2px solid #333; padding: 5px 15px; border-radius: 20px; background: white; }
+.preview-mini { width: 60px; height: 45px; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); overflow: hidden; border-radius: 5px; }
+.preview-mini img { width: 100%; height: 100%; object-fit: cover; }
+.hint-container { display: flex; flex-direction: column; align-items: center; }
+.bulb-row { display: flex; gap: 2px; margin-top: 2px; }
+.hint-bulb { font-size: 0.8rem; opacity: 1; filter: grayscale(0%); transition: 0.3s; }
+.hint-bulb.used { opacity: 0.3; filter: grayscale(100%); }
+.tip-btn { background: #FF9800; color: white; border: none; border-radius: 10px; padding: 2px 8px; font-size: 0.8rem; font-family: 'Fredoka One'; cursor: pointer; }
+.tip-btn:disabled { background: #ccc; }
+.puzzle-main-area { flex: 1; display: flex; padding: 5px; gap: 5px; overflow: hidden; position: relative; }
+.puzzle-pool { width: 70px; background: rgba(255,255,255,0.5); border-radius: 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 5px; overflow-y: auto; flex-shrink: 0; }
+.puzzle-board-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.05); border-radius: 10px; padding: 10px; }
+.puzzle-board { display: grid; grid-template-columns: repeat(var(--puz-cols), var(--piece-size)); grid-template-rows: repeat(var(--puz-rows), var(--piece-size)); background-size: cover; box-shadow: 0 0 20px rgba(0,0,0,0.2); position: relative; background-color: #ddd; /* Vangnet voor transparante PNGs */ }
+.puzzle-board.ghost-mode { opacity: 0.8; }
+.puzzle-slot { width: var(--piece-size); height: var(--piece-size); border: 1px dashed rgba(0,0,0,0.1); box-sizing: border-box; background-color: rgba(255,255,255,0.3); /* Zorgt dat witte gaten iets ingekleurd zijn */ }
+.puzzle-piece { width: var(--piece-size); height: var(--piece-size); cursor: grab; box-shadow: 2px 2px 5px rgba(0,0,0,0.3); transition: transform 0.2s, box-shadow 0.2s; touch-action: none; background-color: #fff; /* Wit achter elk stukje voor het geval dat */ }
+.side-pool .puzzle-piece { width: 60px !important; height: 60px !important; background-size: cover !important; margin-bottom: 5px; border-radius: 5px; }
+.puzzle-piece.selected { transform: scale(1.1); border: 2px solid #2196F3; z-index: 100; box-shadow: 0 0 15px #2196F3; }
+.puzzle-piece.correct { border: none; box-shadow: none; z-index: 1; pointer-events: none; }
+.puzzle-piece.wrong { animation: shake 0.4s; border: 2px solid red; }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+                
