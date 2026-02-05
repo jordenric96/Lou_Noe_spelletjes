@@ -1,5 +1,5 @@
-// PUZZEL.JS - CONSISTENTE LAYOUT & 8 PUZZELS
-console.log("Puzzel.js geladen (Fixed Layout)...");
+// PUZZEL.JS - MET DUIDELIJKE NIVEAU KEUZE
+console.log("Puzzel.js geladen (Level UI Update)...");
 
 let pState = { 
     img: '', pieces: [], rows: 3, cols: 2, selectedPiece: null, correctCount: 0, difficulty: 'easy',
@@ -38,7 +38,6 @@ async function startPuzzleGame() {
     let foundCount = 0;
     
     // ZOEK NAAR 8 GESCHIKTE FOTO'S
-    // We proberen max 50 keer een willekeurig plaatje te pakken om er 8 te vinden
     for(let i=0; i<50 && foundCount < 8; i++) {
         const t = keys[Math.floor(Math.random() * keys.length)];
         const tData = config[t];
@@ -49,7 +48,6 @@ async function startPuzzleGame() {
                 const isGood = await isFullImage(src);
                 if(isGood) {
                     usedSrcs.push(src);
-                    // DIT IS DEZELFDE HTML STRUCTUUR ALS BIJ MEMORY:
                     puzzleOptions += `
                         <div class="theme-card-btn" onclick="puzSetImg('${src}', this)">
                             <div class="theme-img-container"><img src="${src}"></div>
@@ -61,7 +59,7 @@ async function startPuzzleGame() {
         }
     }
 
-    // BOUW HET MENU (EXACT DEZELFDE STIJL ALS MEMORY)
+    // BOUW HET MENU
     board.innerHTML = `
         <div class="memory-setup">
             <div class="setup-group">
@@ -88,11 +86,22 @@ async function startPuzzleGame() {
             </div>
 
             <div class="setup-group">
-                <h3>3. Niveau</h3>
-                <div class="name-row">
-                    <button class="player-btn selected-pending" onclick="puzSetDiff('easy', this)">🟢 6 Stukjes</button>
-                    <button class="player-btn" onclick="puzSetDiff('medium', this)">🟠 20 Stukjes</button>
-                    <button class="player-btn" onclick="puzSetDiff('hard', this)">🔴 30 Stukjes</button>
+                <h3>3. Aantal Stukjes</h3>
+                <div class="level-row">
+                    <div class="level-card-btn easy selected" onclick="puzSetDiff('easy', this)">
+                        <span class="level-num">6</span>
+                        <span class="level-text">Stukjes</span>
+                    </div>
+                    
+                    <div class="level-card-btn medium" onclick="puzSetDiff('medium', this)">
+                        <span class="level-num">20</span>
+                        <span class="level-text">Stukjes</span>
+                    </div>
+                    
+                    <div class="level-card-btn hard" onclick="puzSetDiff('hard', this)">
+                        <span class="level-num">30</span>
+                        <span class="level-text">Stukjes</span>
+                    </div>
                 </div>
             </div>
 
@@ -108,10 +117,21 @@ async function startPuzzleGame() {
 function puzSelectPerson(name, icon, btn) { if(typeof playSound === 'function') playSound('click'); btn.parentElement.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending')); btn.classList.add('selected-pending'); pState.pendingName = name; pState.pendingIcon = icon; const c=document.getElementById('puz-colors'); c.style.animation="shake 0.5s"; setTimeout(()=>c.style.animation="",500); }
 function puzSetColor(color, btn) { if(!pState.pendingName) { alert("Klik eerst op een naam!"); return; } if(typeof playSound === 'function') playSound('pop'); document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected-color')); btn.classList.add('selected-color'); pState.playerNames = [{ name: pState.pendingName, icon: pState.pendingIcon, color: color }]; pState.pendingName = null; const nameRow = document.querySelector('.setup-group .name-row'); if(nameRow) nameRow.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending')); document.getElementById('puz-active-players').innerHTML = pState.playerNames.map(p => `<div class="active-player-tag" style="background:${p.color}"><span>${p.icon} ${p.name}</span></div>`).join(''); puzCheckStart(); }
 function puzSetImg(src, btn) { if(typeof playSound === 'function') playSound('click'); pState.img = src; document.querySelectorAll('.theme-card-btn').forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); puzCheckStart(); }
-function puzSetDiff(diff, btn) { if(typeof playSound === 'function') playSound('click'); pState.difficulty = diff; btn.parentElement.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending')); btn.classList.add('selected'); }
+
+// UPDATE: FUNCTIE AANGEPAST VOOR NIEUWE KNOPPEN
+function puzSetDiff(diff, btn) { 
+    if(typeof playSound === 'function') playSound('click'); 
+    pState.difficulty = diff; 
+    
+    // Reset alle niveau knoppen
+    document.querySelectorAll('.level-card-btn').forEach(b => b.classList.remove('selected')); 
+    // Selecteer de gekozen knop
+    btn.classList.add('selected'); 
+}
+
 function puzCheckStart() { const btn = document.getElementById('puz-start-btn'); if (pState.playerNames.length > 0 && pState.img !== '') { btn.disabled = false; btn.innerText = "START PUZZEL ▶"; btn.style.transform = "scale(1.05)"; } }
 
-// GAME LOGIC (Zelfde als voorheen)
+// GAME LOGIC (Ongewijzigd)
 function puzUpdateSize() { const wrapper = document.querySelector('.puzzle-board-wrapper'); const board = document.querySelector('.puzzle-board'); if (!wrapper || !board) return; const availW = wrapper.clientWidth - 10; const availH = wrapper.clientHeight - 10; if (availW <= 0 || availH <= 0) return; const maxPieceW = availW / pState.cols; const maxPieceH = availH / pState.rows; const pieceSize = Math.floor(Math.min(maxPieceW, maxPieceH)); board.style.setProperty('--piece-size', `${pieceSize}px`); board.style.width = `${pieceSize * pState.cols}px`; board.style.height = `${pieceSize * pState.rows}px`; }
 function initPuzzle() { if(typeof playSound === 'function') playSound('win'); const board = document.getElementById('game-board'); board.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100%;color:white;"><h2>Even geduld...</h2></div>'; const tempImg = new Image(); tempImg.src = pState.img; tempImg.onload = function() { const isLandscape = tempImg.naturalWidth >= tempImg.naturalHeight; if(pState.difficulty === 'easy') { pState.cols = isLandscape ? 3 : 2; pState.rows = isLandscape ? 2 : 3; } else if(pState.difficulty === 'medium') { pState.cols = isLandscape ? 5 : 4; pState.rows = isLandscape ? 4 : 5; } else { pState.cols = isLandscape ? 6 : 5; pState.rows = isLandscape ? 5 : 6; } puzBuildBoard(board); }; }
 
@@ -128,12 +148,7 @@ function puzBuildBoard(board) {
         const y = Math.floor(i / pState.cols) * 100 / (pState.rows - 1); 
         const sizeX = pState.cols * 100; 
         const sizeY = pState.rows * 100; 
-        
-        const pieceHTML = `<div class="puzzle-piece" id="piece-${i}" data-index="${i}" onclick="puzSelectPiece(this)" 
-            style="background-image: url('${pState.img}'); 
-                   background-position: ${x}% ${y}%; 
-                   background-size: ${sizeX}% ${sizeY}%;"></div>`; 
-        
+        const pieceHTML = `<div class="puzzle-piece" id="piece-${i}" data-index="${i}" onclick="puzSelectPiece(this)" style="background-image: url('${pState.img}'); background-position: ${x}% ${y}%; background-size: ${sizeX}% ${sizeY}%;"></div>`; 
         if(index % 2 === 0) leftPoolHTML += pieceHTML; else rightPoolHTML += pieceHTML; 
     });
     
@@ -162,7 +177,6 @@ function puzBuildBoard(board) {
                 <button class="close-preview-btn">Sluiten</button>
             </div>
         </div>`;
-        
     puzUpdateSize(); window.addEventListener('resize', puzUpdateSize);
     setTimeout(() => { const starterIndex = Math.floor(Math.random() * totalPieces); const starterPiece = document.getElementById(`piece-${starterIndex}`); const starterSlot = document.getElementById(`slot-${starterIndex}`); if(starterPiece && starterSlot) { starterSlot.appendChild(starterPiece); starterPiece.classList.add('correct'); starterPiece.onclick = null; pState.correctCount = 1; puzUpdateScore(); } }, 100);
 }
@@ -197,4 +211,4 @@ function puzCheckWin() {
             if(typeof showWinnerModal === 'function') { showWinnerModal(winner); }
         }, 500);
     }
-    }
+}
