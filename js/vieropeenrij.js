@@ -1,5 +1,5 @@
-// VIEROPEENRIJ.JS - SINGLE CHIP & SOLID FIX
-console.log("4-op-een-rij geladen (Final Single Chip)...");
+// VIEROPEENRIJ.JS - FINAL STABLE & VISUALS
+console.log("4-op-een-rij geladen (Stable Fix)...");
 
 let c4State = {
     step: 0, winsNeeded: 3,
@@ -28,14 +28,13 @@ function renderWizardStep() {
     let btnText = "KIES NAAM & PLAATJE...";
     if (isReady) btnText = isP1 ? "BEVESTIG SPELER 1 ➡" : "START HET SPEL! 🚀";
 
-    // Chip opties (Eerste 5 van elk thema)
     let chipsHTML = '';
     if(typeof memThemes !== 'undefined') {
         Object.values(memThemes).forEach(t => {
             if(!t.locked && !t.isMix) {
                 for(let i=1; i<=5; i++) {
                     const src = `${t.path}${i}.${t.extension}`;
-                    if (!isP1 && src === c4State.p1.img) return; // Geen dubbele
+                    if (!isP1 && src === c4State.p1.img) return;
                     const selected = currPlayer.img === src ? 'selected' : '';
                     chipsHTML += `<div class="chip-option ${selected}" style="background:${currPlayer.color}" onclick="c4SetChip('${src}')"><img src="${src}"></div>`;
                 }
@@ -140,40 +139,38 @@ function c4InitGame() {
 function renderGame() {
     const board = document.getElementById('game-board');
     
-    // Helpers
-    const makeStars = (p) => {
-        let h = ''; for(let i=0; i<c4State.winsNeeded; i++) h += `<div class="star-dot ${i<p.wins?'won':''}"></div>`; return h;
+    // Helper voor Score Chips (Nieuw!)
+    const makeScoreChips = (p) => {
+        let h = '<div class="score-chips-row">';
+        for(let i=0; i<c4State.winsNeeded; i++) {
+            // Als i kleiner is dan wins, is hij gewonnen (zichtbaar). Anders doorzichtig.
+            const cls = i < p.wins ? 'score-chip won' : 'score-chip';
+            h += `<div class="${cls}" style="background:${p.color}"><img src="${p.img}"></div>`;
+        }
+        h += '</div>';
+        return h;
     };
 
-    // Masker Grid (Gaten) & Klik Grid
+    // Masker Grid & Klik Grid
     const maskCells = Array(ROWS*COLS).fill('<div class="c4-hole"></div>').join('');
     const clickCols = Array(COLS).fill(0).map((_,i) => `<div class="c4-col-click" onclick="c4Drop(${i})"></div>`).join('');
 
     board.innerHTML = `
         <div class="c4-game-container">
             <div class="player-zone top ${c4State.currentPlayer===1?'active-turn':''}">
-                <div class="pz-info" style="align-items:flex-start">
-                    <div class="pz-name" style="color:${c4State.p1.color}">${c4State.p1.name}</div>
-                    <div class="pz-stars">${makeStars(c4State.p1)}</div>
-                </div>
-                <div class="active-chip-indicator" style="background:${c4State.p1.color}"><img src="${c4State.p1.img}"></div>
+                <div class="pz-name" style="color:${c4State.p1.color}">${c4State.p1.name}</div>
+                ${makeScoreChips(c4State.p1)}
             </div>
 
             <div class="board-area">
                 <div class="board-wrapper" id="board-visual">
-                    <div class="layer-chips" id="chips-layer"></div>
-                    <div class="layer-mask">${maskCells}</div>
-                    <div class="layer-click">${clickCols}</div>
-                </div>
+                    <div class="c4-grid-mask">${maskCells}</div> <div class="click-layer">${clickCols}</div> </div>
                 <button class="tool-btn" style="width:auto; margin-top:5px; padding:5px 20px; font-size:0.8rem;" onclick="startConnect4()">Stoppen</button>
             </div>
 
             <div class="player-zone bottom ${c4State.currentPlayer===2?'active-turn':''}">
-                <div class="active-chip-indicator" style="background:${c4State.p2.color}"><img src="${c4State.p2.img}"></div>
-                <div class="pz-info" style="align-items:flex-end">
-                    <div class="pz-name" style="color:${c4State.p2.color}">${c4State.p2.name}</div>
-                    <div class="pz-stars">${makeStars(c4State.p2)}</div>
-                </div>
+                ${makeScoreChips(c4State.p2)}
+                <div class="pz-name" style="color:${c4State.p2.color}">${c4State.p2.name}</div>
             </div>
         </div>
     `;
@@ -192,7 +189,7 @@ function c4Drop(col) {
     
     const p = c4State.currentPlayer === 1 ? c4State.p1 : c4State.p2;
 
-    // 1. Bereken Dimensies
+    // 1. Bereken Dimensies (Direct op de wrapper)
     const boardEl = document.getElementById('board-visual');
     const boardRect = boardEl.getBoundingClientRect();
     
@@ -207,6 +204,7 @@ function c4Drop(col) {
     // 2. Maak Chip
     const chip = document.createElement('div');
     chip.className = 'game-chip';
+    // Z-index 5 is gedefinieerd in CSS, lager dan het masker (10)
     chip.style.width = `${chipSize}px`;
     chip.style.height = `${chipSize}px`;
     chip.style.left = `${finalLeft}px`;
@@ -216,15 +214,16 @@ function c4Drop(col) {
     chip.style.setProperty('--final-top', `${finalTop}px`);
     chip.style.animation = `dropBounce 0.5s cubic-bezier(0.5, 0.05, 1, 0.5) forwards`;
     
-    document.getElementById('chips-layer').appendChild(chip);
+    // CRUCIAAL: Voeg direct toe aan de wrapper
+    boardEl.appendChild(chip);
     
     setTimeout(() => { if(typeof playSound==='function') playSound('click'); }, 350);
 
     setTimeout(() => {
         c4State.isDropping = false;
-        // FINAL FIX: Harde positie zetten
+        // HARD POSITION LOCK
         chip.style.top = `${finalTop}px`;
-        chip.style.animation = 'none'; // Stop animatie
+        chip.style.animation = 'none'; 
         
         if (c4CheckWin(col, row)) c4Win();
         else if (c4CheckDraw()) { alert("Gelijkspel!"); c4InitGame(); }
@@ -255,7 +254,7 @@ function c4Win() {
     if(typeof playSound==='function') playSound('victory');
     const p = c4State.currentPlayer === 1 ? c4State.p1 : c4State.p2;
     p.wins++;
-    renderGame(); 
+    renderGame(); // Update score chips
     if(p.wins >= c4State.winsNeeded) {
         setTimeout(() => { if(typeof showWinnerModal==='function') showWinnerModal(p.name); }, 1000);
     } else {
