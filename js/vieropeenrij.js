@@ -1,5 +1,5 @@
-// VIEROPEENRIJ.JS - ROBUST RESIZE
-console.log("4-op-een-rij geladen (Robust Resize)...");
+// VIEROPEENRIJ.JS - FIXED CHIP PERSISTENCE
+console.log("4-op-een-rij geladen (Fixed Drops)...");
 
 let c4State = {
     step: 0, winsNeeded: 3,
@@ -94,7 +94,7 @@ function renderSetup() {
     `;
 }
 
-// SETUP ACTIONS
+// UPDATE FUNCTIES
 function c4UpdateVs() {
     document.getElementById('prev-p1-name').innerText = c4State.p1.name || 'Speler 1';
     document.getElementById('prev-p1-chip').style.background = c4State.p1.color;
@@ -141,11 +141,8 @@ function renderBoard() {
             gridHTML += `<div class="c4-cell" id="cell-${c}-${r}"></div>`;
         }
     }
-    
     let colHTML = '';
-    for(let c=0; c<COLS; c++) {
-        colHTML += `<div class="c4-column" id="col-${c}" onclick="c4Drop(${c})"></div>`;
-    }
+    for(let c=0; c<COLS; c++) colHTML += `<div class="c4-column" id="col-${c}" onclick="c4Drop(${c})"></div>`;
 
     board.innerHTML = `
         <div class="c4-game-container">
@@ -160,7 +157,6 @@ function renderBoard() {
                     <div class="mini-chip" style="background:${c4State.p2.color}"><img src="${c4State.p2.img}"></div>
                 </div>
             </div>
-            
             <div class="board-wrapper" id="board-visual">
                 <div class="c4-grid">${gridHTML}</div>
                 <div id="col-layer">${colHTML}</div>
@@ -170,42 +166,28 @@ function renderBoard() {
         </div>
     `;
 
-    // BELANGRIJK: Forceer resize na het renderen om 0px te voorkomen
-    setTimeout(() => {
-        c4Resize();
-        // Dubbele check na 100ms voor tragere apparaten
-        setTimeout(c4Resize, 100);
-    }, 10);
+    setTimeout(c4Resize, 10);
+    setTimeout(c4Resize, 200); // Dubbele check
     window.addEventListener('resize', c4Resize);
 }
 
 function c4Resize() {
     const wrapper = document.getElementById('board-visual');
     if(!wrapper) return;
-    
-    // Bereken breedte van de wrapper
     const w = wrapper.clientWidth;
-    // Padding = 20px totaal, Gap = 5px * 6 = 30px
-    const totalGap = 30; 
-    const padding = 20; 
-    
-    // Bereken celgrootte (afronden naar beneden voor veiligheid)
+    const totalGap = 30; const padding = 20; 
     const cellSize = Math.floor((w - padding - totalGap) / 7);
-    
-    // Update CSS variabele
     wrapper.style.setProperty('--cell-size', `${cellSize}px`);
-    
-    // Update kolom posities (zodat klikken op de juiste plek gebeurt)
     for(let c=0; c<COLS; c++) {
         const colDiv = document.getElementById(`col-${c}`);
         if(colDiv) {
-            // 10px padding-left + (Size + Gap) * index
             const left = 10 + (cellSize + 5) * c;
             colDiv.style.left = `${left}px`;
         }
     }
 }
 
+// --- DROP LOGICA (MET PERSISTENCE FIX) ---
 function c4Drop(col) {
     if(!c4State.gameActive || c4State.isDropping) return;
 
@@ -224,7 +206,6 @@ function c4Drop(col) {
     chip.style.background = p.color;
     chip.innerHTML = `<img src="${p.img}">`;
 
-    // Positie ophalen uit CSS var
     const wrapper = document.getElementById('board-visual');
     const cellSize = parseFloat(wrapper.style.getPropertyValue('--cell-size')) || 40;
     const leftPos = 10 + (cellSize + 5) * col;
@@ -233,7 +214,6 @@ function c4Drop(col) {
     chip.style.width = `${cellSize}px`;
     chip.style.height = `${cellSize}px`;
     
-    // Animatie: Val van boven (rij 5) naar beneden (rij 0 is laag)
     const targetTop = 10 + (5 - row) * (cellSize + 5);
     
     const animName = `bounce-${col}-${row}`;
@@ -249,6 +229,14 @@ function c4Drop(col) {
 
     setTimeout(() => {
         c4State.isDropping = false;
+        
+        // --- DE BELANGRIJKE FIX: ---
+        // 1. Zet de chip 'hard' op zijn plek
+        chip.style.top = `${targetTop}px`;
+        // 2. Verwijder de animatie klasse
+        chip.style.animation = 'none';
+        chip.classList.remove('chip-falling');
+        // 3. Ruim de keyframes op
         document.head.removeChild(styleSheet);
         
         if (c4CheckWin(col, row)) c4Win();
