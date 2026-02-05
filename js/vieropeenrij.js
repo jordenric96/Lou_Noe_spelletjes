@@ -1,5 +1,5 @@
-// VIEROPEENRIJ.JS - FINAL TOY VERSION
-console.log("4-op-een-rij geladen (Toy & Fix)...");
+// VIEROPEENRIJ.JS - EXACT DROPS & ROBUST
+console.log("4-op-een-rij geladen (Precision Fix)...");
 
 let c4State = {
     step: 0, winsNeeded: 3,
@@ -11,7 +11,7 @@ let c4State = {
 const ROWS = 6; const COLS = 7;
 const c4Colors = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#00BCD4', '#4CAF50', '#FFEB3B', '#FF9800'];
 
-// --- SETUP START ---
+// --- SETUP ---
 function startConnect4() {
     c4State.step = 0; c4State.p1.wins = 0; c4State.p2.wins = 0;
     c4State.p1.name = ''; c4State.p1.img = ''; c4State.p1.color = '#F44336';
@@ -98,7 +98,6 @@ function renderWizardStep() {
     `;
 }
 
-// --- SETUP ACTIES ---
 function c4UpdateBtn() {
     const curr = c4State.step === 0 ? c4State.p1 : c4State.p2;
     const btn = document.querySelector('.confirm-action-btn');
@@ -119,7 +118,6 @@ function c4SetName(n) {
     document.querySelectorAll('.preset-btn').forEach(b => {
         if(b.innerText.includes(n)) b.classList.add('active'); else b.classList.remove('active');
     });
-    // VS Update
     const vsId = c4State.step === 0 ? '.vs-mini-player:first-child .vs-mini-name' : '.vs-mini-player:last-child .vs-mini-name';
     document.querySelector(vsId).innerText = n;
     c4UpdateBtn();
@@ -159,7 +157,6 @@ function renderBoard() {
     const makeDots = (wins) => { let h=''; for(let i=0; i<c4State.winsNeeded; i++) h+=`<div class="win-dot ${i<wins?'filled':''}"></div>`; return h; };
 
     let gridHTML = '';
-    // Let op: Grid cellen zijn alleen maar MASKERS. id is cell-k-r
     for(let r=ROWS-1; r>=0; r--) { 
         for(let c=0; c<COLS; c++) gridHTML += `<div class="c4-cell" id="cell-${c}-${r}"></div>`; 
     }
@@ -185,7 +182,8 @@ function renderBoard() {
                 <div id="col-layer">${colHTML}</div>
                 <div id="chips-layer"></div>
             </div>
-            </div>
+            <div class="board-legs"></div>
+        </div>
     `;
     setTimeout(c4Resize, 10);
     setTimeout(c4Resize, 200);
@@ -195,15 +193,10 @@ function renderBoard() {
 function c4Resize() {
     const wrapper = document.getElementById('board-visual');
     if(!wrapper) return;
-    
-    // Meet één cel in het grid (die wordt automatisch goed geschaald door CSS Grid)
     const cellRef = document.querySelector('.c4-cell');
     if(cellRef) {
         const cellSize = cellRef.clientWidth;
-        // Zet de chip grootte gelijk aan de cel grootte
-        wrapper.style.setProperty('--chip-size', `${cellSize}px`);
-        
-        // Positie kolommen updaten
+        wrapper.style.setProperty('--chip-size', `${cellSize * 0.9}px`); // Chips iets kleiner dan cel voor passing
         for(let c=0; c<COLS; c++) {
             const colDiv = document.getElementById(`col-${c}`);
             const cell = document.getElementById(`cell-${c}-0`);
@@ -230,44 +223,56 @@ function c4Drop(col) {
     chip.style.background = p.color;
     chip.innerHTML = `<img src="${p.img}">`;
 
-    const wrapper = document.getElementById('board-visual');
-    // Positie bepalen relative aan chips-layer (die is even groot als board-wrapper padding box)
+    const chipsLayer = document.getElementById('chips-layer');
     const targetCell = document.getElementById(`cell-${col}-${row}`);
     
     if(targetCell) {
-        // We gebruiken offsetLeft van de cel
-        chip.style.left = targetCell.offsetLeft + 'px';
-        // Top calculation: start bovenin (-100px) en val naar targetCell.offsetTop
-        const targetTop = targetCell.offsetTop;
+        // GEBRUIK EXACTE AFMETINGEN VAN HET DOEL
+        // OffsetLeft/Top zijn relatief aan de parent (board-wrapper/grid)
+        const left = targetCell.offsetLeft;
+        const top = targetCell.offsetTop;
+        const width = targetCell.clientWidth;
+        const height = targetCell.clientHeight;
         
-        const animName = `bounce-${col}-${row}-${Date.now()}`;
-        // Keyframes: Val naar beneden, stuiter iets omhoog, land
+        // Chip iets kleiner voor 3D effect in het gat
+        const pad = width * 0.05;
+        
+        chip.style.left = (left + pad) + 'px';
+        chip.style.width = (width - 2*pad) + 'px';
+        chip.style.height = (height - 2*pad) + 'px';
+        
+        // Animatie start boven de grid
+        const animName = `drop-${Date.now()}`;
         const keyframes = `@keyframes ${animName} { 
-            0% { top: -120%; } 
-            60% { top: ${targetTop}px; } 
-            80% { top: ${targetTop - 20}px; } 
-            100% { top: ${targetTop}px; } 
+            0% { top: -150px; } 
+            60% { top: ${top + pad}px; } 
+            80% { top: ${top + pad - 20}px; } 
+            100% { top: ${top + pad}px; } 
         }`;
-        const styleSheet = document.createElement("style");
-        styleSheet.innerText = keyframes;
-        document.head.appendChild(styleSheet);
+        
+        const style = document.createElement('style');
+        style.innerText = keyframes;
+        document.head.appendChild(style);
         
         chip.style.animation = `${animName} 0.5s ease-in forwards`;
-        document.getElementById('chips-layer').appendChild(chip);
+        chipsLayer.appendChild(chip);
         
         setTimeout(() => { if(typeof playSound==='function') playSound('click'); }, 300);
 
         setTimeout(() => {
             c4State.isDropping = false;
-            // DE FIX: Harde positie instellen
-            chip.style.top = targetTop + 'px';
+            // PERSISTENCE FIX
+            chip.style.top = (top + pad) + 'px';
             chip.style.animation = 'none';
             chip.classList.remove('chip-falling');
-            document.head.removeChild(styleSheet);
+            document.head.removeChild(style);
             
-            if (c4CheckWin(col, row)) c4Win();
-            else if (c4CheckDraw()) { alert("Gelijkspel!"); c4InitGame(); }
-            else {
+            if (c4CheckWin(col, row)) {
+                // Highlight winnende cellen
+                c4Win();
+            } else if (c4CheckDraw()) { 
+                alert("Gelijkspel!"); c4InitGame(); 
+            } else {
                 c4State.currentPlayer = c4State.currentPlayer===1?2:1;
                 c4InitGameHeader(); 
             }
@@ -282,6 +287,9 @@ function c4CheckWin(c, r) {
     const dirs = [[[0,1]], [[1,0]], [[1,1]], [[1,-1]]];
     for(let d of dirs) {
         let count = 1;
+        // Check winst logica...
+        // Om het simpel te houden, retourneren we true als gewonnen
+        // Een echte implementatie zou de winnende cellen markeren
         for(let side of [-1,1]) {
             let dc=d[0][0]*side, dr=d[0][1]*side, nc=c+dc, nr=r+dr;
             while(nc>=0 && nc<COLS && nr>=0 && nr<ROWS && c4State.board[nc][nr]===p) {
