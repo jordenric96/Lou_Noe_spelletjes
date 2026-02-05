@@ -1,4 +1,4 @@
-/* VIEROPEENRIJ.CSS - STABLE MENU */
+/* VIEROPEENRIJ.CSS - FIXED GRID & LAYOUT */
 
 /* --- SETUP SCHERM --- */
 .c4-setup-container {
@@ -14,8 +14,9 @@
     padding: 20px; width: 100%; max-width: 500px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     text-align: center; margin-bottom: 20px;
-    /* Geen animatie op de box zelf om verspringen te voorkomen bij kleine updates */
+    animation: slideUp 0.3s ease-out;
 }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 .c4-title { font-size: 1.3rem; color: #333; margin-bottom: 10px; text-transform: uppercase; font-weight: bold; }
 .c4-subtitle { font-size: 0.9rem; color: #666; margin-bottom: 15px; }
@@ -31,22 +32,16 @@
     transform: scale(1.1); box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3); 
 }
 
-/* NAAM KNOPPEN (Presets) */
+/* Preset Buttons */
 .preset-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; }
 .preset-btn {
     flex: 1; min-width: 70px; background: #fafafa; border: 2px solid #eee;
     border-radius: 12px; padding: 10px 5px; cursor: pointer; transition: all 0.2s;
     font-family: 'Fredoka One'; color: #555;
 }
-
-/* HIER ZAT HET PROBLEEM: Nu duidelijke actieve stijl */
 .preset-btn.active {
-    background: #E8F5E9; 
-    border-color: #4CAF50; 
-    color: #2E7D32;
-    transform: scale(1.05);
-    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-    font-weight: bold;
+    background: #E8F5E9; border-color: #4CAF50; color: #2E7D32;
+    transform: scale(1.05); box-shadow: 0 3px 8px rgba(0,0,0,0.1); font-weight: bold;
 }
 
 /* Kleurenkiezer */
@@ -66,18 +61,12 @@
     aspect-ratio: 1/1; border-radius: 50%;
     border: 3px solid transparent; cursor: pointer;
     box-shadow: 0 3px 5px rgba(0,0,0,0.2);
-    overflow: hidden; position: relative;
-    background: white; 
-    transition: transform 0.1s;
+    overflow: hidden; position: relative; background: white; transition: transform 0.1s;
 }
 .chip-option img { width: 100%; height: 100%; object-fit: cover; }
 .chip-option:active { transform: scale(0.9); }
-
 .chip-option.selected { 
-    border-color: #4CAF50; 
-    transform: scale(1.05); 
-    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5); 
-    z-index: 5;
+    border-color: #4CAF50; transform: scale(1.05); box-shadow: 0 0 10px rgba(76, 175, 80, 0.5); z-index: 5;
 }
 
 /* VS Screen */
@@ -89,8 +78,7 @@
     box-shadow: 0 5px 10px rgba(0,0,0,0.2); border: 4px solid white;
     margin-bottom: 5px; overflow: hidden; background: #ccc;
     display: flex; justify-content: center; align-items: center;
-    font-size: 2rem; color: rgba(255,255,255,0.5);
-    transition: background 0.3s; /* Smooth color change */
+    font-size: 2rem; color: rgba(255,255,255,0.5); transition: background 0.3s;
 }
 .vs-chip-big img { width: 100%; height: 100%; object-fit: cover; }
 .vs-mid { font-size: 1.5rem; font-weight: 900; color: #F44336; font-style: italic; }
@@ -106,7 +94,7 @@
 .c4-header {
     width: 100%; padding: 8px; background: white;
     display: flex; justify-content: space-between; align-items: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 50;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 50; box-sizing: border-box;
 }
 
 .score-pill {
@@ -121,26 +109,57 @@
 .win-dot { width: 8px; height: 8px; background: #ccc; border-radius: 50%; }
 .win-dot.filled { background: #FFD700; box-shadow: 0 0 5px #FFD700; }
 
+/* HET BORD (Hier zat het probleem) */
 .board-wrapper {
-    position: relative; margin-top: 10px; padding: 10px; 
+    position: relative; margin-top: 10px; 
+    /* Dwing een breedte af zodat hij niet inklapt */
+    width: 95%; max-width: 500px; 
+    padding: 10px; box-sizing: border-box;
     background: #1976D2; border-radius: 10px 10px 0 0;
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.3), 0 10px 20px rgba(0,0,0,0.5); z-index: 10;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.3), 0 10px 20px rgba(0,0,0,0.5); 
+    z-index: 10;
+    /* Zorg dat de grid erin gecentreerd wordt */
+    display: flex; justify-content: center;
 }
-.board-legs { width: 95%; height: 30px; background: #1565C0; border-radius: 0 0 15px 15px; }
+.board-legs { width: 90%; max-width: 480px; height: 30px; background: #1565C0; border-radius: 0 0 15px 15px; }
 
-.c4-grid { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(6, 1fr); gap: 8px; }
-.c4-cell {
-    width: var(--cell-size); height: var(--cell-size); position: relative;
-    background: radial-gradient(circle, transparent 66%, #1565C0 67%); z-index: 20; pointer-events: none;
+/* DE GRID */
+.c4-grid { 
+    display: grid; 
+    grid-template-columns: repeat(7, 1fr); 
+    grid-template-rows: repeat(6, 1fr); 
+    gap: 5px; /* Iets kleiner gat voor strakker bord */
 }
-.c4-column { position: absolute; top: 0; bottom: 0; width: var(--cell-size); z-index: 30; cursor: pointer; }
+
+/* CEL MET FALLBACK SIZE */
+.c4-cell {
+    /* Als --cell-size nog niet berekend is, gebruik 40px */
+    width: var(--cell-size, 40px); 
+    height: var(--cell-size, 40px); 
+    position: relative;
+    background: radial-gradient(circle, transparent 66%, #1565C0 67%); 
+    z-index: 20; pointer-events: none;
+}
+
+/* Klikzone */
+.c4-column { 
+    position: absolute; top: 0; bottom: 0; 
+    width: var(--cell-size, 40px); 
+    z-index: 30; cursor: pointer; 
+}
 .c4-column:hover { background: rgba(255,255,255,0.1); }
 
+/* CHIPS */
 .game-chip {
-    position: absolute; width: var(--cell-size); height: var(--cell-size); border-radius: 50%;
-    z-index: 5; top: -80px; box-shadow: inset -3px -3px 5px rgba(0,0,0,0.4), inset 2px 2px 5px rgba(255,255,255,0.4);
+    position: absolute; 
+    width: var(--cell-size, 40px); 
+    height: var(--cell-size, 40px); 
+    border-radius: 50%;
+    z-index: 5; top: -80px; 
+    box-shadow: inset -3px -3px 5px rgba(0,0,0,0.4), inset 2px 2px 5px rgba(255,255,255,0.4);
 }
 .game-chip img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+
 .chip-falling { animation-fill-mode: forwards; animation-timing-function: cubic-bezier(0.6, 0.04, 0.98, 0.335); }
 .winning-cell { animation: pulseWin 0.5s infinite alternate; }
 @keyframes pulseWin { from { filter: brightness(1); transform: scale(1); } to { filter: brightness(1.5); transform: scale(1.1); } }
