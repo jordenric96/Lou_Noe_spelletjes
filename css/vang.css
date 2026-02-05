@@ -1,4 +1,4 @@
-/* VANG.CSS - MET STERREN TRACKER */
+/* VANG.CSS - SIMPEL MENU & LEVEL KAARTEN */
 
 /* --- 1. SETUP SCHERM --- */
 .memory-setup {
@@ -11,46 +11,62 @@
 
 .setup-group {
     background: white; border-radius: 20px;
-    padding: 15px; margin-bottom: 15px;
+    padding: 20px; margin-bottom: 20px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     width: 100%; box-sizing: border-box;
 }
 
-h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
-
-/* KNOPPEN & KLEUREN */
-.name-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; }
-.player-btn {
-    flex: 1; min-width: 80px;
-    background: #f0f0f0; border: 2px solid #ddd;
-    border-radius: 12px; padding: 15px 5px;
-    font-family: 'Fredoka One'; cursor: pointer;
-    transition: all 0.2s; white-space: nowrap;
-    opacity: 0.7; font-size: 1rem; position: relative;
-}
-.player-btn.selected-pending {
-    background: #4CAF50 !important; border-color: #2E7D32 !important; color: white !important;
-    transform: scale(1.05); box-shadow: 0 4px 10px rgba(0,0,0,0.3); opacity: 1; font-weight: bold;
-}
-.player-btn.selected-pending::after {
-    content: '✅'; position: absolute; top: -8px; right: -8px; font-size: 1.2rem;
-    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+h3 { 
+    margin: 0 0 15px 0; font-size: 1.3rem; color: #333; 
+    text-align: center; text-transform: uppercase; letter-spacing: 1px;
 }
 
-.color-grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 10px; width: 100%; }
-.color-dot {
-    width: 100% !important; max-width: 55px; aspect-ratio: 1 / 1; height: auto !important;
-    margin: 0 auto; border-radius: 50%; border: 3px solid white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer; transition: transform 0.2s; opacity: 0.6;
+/* --- NIEUW: NIVEAU KAARTEN (Grote Knoppen) --- */
+.level-row {
+    display: grid; 
+    grid-template-columns: 1fr 1fr 1fr; /* 3 naast elkaar */
+    gap: 10px; width: 100%;
 }
-.color-dot.selected-color { transform: scale(1.2); border: 3px solid #333; opacity: 1; position: relative; z-index: 5; }
+
+.level-card-btn {
+    background: #FAFAFA; border: 3px solid #EEE;
+    border-radius: 18px; padding: 10px 5px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s; position: relative;
+    height: 110px;
+}
+
+.level-icon { font-size: 2.5rem; margin-bottom: 5px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1)); }
+.level-text { font-size: 0.8rem; color: #777; font-weight: bold; text-transform: uppercase; text-align: center; }
+.level-sub { font-size: 0.7rem; color: #999; margin-top: 2px; }
+
+/* GESELECTEERDE STATEN */
+/* Makkelijk - Groen */
+.level-card-btn.easy.selected {
+    border-color: #4CAF50; background: #E8F5E9; transform: scale(1.05);
+    box-shadow: 0 5px 0 #2E7D32; z-index: 2;
+}
+/* Medium - Oranje */
+.level-card-btn.medium.selected {
+    border-color: #FF9800; background: #FFF3E0; transform: scale(1.05);
+    box-shadow: 0 5px 0 #EF6C00; z-index: 2;
+}
+/* Moeilijk - Rood */
+.level-card-btn.hard.selected {
+    border-color: #F44336; background: #FFEBEE; transform: scale(1.05);
+    box-shadow: 0 5px 0 #C62828; z-index: 2;
+}
+
+/* Vinkje */
+.level-card-btn.selected::after {
+    content: '✅'; position: absolute; top: -8px; right: -8px;
+    font-size: 1.5rem; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+}
 
 /* FOOTER */
-#vang-active-players { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 10px; min-height: 30px; }
-.active-player-tag { display: inline-block; padding: 5px 12px; margin: 3px; border-radius: 15px; color: white; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2); border: 2px solid white; }
 .bottom-actions { margin-top: auto; display: flex; flex-direction: column; gap: 8px; padding-top: 20px; }
-.start-btn { width: 100%; padding: 15px; font-size: 1.2rem; border-radius: 15px; background: #4CAF50; color: white; border: none; font-family: 'Fredoka One'; box-shadow: 0 4px 0 #2E7D32; transition: 0.3s; }
-.start-btn:disabled { background: #ccc; box-shadow: none; color: #666; }
+.start-btn { width: 100%; padding: 18px; font-size: 1.4rem; border-radius: 18px; background: #4CAF50; color: white; border: none; font-family: 'Fredoka One'; box-shadow: 0 4px 0 #2E7D32; transition: 0.3s; }
+.start-btn:disabled { background: #ccc; box-shadow: none; color: #666; transform: none; }
 .tool-btn { border: none; background: #90A4AE; color: white; padding: 10px; border-radius: 10px; font-family: 'Fredoka One'; }
 
 
@@ -63,21 +79,17 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
     user-select: none; -webkit-tap-highlight-color: transparent;
 }
 
-/* HEADER AANGEPAST VOOR STERREN */
 .whack-header {
     width: 100%; max-width: 600px;
-    display: flex; flex-direction: column; /* Onder elkaar voor ruimte */
-    gap: 5px;
-    align-items: center;
+    display: flex; flex-direction: column; gap: 5px; align-items: center;
     margin-bottom: 10px;
     background: rgba(255,255,255,0.9); padding: 8px 15px; border-radius: 20px;
     box-shadow: 0 4px 0 rgba(0,0,0,0.1);
 }
 
-/* De bovenste rij met knop en speler */
 .header-top { width: 100%; display: flex; justify-content: space-between; align-items: center; }
 
-/* De Sterrenbalk (Nieuw!) */
+/* STERREN BALK */
 .star-tracker {
     background: #EFEBE9; border-radius: 20px;
     padding: 5px 10px; display: flex; gap: 2px;
@@ -87,23 +99,17 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
 .star-icon { font-size: 1.5rem; color: #CCC; transition: 0.3s; transform: scale(0.9); }
 .star-icon.active { color: #FFD700; transform: scale(1.2); filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); }
 
-.player-icon-display { font-size: 1.5rem; text-shadow: 2px 2px 0 rgba(0,0,0,0.2); }
-
 /* ROOSTER */
 .whack-grid {
-    display: grid; gap: 10px;
-    width: 100%; max-width: 500px;
+    display: grid; gap: 10px; width: 100%; max-width: 500px;
     margin-top: 10px; flex: 1; align-content: center;
 }
 .whack-grid.easy { grid-template-columns: repeat(2, 1fr); max-width: 400px; }
 .whack-grid.medium { grid-template-columns: repeat(3, 1fr); }
 .whack-grid.hard { grid-template-columns: repeat(3, 1fr); } 
 
-/* GAT & PLAATJE */
 .hole {
-    aspect-ratio: 1 / 1;
-    background: #5D4037;
-    border-radius: 50%;
+    aspect-ratio: 1 / 1; background: #5D4037; border-radius: 50%;
     position: relative; overflow: hidden;
     box-shadow: inset 0 10px 20px rgba(0,0,0,0.5), 0 5px 0 rgba(255,255,255,0.2);
     border-bottom: 5px solid #3E2723;
@@ -115,6 +121,7 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
     position: absolute; bottom: -120%; left: 10%;
     transition: bottom 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     object-fit: contain; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
+    /* Klik fix */
     pointer-events: none !important; 
 }
 
