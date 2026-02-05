@@ -1,89 +1,71 @@
-/* VANG.CSS - MEP SPEL (Whack-a-Mole stijl) */
+/* VANG.CSS - WHACK-A-MOLE STIJL */
 
 .whack-game-container {
-    display: flex; flex-direction: column;
+    display: flex; flex-direction: column; align-items: center;
     width: 100%; height: 100%;
+    /* Gras/Tuin achtergrond */
+    background: linear-gradient(180deg, #81C784 0%, #4CAF50 100%);
     padding: 10px; box-sizing: border-box;
-    font-family: 'Fredoka One', cursive;
     overflow: hidden;
-    touch-action: manipulation; /* Voorkomt vertraging bij tikken */
+    user-select: none;
 }
 
 /* HEADER */
 .whack-header {
+    width: 100%; max-width: 600px;
     display: flex; justify-content: space-between; align-items: center;
-    height: 60px; flex-shrink: 0; margin-bottom: 10px;
-}
-
-.whack-score-box {
-    background: white; padding: 5px 20px; border-radius: 20px;
-    font-size: 1.2rem; color: #D32F2F; border: 2px solid #D32F2F;
+    margin-bottom: 10px;
+    background: rgba(255,255,255,0.8);
+    padding: 5px 15px; border-radius: 20px;
     box-shadow: 0 4px 0 rgba(0,0,0,0.1);
 }
 
-/* HET RASTER (De gaten) */
-.whack-grid-container {
-    flex: 1;
-    display: flex; justify-content: center; align-items: center;
-    overflow-y: auto;
+.whack-score {
+    font-size: 1.5rem; font-weight: bold; color: #333;
 }
 
+/* HET SPELBORD (De Gaten) */
 .whack-grid {
     display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 gaten naast elkaar */
     gap: 15px;
-    padding: 10px;
-    width: 100%; max-width: 600px;
+    width: 100%; max-width: 500px;
+    margin-top: 20px;
 }
 
-/* Verschillende moeilijkheidsgraden rasters */
-.grid-easy { grid-template-columns: repeat(2, 1fr); }   /* 2x2 = 4 */
-.grid-medium { grid-template-columns: repeat(3, 1fr); } /* 3x3 = 9 */
-.grid-hard { grid-template-columns: repeat(3, 1fr); }   /* 3x4 = 12 */
-
-/* HET GAT */
-.whack-hole {
-    position: relative;
-    background: #3E2723; /* Donkerbruin aarde */
+.hole {
+    aspect-ratio: 1 / 1;
+    background: #5D4037; /* Aarde kleur */
     border-radius: 50%;
-    aspect-ratio: 1/1; /* Altijd rond */
-    border: 4px solid #5D4037;
+    position: relative;
+    overflow: hidden;
     box-shadow: inset 0 10px 20px rgba(0,0,0,0.5), 0 5px 0 rgba(255,255,255,0.2);
-    overflow: hidden; /* Zodat mannetje erin kan zakken */
+    border-bottom: 5px solid #3E2723;
+}
+
+/* HET PLAATJE (De Mol) */
+.mole-img {
+    width: 80%; height: 80%;
+    position: absolute;
+    bottom: -100%; /* Verstopt onderin */
+    left: 10%;
+    transition: bottom 0.2s; /* Snel omhoog */
+    pointer-events: none; /* Klikken gebeurt op de hole div, of we vangen click bubbling */
+    object-fit: contain;
+    filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
+}
+
+.hole.up .mole-img {
+    bottom: 0%; /* Omhoog! */
+    pointer-events: auto; /* Nu kun je klikken */
     cursor: pointer;
 }
 
-/* HET MANNETJE */
-.whack-character {
-    position: absolute;
-    width: 80%; height: 80%;
-    left: 10%; bottom: -100%; /* Start verstopt onderin */
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center bottom;
-    transition: bottom 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    
-    /* Voor de bom en drol (tekst) */
-    display: flex; justify-content: center; align-items: center;
-    font-size: 3rem; 
-}
-
-/* Als hij omhoog komt */
-.whack-hole.up .whack-character {
-    bottom: 0; /* Zichtbaar */
-}
-
-/* Als je hem raakt */
-.whack-hole.whacked .whack-character {
+/* HIT EFFECTEN */
+.hole.bonked .mole-img {
     transform: scale(0.9) rotate(10deg);
-    filter: brightness(0.5) sepia(1) hue-rotate(-50deg) saturate(5); /* Rood effect */
+    filter: brightness(1.5) sepia(1); /* Even oplichten */
 }
 
-/* Bom & Drol Effecten */
-.trap-bomb .whack-character { font-size: 3.5rem; }
-.trap-poop .whack-character { font-size: 3.5rem; }
-
-/* Mobiele aanpassingen */
-@media (max-width: 600px) {
-    .whack-grid { gap: 10px; }
-    .grid-hard { grid-template-columns: repeat(3, 1fr); } 
-}
+/* HAMER Muis (Optioneel voor desktop) */
+.whack-game-container { cursor: crosshair; }
