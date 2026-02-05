@@ -1,5 +1,5 @@
-// MEMORY.JS - FINAL MET WINNER MODAL
-console.log("Memory.js geladen (Final + Modal)...");
+// MEMORY.JS - FINAL (BETERE BEURT INDICATOR)
+console.log("Memory.js geladen (Visual Update)...");
 
 let memoryState = { 
     theme: 'boerderij', gridSize: 30, playerNames: [], currentPlayerIndex: 0, scores: {}, 
@@ -15,7 +15,7 @@ const memThemes = {
     'dino':      { locked: false, extension: 'png', path: 'assets/images/memory/dino/' },
     'sonic':     { locked: false, extension: 'png', path: 'assets/images/memory/natuur/' },
     'cars':      { locked: false, extension: 'png', path: 'assets/images/memory/beroepen/' },
-    'toystory':      { locked: false, extension: 'png', path: 'assets/images/memory/toystory/' },
+    'toystory':  { locked: false, extension: 'png', path: 'assets/images/memory/toystory/' },
     'mix':       { locked: false, extension: 'png', path: '', isMix: true }
 };
 const mixCoverIcon = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23FF9800' stroke='white' stroke-width='5'/%3E%3Ctext x='50' y='70' font-family='Arial' font-size='60' font-weight='bold' fill='white' text-anchor='middle'%3E?%3C/text%3E%3C/svg%3E";
@@ -84,30 +84,36 @@ function memFlipCard() {
             c1.querySelector('.card-back').style.borderColor = p.color; c2.querySelector('.card-back').style.borderColor = p.color;
             memoryState.flippedCards = []; memoryState.lockBoard = false;
             if(typeof playSound === 'function') playSound('win');
-            
-            // --- HIER IS DE AANPASSING: ---
             if (memoryState.matchedPairs === 15) {
-                // Spel is afgelopen!
                 setTimeout(() => { 
-                    // Maak een lijstje voor het klassement: [{name:"Lou", score:10}, ...]
-                    let leaderboardData = memoryState.playerNames.map(pn => ({
-                        name: pn.name, 
-                        score: memoryState.scores[pn.name]
-                    }));
-                    // Sorteer wie de winnaar is
+                    let leaderboardData = memoryState.playerNames.map(pn => ({ name: pn.name, score: memoryState.scores[pn.name] }));
                     leaderboardData.sort((a,b) => b.score - a.score);
-                    
-                    // ROEP DE NIEUWE MODAL AAN!
-                    if(typeof showWinnerModal === 'function') {
-                        showWinnerModal(leaderboardData[0].name, leaderboardData);
-                    }
+                    if(typeof showWinnerModal === 'function') { showWinnerModal(leaderboardData[0].name, leaderboardData); }
                 }, 1000);
             }
-
         } else {
             setTimeout(() => { c1.classList.remove('flipped'); c2.classList.remove('flipped'); memoryState.flippedCards = []; memoryState.lockBoard = false; memSwitchPlayer(); }, 1200);
         }
     }
 }
 function memSwitchPlayer() { memoryState.currentPlayerIndex = (memoryState.currentPlayerIndex + 1) % memoryState.playerNames.length; memUpdateActiveBadgeColor(); }
-function memUpdateActiveBadgeColor() { memoryState.playerNames.forEach((p, i) => { let b = document.getElementById(`badge-${i}`); if(b) { const active = i === memoryState.currentPlayerIndex; b.classList.toggle('active', active); if(active) b.style.borderColor = p.color; } }); }
+
+// DEZE FUNCTIE ZORGT VOOR DE DIKKE RAND + SPOTLIGHT
+function memUpdateActiveBadgeColor() { 
+    memoryState.playerNames.forEach((p, i) => { 
+        let b = document.getElementById(`badge-${i}`); 
+        if(b) { 
+            const active = i === memoryState.currentPlayerIndex; 
+            b.classList.toggle('active', active); 
+            
+            // Als actief: Geef de rand de kleur van de speler
+            if(active) {
+                b.style.borderColor = p.color;
+                b.style.boxShadow = `0 0 15px ${p.color}`;
+            } else {
+                b.style.borderColor = 'transparent';
+                b.style.boxShadow = 'none';
+            }
+        } 
+    }); 
+}
