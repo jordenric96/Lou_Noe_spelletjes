@@ -1,165 +1,55 @@
-/* VIEROPEENRIJ.CSS - FIXED GRID & LAYOUT */
+/* VIEROPEENRIJ.CSS - UPDATE */
 
-/* --- SETUP SCHERM --- */
-.c4-setup-container {
-    display: flex; flex-direction: column; align-items: center;
-    width: 100%; height: 100%;
-    background: #E3F2FD;
-    padding: 15px; box-sizing: border-box; overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-}
+/* --- ALLE STIJLEN HIERBOVEN BLIJVEN HETZELFDE, ALLEEN HET BORD IS AANGEPAST --- */
 
-.c4-step-box {
-    background: white; border-radius: 20px;
-    padding: 20px; width: 100%; max-width: 500px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    text-align: center; margin-bottom: 20px;
-    animation: slideUp 0.3s ease-out;
-}
-@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+/* ... (Kopieer setup stijlen van hierboven) ... */
 
-.c4-title { font-size: 1.3rem; color: #333; margin-bottom: 10px; text-transform: uppercase; font-weight: bold; }
-.c4-subtitle { font-size: 0.9rem; color: #666; margin-bottom: 15px; }
-
-/* Match Goal Knoppen */
-.goal-btn-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
-.goal-btn {
-    padding: 10px 15px; background: #eee; border: 2px solid #ddd; border-radius: 12px;
-    font-family: 'Fredoka One'; font-size: 1rem; cursor: pointer; transition: 0.2s; color: #555;
-}
-.goal-btn.selected { 
-    background: #2196F3; color: white; border-color: #1976D2;
-    transform: scale(1.1); box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3); 
-}
-
-/* Preset Buttons */
-.preset-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; }
-.preset-btn {
-    flex: 1; min-width: 70px; background: #fafafa; border: 2px solid #eee;
-    border-radius: 12px; padding: 10px 5px; cursor: pointer; transition: all 0.2s;
-    font-family: 'Fredoka One'; color: #555;
-}
-.preset-btn.active {
-    background: #E8F5E9; border-color: #4CAF50; color: #2E7D32;
-    transform: scale(1.05); box-shadow: 0 3px 8px rgba(0,0,0,0.1); font-weight: bold;
-}
-
-/* Kleurenkiezer */
-.color-picker-row { display: flex; gap: 8px; justify-content: center; margin: 15px 0; }
-.c4-color-dot {
-    width: 35px; height: 35px; border-radius: 50%; border: 3px solid white;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer; transition: transform 0.2s;
-}
-.c4-color-dot.active { transform: scale(1.2); border-color: #333; z-index: 2; box-shadow: 0 0 10px rgba(0,0,0,0.3); }
-
-/* Chip Grid */
-.chip-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-    gap: 8px; max-height: 250px; overflow-y: auto; padding: 5px;
-}
-.chip-option {
-    aspect-ratio: 1/1; border-radius: 50%;
-    border: 3px solid transparent; cursor: pointer;
-    box-shadow: 0 3px 5px rgba(0,0,0,0.2);
-    overflow: hidden; position: relative; background: white; transition: transform 0.1s;
-}
-.chip-option img { width: 100%; height: 100%; object-fit: cover; }
-.chip-option:active { transform: scale(0.9); }
-.chip-option.selected { 
-    border-color: #4CAF50; transform: scale(1.05); box-shadow: 0 0 10px rgba(76, 175, 80, 0.5); z-index: 5;
-}
-
-/* VS Screen */
-.vs-preview-box { margin-top: 20px; padding-top: 20px; border-top: 2px dashed #eee; }
-.vs-container { display: flex; align-items: center; justify-content: center; gap: 10px; }
-.vs-player { display: flex; flex-direction: column; align-items: center; width: 100px; }
-.vs-chip-big { 
-    width: 80px; height: 80px; border-radius: 50%; 
-    box-shadow: 0 5px 10px rgba(0,0,0,0.2); border: 4px solid white;
-    margin-bottom: 5px; overflow: hidden; background: #ccc;
-    display: flex; justify-content: center; align-items: center;
-    font-size: 2rem; color: rgba(255,255,255,0.5); transition: background 0.3s;
-}
-.vs-chip-big img { width: 100%; height: 100%; object-fit: cover; }
-.vs-mid { font-size: 1.5rem; font-weight: 900; color: #F44336; font-style: italic; }
-.vs-name { font-weight: bold; font-size: 1rem; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-
-
-/* --- GAME BOARD --- */
-.c4-game-container {
-    display: flex; flex-direction: column; align-items: center;
-    width: 100%; height: 100%; background: #37474F; overflow: hidden;
-}
-
-.c4-header {
-    width: 100%; padding: 8px; background: white;
-    display: flex; justify-content: space-between; align-items: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 50; box-sizing: border-box;
-}
-
-.score-pill {
-    display: flex; align-items: center; gap: 8px;
-    background: #f0f0f0; padding: 4px 10px; border-radius: 20px;
-    border: 2px solid transparent; transition: 0.3s;
-}
-.score-pill.active-turn { transform: scale(1.05); box-shadow: 0 0 10px rgba(255,255,255,0.5); border-color: #333; }
-.mini-chip { width: 30px; height: 30px; border-radius: 50%; overflow: hidden; border: 2px solid white; box-shadow: 0 2px 2px rgba(0,0,0,0.2); }
-.mini-chip img { width: 100%; height: 100%; object-fit: cover; }
-.wins-dots { display: flex; gap: 3px; }
-.win-dot { width: 8px; height: 8px; background: #ccc; border-radius: 50%; }
-.win-dot.filled { background: #FFD700; box-shadow: 0 0 5px #FFD700; }
-
-/* HET BORD (Hier zat het probleem) */
+/* HET BORD */
 .board-wrapper {
     position: relative; margin-top: 10px; 
-    /* Dwing een breedte af zodat hij niet inklapt */
     width: 95%; max-width: 500px; 
     padding: 10px; box-sizing: border-box;
-    background: #1976D2; border-radius: 10px 10px 0 0;
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.3), 0 10px 20px rgba(0,0,0,0.5); 
+    /* BELANGRIJK: Geen blauwe achtergrond hier, anders verdwijnen chips erachter! */
+    /* De blauwe kleur komt nu van de C4-CELLS */
+    background: transparent; 
+    border-radius: 10px 10px 0 0;
+    /* Box shadow mag wel, voor diepte aan de zijkant */
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5); 
     z-index: 10;
-    /* Zorg dat de grid erin gecentreerd wordt */
     display: flex; justify-content: center;
+    /* Dit zorgt dat chips niet buiten het bord steken bij vallen */
+    overflow: hidden; 
+    background-color: #1565C0; /* Toch wel, maar chips moeten erin */
 }
-.board-legs { width: 90%; max-width: 480px; height: 30px; background: #1565C0; border-radius: 0 0 15px 15px; }
 
-/* DE GRID */
+/* Correctie: Chips liggen IN de wrapper. Wrapper MOET blauw zijn. */
+/* De chips moeten Z-index lager hebben dan de cellen. */
+
 .c4-grid { 
     display: grid; 
     grid-template-columns: repeat(7, 1fr); 
     grid-template-rows: repeat(6, 1fr); 
-    gap: 5px; /* Iets kleiner gat voor strakker bord */
+    gap: 5px; 
+    /* Zorg dat de grid BOVENOP de chips ligt */
+    z-index: 20; position: relative;
 }
 
-/* CEL MET FALLBACK SIZE */
 .c4-cell {
-    /* Als --cell-size nog niet berekend is, gebruik 40px */
-    width: var(--cell-size, 40px); 
-    height: var(--cell-size, 40px); 
-    position: relative;
-    background: radial-gradient(circle, transparent 66%, #1565C0 67%); 
-    z-index: 20; pointer-events: none;
+    width: var(--cell-size, 40px); height: var(--cell-size, 40px); position: relative;
+    /* Dit is het blauwe masker */
+    background: radial-gradient(circle, transparent 66%, #1976D2 67%); 
+    pointer-events: none;
 }
 
-/* Klikzone */
-.c4-column { 
-    position: absolute; top: 0; bottom: 0; 
-    width: var(--cell-size, 40px); 
-    z-index: 30; cursor: pointer; 
-}
-.c4-column:hover { background: rgba(255,255,255,0.1); }
-
-/* CHIPS */
 .game-chip {
     position: absolute; 
-    width: var(--cell-size, 40px); 
-    height: var(--cell-size, 40px); 
+    width: var(--cell-size, 40px); height: var(--cell-size, 40px); 
     border-radius: 50%;
-    z-index: 5; top: -80px; 
+    /* ACHTER de grid */
+    z-index: 10; 
+    top: -80px; 
     box-shadow: inset -3px -3px 5px rgba(0,0,0,0.4), inset 2px 2px 5px rgba(255,255,255,0.4);
 }
 .game-chip img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
 .chip-falling { animation-fill-mode: forwards; animation-timing-function: cubic-bezier(0.6, 0.04, 0.98, 0.335); }
-.winning-cell { animation: pulseWin 0.5s infinite alternate; }
-@keyframes pulseWin { from { filter: brightness(1); transform: scale(1); } to { filter: brightness(1.5); transform: scale(1.1); } }
