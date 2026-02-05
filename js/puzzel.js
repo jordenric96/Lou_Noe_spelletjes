@@ -1,5 +1,5 @@
-// PUZZEL.JS - STUKJES FIX & PREVIEW MODAL
-console.log("Puzzel.js geladen (Fixed + Preview)...");
+// PUZZEL.JS - CONSISTENTE LAYOUT & 8 PUZZELS
+console.log("Puzzel.js geladen (Fixed Layout)...");
 
 let pState = { 
     img: '', pieces: [], rows: 3, cols: 2, selectedPiece: null, correctCount: 0, difficulty: 'easy',
@@ -34,9 +34,12 @@ async function startPuzzleGame() {
     const config = (typeof memThemes !== 'undefined') ? memThemes : {};
     let puzzleOptions = '';
     const keys = Object.keys(config);
-    const usedSrcs = []; let foundCount = 0;
+    const usedSrcs = []; 
+    let foundCount = 0;
     
-    for(let i=0; i<40 && foundCount < 8; i++) {
+    // ZOEK NAAR 8 GESCHIKTE FOTO'S
+    // We proberen max 50 keer een willekeurig plaatje te pakken om er 8 te vinden
+    for(let i=0; i<50 && foundCount < 8; i++) {
         const t = keys[Math.floor(Math.random() * keys.length)];
         const tData = config[t];
         if(tData && !tData.locked && !tData.isMix) {
@@ -46,14 +49,59 @@ async function startPuzzleGame() {
                 const isGood = await isFullImage(src);
                 if(isGood) {
                     usedSrcs.push(src);
-                    puzzleOptions += `<div class="theme-card-btn" onclick="puzSetImg('${src}', this)"><div class="theme-img-container"><img src="${src}"></div><div class="btn-label">Kies mij!</div></div>`;
+                    // DIT IS DEZELFDE HTML STRUCTUUR ALS BIJ MEMORY:
+                    puzzleOptions += `
+                        <div class="theme-card-btn" onclick="puzSetImg('${src}', this)">
+                            <div class="theme-img-container"><img src="${src}"></div>
+                            <div class="btn-label">Puzzel ${foundCount + 1}</div>
+                        </div>`;
                     foundCount++;
                 }
             }
         }
     }
 
-    board.innerHTML = `<div class="memory-setup"><div class="setup-group"><h3>1. Wie Puzzelt?</h3><div class="name-row"><button class="player-btn" onclick="puzSelectPerson('Lou', '👦🏼', this)">👦🏼 Lou</button><button class="player-btn" onclick="puzSelectPerson('Noé', '👶🏼', this)">👶🏼 Noé</button><button class="player-btn" onclick="puzSelectPerson('Mama', '👩🏻', this)">👩🏻 Mama</button><button class="player-btn" onclick="puzSelectPerson('Papa', '👨🏻', this)">👨🏻 Papa</button></div><div class="color-grid-6" id="puz-colors">${puzColors.map(c => `<div class="color-dot" style="background:${c}" onclick="puzSetColor('${c}', this)"></div>`).join('')}</div><div id="puz-active-players" style="margin-top:10px; min-height:30px;"></div></div><div class="setup-group"><h3>2. Kies een Plaatje</h3><div class="theme-grid-wrapper">${puzzleOptions}</div></div><div class="setup-group"><h3>3. Niveau</h3><div class="name-row"><button class="player-btn selected-pending" onclick="puzSetDiff('easy', this)">🟢 6 Stukjes</button><button class="player-btn" onclick="puzSetDiff('medium', this)">🟠 20 Stukjes</button><button class="player-btn" onclick="puzSetDiff('hard', this)">🔴 30 Stukjes</button></div></div><div class="bottom-actions"><button id="puz-start-btn" class="start-btn" onclick="initPuzzle()" disabled>Kies eerst een plaatje...</button><button class="tool-btn" onclick="location.reload()">⬅ Menu</button></div></div>`;
+    // BOUW HET MENU (EXACT DEZELFDE STIJL ALS MEMORY)
+    board.innerHTML = `
+        <div class="memory-setup">
+            <div class="setup-group">
+                <h3>1. Wie Puzzelt?</h3>
+                <div class="name-row">
+                    <button class="player-btn" onclick="puzSelectPerson('Lou', '👦🏼', this)">👦🏼 Lou</button>
+                    <button class="player-btn" onclick="puzSelectPerson('Noé', '👶🏼', this)">👶🏼 Noé</button>
+                    <button class="player-btn" onclick="puzSelectPerson('Mama', '👩🏻', this)">👩🏻 Mama</button>
+                    <button class="player-btn" onclick="puzSelectPerson('Papa', '👨🏻', this)">👨🏻 Papa</button>
+                </div>
+                
+                <div class="color-grid-6" id="puz-colors">
+                    ${puzColors.map(c => `<div class="color-dot" style="background:${c}" onclick="puzSetColor('${c}', this)"></div>`).join('')}
+                </div>
+                
+                <div id="puz-active-players" style="margin-top:10px; min-height:30px;"></div>
+            </div>
+
+            <div class="setup-group">
+                <h3>2. Kies een Puzzel</h3>
+                <div class="theme-grid-wrapper">
+                    ${puzzleOptions}
+                </div>
+            </div>
+
+            <div class="setup-group">
+                <h3>3. Niveau</h3>
+                <div class="name-row">
+                    <button class="player-btn selected-pending" onclick="puzSetDiff('easy', this)">🟢 6 Stukjes</button>
+                    <button class="player-btn" onclick="puzSetDiff('medium', this)">🟠 20 Stukjes</button>
+                    <button class="player-btn" onclick="puzSetDiff('hard', this)">🔴 30 Stukjes</button>
+                </div>
+            </div>
+
+            <div class="bottom-actions">
+                <button id="puz-start-btn" class="start-btn" onclick="initPuzzle()" disabled>Kies eerst een puzzel...</button>
+                <button class="tool-btn" onclick="location.reload()">⬅ Menu</button>
+            </div>
+        </div>
+    `;
     pState.playerNames = []; pState.img = ''; pState.difficulty = 'easy';
 }
 
@@ -63,7 +111,7 @@ function puzSetImg(src, btn) { if(typeof playSound === 'function') playSound('cl
 function puzSetDiff(diff, btn) { if(typeof playSound === 'function') playSound('click'); pState.difficulty = diff; btn.parentElement.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending')); btn.classList.add('selected'); }
 function puzCheckStart() { const btn = document.getElementById('puz-start-btn'); if (pState.playerNames.length > 0 && pState.img !== '') { btn.disabled = false; btn.innerText = "START PUZZEL ▶"; btn.style.transform = "scale(1.05)"; } }
 
-// GAME LOGIC
+// GAME LOGIC (Zelfde als voorheen)
 function puzUpdateSize() { const wrapper = document.querySelector('.puzzle-board-wrapper'); const board = document.querySelector('.puzzle-board'); if (!wrapper || !board) return; const availW = wrapper.clientWidth - 10; const availH = wrapper.clientHeight - 10; if (availW <= 0 || availH <= 0) return; const maxPieceW = availW / pState.cols; const maxPieceH = availH / pState.rows; const pieceSize = Math.floor(Math.min(maxPieceW, maxPieceH)); board.style.setProperty('--piece-size', `${pieceSize}px`); board.style.width = `${pieceSize * pState.cols}px`; board.style.height = `${pieceSize * pState.rows}px`; }
 function initPuzzle() { if(typeof playSound === 'function') playSound('win'); const board = document.getElementById('game-board'); board.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100%;color:white;"><h2>Even geduld...</h2></div>'; const tempImg = new Image(); tempImg.src = pState.img; tempImg.onload = function() { const isLandscape = tempImg.naturalWidth >= tempImg.naturalHeight; if(pState.difficulty === 'easy') { pState.cols = isLandscape ? 3 : 2; pState.rows = isLandscape ? 2 : 3; } else if(pState.difficulty === 'medium') { pState.cols = isLandscape ? 5 : 4; pState.rows = isLandscape ? 4 : 5; } else { pState.cols = isLandscape ? 6 : 5; pState.rows = isLandscape ? 5 : 6; } puzBuildBoard(board); }; }
 
@@ -74,7 +122,6 @@ function puzBuildBoard(board) {
     let gridHTML = ''; for(let i=0; i<totalPieces; i++) gridHTML += `<div class="puzzle-slot" id="slot-${i}" data-index="${i}" onclick="puzPlacePiece(this)"></div>`;
     let pieces = []; for(let i=0; i<totalPieces; i++) pieces.push(i); pieces.sort(() => Math.random() - 0.5); 
     
-    // STUKJES GENEREREN MET JUISTE ACHTERGROND POSITIE
     let leftPoolHTML = '', rightPoolHTML = ''; 
     pieces.forEach((i, index) => { 
         const x = (i % pState.cols) * 100 / (pState.cols - 1); 
@@ -82,8 +129,6 @@ function puzBuildBoard(board) {
         const sizeX = pState.cols * 100; 
         const sizeY = pState.rows * 100; 
         
-        // Let op: Hier stellen we de background-size inline in. 
-        // Omdat we in CSS de 'cover !important' hebben weggehaald, werkt dit nu ook in de zijbalk!
         const pieceHTML = `<div class="puzzle-piece" id="piece-${i}" data-index="${i}" onclick="puzSelectPiece(this)" 
             style="background-image: url('${pState.img}'); 
                    background-position: ${x}% ${y}%; 
@@ -94,8 +139,6 @@ function puzBuildBoard(board) {
     
     let boardClass = (pState.difficulty === 'easy') ? 'ghost-mode' : ''; 
     let boardStyle = (pState.difficulty === 'easy') ? `background-image: url('${pState.img}');` : ''; 
-    
-    // PREVIEW KNOP TOEVOEGEN
     let previewHTML = (pState.difficulty !== 'easy') ? `<div class="preview-mini" onclick="puzShowFullPreview()"><img src="${pState.img}"></div>` : ''; 
     
     const cssVars = `style="--puz-cols: ${pState.cols}; --puz-rows: ${pState.rows}; ${boardStyle}"`; 
@@ -114,7 +157,6 @@ function puzBuildBoard(board) {
                 <div class="puzzle-board-wrapper"><div class="puzzle-board ${boardClass}" ${cssVars}>${gridHTML}</div></div>
                 <div class="puzzle-pool side-pool" id="pool-right">${rightPoolHTML}</div>
             </div>
-            
             <div id="full-preview-overlay" class="preview-overlay" onclick="puzClosePreview()">
                 <img src="${pState.img}">
                 <button class="close-preview-btn">Sluiten</button>
@@ -125,14 +167,8 @@ function puzBuildBoard(board) {
     setTimeout(() => { const starterIndex = Math.floor(Math.random() * totalPieces); const starterPiece = document.getElementById(`piece-${starterIndex}`); const starterSlot = document.getElementById(`slot-${starterIndex}`); if(starterPiece && starterSlot) { starterSlot.appendChild(starterPiece); starterPiece.classList.add('correct'); starterPiece.onclick = null; pState.correctCount = 1; puzUpdateScore(); } }, 100);
 }
 
-// NIEUWE PREVIEW FUNCTIES
-function puzShowFullPreview() {
-    document.getElementById('full-preview-overlay').classList.add('show');
-}
-function puzClosePreview() {
-    document.getElementById('full-preview-overlay').classList.remove('show');
-}
-
+function puzShowFullPreview() { document.getElementById('full-preview-overlay').classList.add('show'); }
+function puzClosePreview() { document.getElementById('full-preview-overlay').classList.remove('show'); }
 function puzUpdateScore() { const el = document.getElementById('puz-score-txt'); if(el) el.innerText = pState.correctCount; }
 function puzSelectPiece(el) { if(el.parentElement.classList.contains('puzzle-slot')) return; if(typeof playSound === 'function') playSound('click'); if(pState.selectedPiece) pState.selectedPiece.classList.remove('selected'); pState.selectedPiece = el; el.classList.add('selected'); }
 function puzPlacePiece(slot) {
@@ -161,4 +197,4 @@ function puzCheckWin() {
             if(typeof showWinnerModal === 'function') { showWinnerModal(winner); }
         }, 500);
     }
-}
+    }
