@@ -1,15 +1,17 @@
-// VANG.JS - STABIELE VERSIE (CLICK FIX)
-console.log("Vang.js geladen (Fixed Click)...");
+// VANG.JS - DOEL 10 PUNTEN + GELUID FIX
+console.log("Vang.js geladen (Goal 10 + Sound)...");
 
 let whackState = {
-    score: 0, lastHole: null, timeUp: false, scoreGoal: 15, speed: 1000,
+    score: 0, lastHole: null, timeUp: false, 
+    scoreGoal: 10, // AANGEPAST NAAR 10
+    speed: 1000,
     difficulty: 'medium', player: { name: '', color: '#333', icon: '👤' },
     pendingName: null, pendingIcon: null, validImages: []
 };
 
 const vangColors = ['#F44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#00BCD4', '#009688', '#4CAF50', '#8BC34A', '#FFC107', '#FF9800'];
 
-// --- FILTER: IS CUTOUT? ---
+// --- FILTER FUNCTIE ---
 function isCutout(src) {
     return new Promise((resolve) => {
         const img = new Image(); img.src = src; img.crossOrigin = "Anonymous"; 
@@ -28,7 +30,7 @@ function isCutout(src) {
     });
 }
 
-// --- SETUP ---
+// --- SETUP START ---
 async function startWhackGame() {
     const board = document.getElementById('game-board');
     board.innerHTML = `<div style="display:flex; height:100%; justify-content:center; align-items:center; color:white; font-size:1.5rem;">Even wachten... 🔨</div>`;
@@ -42,7 +44,7 @@ async function startWhackGame() {
             }
         });
         
-        // Check max 30 plaatjes (sneller laden)
+        // Max 30 checken
         let checked = 0;
         for(let src of allPool) {
             if(checked > 30) break;
@@ -91,12 +93,15 @@ function vangSelectPerson(name, icon, btn) { if(typeof playSound === 'function')
 function vangSetColor(color, btn) { if(!whackState.pendingName) { alert("Kies eerst een naam!"); return; } if(typeof playSound === 'function') playSound('pop'); document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected-color')); btn.classList.add('selected-color'); whackState.player = { name: whackState.pendingName, icon: whackState.pendingIcon, color: color }; whackState.pendingName = null; document.querySelector('.setup-group .name-row').querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending')); document.getElementById('vang-active-players').innerHTML = `<div class="active-player-tag" style="background:${color}"><span>${whackState.player.icon} ${whackState.player.name}</span></div>`; const sBtn = document.getElementById('vang-start-btn'); sBtn.disabled = false; sBtn.innerText = "START SPEL ▶"; sBtn.style.transform = "scale(1.05)"; }
 function vangSetDiff(diff, btn) { if(typeof playSound === 'function') playSound('click'); whackState.difficulty = diff; btn.parentElement.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending')); btn.classList.add('selected-pending'); }
 
-// --- GAME LOGICA ---
+// --- GAME ---
 function initWhackGame() {
     if(typeof playSound === 'function') playSound('win');
     const board = document.getElementById('game-board');
     whackState.score = 0; whackState.timeUp = false;
     
+    // Reset doel naar 10 (voor de zekerheid)
+    whackState.scoreGoal = 10;
+
     let holesCount = 9; let gridClass = 'medium';
     if (whackState.difficulty === 'easy') { holesCount = 4; gridClass = 'easy'; whackState.speed = 1500; } 
     else if (whackState.difficulty === 'hard') { holesCount = 12; gridClass = 'hard'; whackState.speed = 700; } 
@@ -154,20 +159,23 @@ function peep() {
 }
 
 function bonk(hole) {
-    // Check of de mol omhoog is
     if(!hole.classList.contains('up')) return; 
     
     const imgEl = hole.querySelector('.mole-img');
     const type = imgEl.dataset.type;
 
     if(type === "bomb" || type === "poop") {
+        // FOUT GELUID
         if(typeof playSound === 'function') playSound('error'); 
+        
         hole.classList.remove('up'); 
         whackState.score = Math.max(0, whackState.score - 1);
         document.querySelector('.whack-game-container').style.backgroundColor = "#F44336";
         setTimeout(()=>document.querySelector('.whack-game-container').style.backgroundColor = "", 200);
     } else {
+        // GOED GELUID
         if(typeof playSound === 'function') playSound('pop'); 
+        
         hole.classList.remove('up'); 
         whackState.score++;
         whackState.speed = Math.max(400, whackState.speed - 20);
