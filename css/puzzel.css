@@ -1,12 +1,12 @@
-/* PUZZEL.CSS - UNIFORME STIJL & KLEINERE BOLLEN */
+/* PUZZEL.CSS - VOLLEDIG (SETUP + GAME + LEVEL CARDS) */
 
-/* --- 1. SETUP SCHERM (Gelijk aan Memory) --- */
+/* --- 1. SETUP SCHERM (Uniforme Stijl) --- */
 .memory-setup {
     display: flex; flex-direction: column;
     height: 100%; width: 100%;
     padding: 15px; box-sizing: border-box;
-    background: #E3F2FD; /* Dezelfde lichtblauwe achtergrond */
-    overflow-y: auto;
+    background: #E3F2FD; /* Lichtblauw */
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
 }
 
 .setup-group {
@@ -18,7 +18,7 @@
 
 h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
 
-/* NAMEN & NIVEAU KNOPPEN */
+/* SPELERS KIEZEN */
 .name-row {
     display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px;
 }
@@ -27,37 +27,27 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
     background: #f0f0f0; border: 2px solid #ddd;
     border-radius: 12px; padding: 10px 5px;
     font-family: 'Fredoka One'; cursor: pointer;
-    transition: all 0.2s; white-space: nowrap;
-    opacity: 0.7;
+    transition: all 0.2s; white-space: nowrap; opacity: 0.7;
 }
 
+/* Actieve speler knop */
 .player-btn.selected-pending {
     background: #4CAF50 !important; border-color: #2E7D32 !important; color: white !important;
-    transform: scale(1.05); box-shadow: 0 4px 10px rgba(0,0,0,0.2); opacity: 1; font-weight: bold;
+    transform: scale(1.05); box-shadow: 0 4px 10px rgba(0,0,0,0.3); opacity: 1; font-weight: bold;
 }
 
-/* --- DE BELANGRIJKE FIX VOOR DE BOLLEN --- */
+/* KLEUREN GRID (Met Tablet Fix) */
 .color-grid-6 {
-    display: grid; 
-    grid-template-columns: repeat(6, 1fr);
-    gap: 8px; 
-    margin-top: 10px; 
-    width: 100%;
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; 
+    margin-top: 10px; width: 100%;
 }
-
 .color-dot {
-    width: 100% !important; 
-    max-width: 55px; /* STOP MET GROEIEN OP TABLET! */
-    aspect-ratio: 1 / 1; 
-    height: auto !important;
-    
-    margin: 0 auto; /* Netjes centreren in het vakje */
+    width: 100% !important; max-width: 55px; /* FIX: Niet te groot op tablet */
+    aspect-ratio: 1 / 1; height: auto !important; margin: 0 auto;
     border-radius: 50%; border: 3px solid white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
-    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer;
     transition: transform 0.2s; opacity: 0.6;
 }
-
 .color-dot.selected-color {
     transform: scale(1.2); border: 3px solid #333; opacity: 1; position: relative; z-index: 5;
 }
@@ -67,13 +57,14 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
     display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px;
 }
 .theme-card-btn {
-    aspect-ratio: 4/3; background: white; border: 3px solid #eee; /* Geen zwarte rand meer */
+    aspect-ratio: 4/3; background: white; border: 3px solid #eee;
     border-radius: 12px; overflow: hidden;
     position: relative; display: flex; flex-direction: column; cursor: pointer;
     opacity: 0.8; transition: all 0.2s;
 }
 .theme-card-btn.selected {
-    border-color: #4CAF50; border-width: 4px; transform: scale(1.05); opacity: 1;
+    border-color: #4CAF50; border-width: 4px; transform: scale(1.05); 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3); opacity: 1;
 }
 .theme-card-btn.selected::after {
     content: '✅'; position: absolute; top: 5px; right: 5px; font-size: 1.5rem;
@@ -84,7 +75,36 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
 .btn-label { height: 25%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; background: #fafafa; width: 100%; font-weight: bold; }
 .theme-card-btn.selected .btn-label { background: #4CAF50; color: white; }
 
-/* OVERIGE ELEMENTEN */
+
+/* --- 2. NIEUWE NIVEAU KAARTEN (Grote Cijfers) --- */
+.level-row {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; width: 100%;
+}
+.level-card-btn {
+    background: white; border: 3px solid #eee; border-radius: 15px;
+    padding: 15px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s; opacity: 0.7; box-shadow: 0 4px 0 rgba(0,0,0,0.05);
+}
+.level-num { font-size: 2.5rem; font-weight: bold; color: #555; margin-bottom: 5px; }
+.level-text { font-size: 0.8rem; color: #777; text-transform: uppercase; }
+
+/* GESELECTEERDE STATEN */
+.level-card-btn.easy.selected { border-color: #4CAF50; background: #E8F5E9; opacity: 1; transform: scale(1.05); box-shadow: 0 5px 0 #2E7D32; }
+.level-card-btn.easy.selected .level-num { color: #4CAF50; }
+
+.level-card-btn.medium.selected { border-color: #FF9800; background: #FFF3E0; opacity: 1; transform: scale(1.05); box-shadow: 0 5px 0 #EF6C00; }
+.level-card-btn.medium.selected .level-num { color: #FF9800; }
+
+.level-card-btn.hard.selected { border-color: #F44336; background: #FFEBEE; opacity: 1; transform: scale(1.05); box-shadow: 0 5px 0 #C62828; }
+.level-card-btn.hard.selected .level-num { color: #F44336; }
+
+.level-card-btn.selected::after {
+    content: '✅'; position: absolute; top: -8px; right: -8px; font-size: 1.2rem;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+}
+
+
+/* --- 3. FOOTER & ALGEMENE UI --- */
 #puz-active-players { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 10px; min-height: 30px; }
 .active-player-tag { display: inline-block; padding: 5px 12px; margin: 3px; border-radius: 15px; color: white; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2); border: 2px solid white; }
 
@@ -93,31 +113,52 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
 .start-btn:disabled { background: #ccc; box-shadow: none; color: #666; }
 .tool-btn { border: none; background: #90A4AE; color: white; padding: 10px; border-radius: 10px; font-family: 'Fredoka One'; }
 
-/* SPEL STIJLEN (Ongewijzigd, maar nodig voor het spel) */
+
+/* --- 4. HET SPELBORD --- */
 .puzzle-game-container { display: flex; flex-direction: column; width: 100%; height: 100%; background: #FFECB3; overflow: hidden; }
+
+/* Header */
 .puzzle-header { display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 10; }
 .puzzle-score { font-size: 1.2rem; font-weight: bold; border: 2px solid #333; padding: 5px 15px; border-radius: 20px; background: white; }
+
+/* Mini Preview */
 .preview-mini { width: 60px; height: 45px; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); overflow: hidden; border-radius: 5px; cursor: pointer; position: relative; }
 .preview-mini::after { content: '🔍'; position: absolute; bottom: 0; right: 0; font-size: 0.8rem; background: rgba(255,255,255,0.7); border-radius: 50%; padding: 2px; }
 .preview-mini img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Full Preview Modal */
 .preview-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: none; justify-content: center; align-items: center; animation: fadeIn 0.3s; }
 .preview-overlay.show { display: flex; }
 .preview-overlay img { max-width: 90%; max-height: 80%; border: 5px solid white; border-radius: 15px; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
 .close-preview-btn { position: absolute; bottom: 50px; background: #F44336; color: white; padding: 10px 30px; border: none; border-radius: 20px; font-size: 1.2rem; font-family: 'Fredoka One'; box-shadow: 0 4px 0 #D32F2F; }
+
+/* Hints */
 .hint-container { display: flex; flex-direction: column; align-items: center; }
 .bulb-row { display: flex; gap: 2px; margin-top: 2px; }
 .hint-bulb { font-size: 0.8rem; opacity: 1; filter: grayscale(0%); transition: 0.3s; }
 .hint-bulb.used { opacity: 0.3; filter: grayscale(100%); }
 .tip-btn { background: #FF9800; color: white; border: none; border-radius: 10px; padding: 2px 8px; font-size: 0.8rem; font-family: 'Fredoka One'; cursor: pointer; }
 .tip-btn:disabled { background: #ccc; }
+
+/* Speelveld */
 .puzzle-main-area { flex: 1; display: flex; padding: 5px; gap: 5px; overflow: hidden; position: relative; }
 .puzzle-pool { width: 70px; background: rgba(255,255,255,0.5); border-radius: 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 5px; overflow-y: auto; flex-shrink: 0; }
 .puzzle-board-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.05); border-radius: 10px; padding: 10px; }
+
+/* Grid & Stukjes */
 .puzzle-board { display: grid; grid-template-columns: repeat(var(--puz-cols), var(--piece-size)); grid-template-rows: repeat(var(--puz-rows), var(--piece-size)); background-size: cover; box-shadow: 0 0 20px rgba(0,0,0,0.2); position: relative; background-color: #ddd; }
 .puzzle-board.ghost-mode { opacity: 0.8; }
 .puzzle-slot { width: var(--piece-size); height: var(--piece-size); border: 1px dashed rgba(0,0,0,0.1); box-sizing: border-box; background-color: rgba(255,255,255,0.3); }
+
+/* DE STUKJES */
 .puzzle-piece { width: var(--piece-size); height: var(--piece-size); cursor: grab; box-shadow: 2px 2px 5px rgba(0,0,0,0.3); transition: transform 0.2s, box-shadow 0.2s; touch-action: none; background-color: #fff; }
-.side-pool .puzzle-piece { width: 60px !important; height: 60px !important; margin-bottom: 5px; border-radius: 5px; }
+
+/* Stukjes in de zijbalk (Klein en NIET cover) */
+.side-pool .puzzle-piece { 
+    width: 60px !important; height: 60px !important; 
+    margin-bottom: 5px; border-radius: 5px; 
+}
+
 .puzzle-piece.selected { transform: scale(1.1); border: 2px solid #2196F3; z-index: 100; box-shadow: 0 0 15px #2196F3; }
 .puzzle-piece.correct { border: none; box-shadow: none; z-index: 1; pointer-events: none; }
 .puzzle-piece.wrong { animation: shake 0.4s; border: 2px solid red; }
