@@ -20,7 +20,7 @@
 <body>
 
     <div id="main-menu">
-        <h1>🚀 Lou & Noé</h1>
+        <h1>🚀 Lou & Noé<br>Games</h1>
         <div class="game-selection">
             <div class="game-card" onclick="loadGame('memory')"><div class="game-icon">🧠</div><div class="game-title">Memory</div></div>
             <div class="game-card" onclick="loadGame('puzzel')"><div class="game-icon">🧩</div><div class="game-title">Puzzel</div></div>
@@ -43,11 +43,66 @@
     <script src="js/vang.js"></script> 
     
     <script>
-        // Functie om spellen te laden
+        // --- 1. DE GELUIDSMACHINE (Alleen voor Memory voorlopig) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSound(type) {
+            // Audio aanzetten als de browser het blokkeert
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'pop' || type === 'click') {
+                // "Plop" geluidje (kaart omdraaien)
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, now);
+                osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
+                gainNode.gain.setValueAtTime(0.3, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+
+            } else if (type === 'win' || type === 'success') {
+                // "Ting!" (Setje gevonden)
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now); // C
+                osc.frequency.setValueAtTime(659.25, now + 0.1); // E
+                gainNode.gain.setValueAtTime(0.2, now);
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+
+            } else if (type === 'victory') {
+                // "Ta-daaa!" (Spel gewonnen)
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C E G C
+                notes.forEach((note, i) => {
+                    const o = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    o.connect(g); g.connect(audioCtx.destination);
+                    o.type = 'square';
+                    o.frequency.value = note;
+                    g.gain.setValueAtTime(0.1, now + (i*0.1));
+                    g.gain.exponentialRampToValueAtTime(0.01, now + (i*0.1) + 0.4);
+                    o.start(now + (i*0.1));
+                    o.stop(now + (i*0.1) + 0.4);
+                });
+            }
+        }
+
+        // --- 2. DE FUNCTIE OM SPELLEN TE LADEN ---
         function loadGame(gameType) {
             document.getElementById('main-menu').style.display = 'none';
             document.getElementById('game-board').style.display = 'block';
-            // Verwijder eventuele oude modals
+            
+            // Audio 'wakker maken' bij eerste klik
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            // Verwijder oude pop-ups
             const oldModal = document.querySelector('.winner-modal-overlay');
             if(oldModal) oldModal.remove();
             
@@ -59,22 +114,14 @@
             else if(gameType === 'schaduw' && typeof startShadowGame === 'function') startShadowGame();
             else if(gameType === 'vang' && typeof startWhackGame === 'function') startWhackGame();
         }
-        
-        // Geluidsfunctie (placeholder)
-        function playSound(type) { console.log("Audio:", type); }
 
-        // --- NIEUW: DE CENTRALE WINNAAR MODAL FUNCTIE ---
-        // Deze functie wordt aangeroepen door ELK spel als het klaar is.
-        // winnerName: De naam van de winnaar (bv. "Lou")
-        // allScores: (Optioneel) Een lijst met alle scores voor het klassement: [{name:"Lou", score:10}, {name:"Papa", score:5}]
+        // --- 3. WINNAAR MODAL (Met geluid!) ---
         function showWinnerModal(winnerName, allScores = []) {
-            if(typeof playSound === 'function') playSound('win');
+            playSound('victory'); // SPEEL HET OVERWINNINGS GELUID!
             if(typeof memFireConfetti === 'function') memFireConfetti();
 
-            // 1. Bouw het klassement HTML (als er meerdere spelers zijn)
             let leaderboardHTML = '';
             if (allScores.length > 1) {
-                // Sorteer op score (hoogste eerst)
                 allScores.sort((a, b) => b.score - a.score);
                 leaderboardHTML = '<div class="leaderboard-list">';
                 allScores.forEach((player, index) => {
@@ -89,12 +136,10 @@
                 leaderboardHTML += '</div>';
             }
 
-            // 2. Probeer een sticker te ontgrendelen (via stickers.js)
             let stickerHTML = '';
             if (typeof unlockRandomSticker === 'function') {
                 const newSticker = unlockRandomSticker();
                 if (newSticker) {
-                    // JA! Een nieuwe sticker!
                     stickerHTML = `
                         <div class="sticker-reward-box">
                             <h4>✨ NIEUWE STICKER! ✨</h4>
@@ -102,16 +147,14 @@
                             <p>Je hebt de <b>${newSticker.id.split('-')[0]}</b> sticker verdiend!</p>
                         </div>`;
                 } else {
-                    // Helaas, geen nieuwe sticker (of alles al verzameld)
                     stickerHTML = `
-                        <div class="sticker-reward-box" style="background:#f0f0f0; border-color:#ccc;">
+                        <div class="sticker-reward-box" style="background:rgba(255,255,255,0.3); border-color:white;">
                             <h4>Geen nieuwe sticker...</h4>
                             <p>Probeer het nog eens!</p>
                         </div>`;
                 }
             }
 
-            // 3. Maak de volledige HTML voor de modal
             const modalHTML = `
                 <div class="winner-modal-overlay">
                     <div class="winner-modal-content">
@@ -129,8 +172,6 @@
                     </div>
                 </div>
             `;
-
-            // 4. Voeg toe aan de pagina
             document.body.insertAdjacentHTML('beforeend', modalHTML);
         }
     </script>
