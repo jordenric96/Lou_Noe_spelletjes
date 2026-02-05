@@ -1,25 +1,15 @@
-// VANG.JS - SETUP MENU + FILTER + AUDIO
-console.log("Vang.js geladen (Advanced)...");
+// VANG.JS - STABIELE VERSIE (CLICK FIX)
+console.log("Vang.js geladen (Fixed Click)...");
 
 let whackState = {
-    score: 0,
-    lastHole: null,
-    timeUp: false,
-    scoreGoal: 15,
-    speed: 1000,
-    difficulty: 'medium', // easy, medium, hard
-    player: { name: '', color: '#333', icon: '👤' },
-    
-    // Setup vars
-    pendingName: null,
-    pendingIcon: null,
-    validImages: [] // Hier komen alleen de cutouts in
+    score: 0, lastHole: null, timeUp: false, scoreGoal: 15, speed: 1000,
+    difficulty: 'medium', player: { name: '', color: '#333', icon: '👤' },
+    pendingName: null, pendingIcon: null, validImages: []
 };
 
 const vangColors = ['#F44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#00BCD4', '#009688', '#4CAF50', '#8BC34A', '#FFC107', '#FF9800'];
 
-// --- 1. SLIMME FILTER: IS HET EEN CUTOUT? ---
-// (Checkt of de hoeken transparant zijn. Zo JA = Goed. Zo NEE = Rechthoek = Fout)
+// --- FILTER: IS CUTOUT? ---
 function isCutout(src) {
     return new Promise((resolve) => {
         const img = new Image(); img.src = src; img.crossOrigin = "Anonymous"; 
@@ -27,30 +17,22 @@ function isCutout(src) {
             const canvas = document.createElement('canvas'); canvas.width = img.width; canvas.height = img.height;
             const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0);
             try {
-                // Pak alpha kanaal van de hoeken
                 const corners = [
-                    ctx.getImageData(0, 0, 1, 1).data[3],
-                    ctx.getImageData(img.width-1, 0, 1, 1).data[3],
-                    ctx.getImageData(0, img.height-1, 1, 1).data[3],
-                    ctx.getImageData(img.width-1, img.height-1, 1, 1).data[3]
+                    ctx.getImageData(0, 0, 1, 1).data[3], ctx.getImageData(img.width-1, 0, 1, 1).data[3],
+                    ctx.getImageData(0, img.height-1, 1, 1).data[3], ctx.getImageData(img.width-1, img.height-1, 1, 1).data[3]
                 ];
-                // Als ook maar 1 hoek volledig zichtbaar is (>200), is het waarschijnlijk een rechthoek.
-                // Wij willen dat de hoeken transparant zijn (<200).
-                const isSolidRectangle = corners.every(alpha => alpha > 200);
-                resolve(!isSolidRectangle); // Return TRUE als het GEEN rechthoek is
-            } catch (e) { resolve(true); } // Bij twijfel doorlaten
+                resolve(!corners.every(alpha => alpha > 200)); 
+            } catch (e) { resolve(true); }
         };
         img.onerror = () => resolve(false);
     });
 }
 
-// --- 2. START SETUP ---
+// --- SETUP ---
 async function startWhackGame() {
     const board = document.getElementById('game-board');
-    // Laadscherm tijdens filteren
-    board.innerHTML = `<div style="display:flex; height:100%; justify-content:center; align-items:center; color:white; font-size:1.5rem;">Plaatjes controleren... 🔨</div>`;
+    board.innerHTML = `<div style="display:flex; height:100%; justify-content:center; align-items:center; color:white; font-size:1.5rem;">Even wachten... 🔨</div>`;
 
-    // Filter de plaatjes op de achtergrond
     whackState.validImages = [];
     if(typeof memThemes !== 'undefined') {
         let allPool = [];
@@ -60,20 +42,16 @@ async function startWhackGame() {
             }
         });
         
-        // Check max 50 plaatjes om tijd te besparen
-        let checkedCount = 0;
+        // Check max 30 plaatjes (sneller laden)
+        let checked = 0;
         for(let src of allPool) {
-            if(checkedCount > 50) break;
+            if(checked > 30) break;
             const ok = await isCutout(src);
             if(ok) whackState.validImages.push(src);
-            checkedCount++;
+            checked++;
         }
     }
-    
-    // Als we niks vinden, fallback
     if(whackState.validImages.length === 0) whackState.validImages = ['assets/images/icon.png'];
-
-    // Toon Setup Menu
     renderWhackSetup(board);
 }
 
@@ -93,115 +71,50 @@ function renderWhackSetup(board) {
                 </div>
                 <div id="vang-active-players" style="margin-top:10px; min-height:30px;"></div>
             </div>
-
             <div class="setup-group">
                 <h3>2. Moeilijkheid</h3>
                 <div class="name-row" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
-                    <button class="player-btn" onclick="vangSetDiff('easy', this)">
-                        <div>🟢</div>Makkelijk<br><small>4 gaten</small>
-                    </button>
-                    <button class="player-btn selected-pending" onclick="vangSetDiff('medium', this)">
-                        <div>🟠</div>Medium<br><small>9 gaten</small>
-                    </button>
-                    <button class="player-btn" onclick="vangSetDiff('hard', this)">
-                        <div>🔴</div>Moeilijk<br><small>12 gaten</small>
-                    </button>
+                    <button class="player-btn" onclick="vangSetDiff('easy', this)"><div>🟢</div>Makkelijk<br><small>4 gaten</small></button>
+                    <button class="player-btn selected-pending" onclick="vangSetDiff('medium', this)"><div>🟠</div>Medium<br><small>9 gaten</small></button>
+                    <button class="player-btn" onclick="vangSetDiff('hard', this)"><div>🔴</div>Moeilijk<br><small>12 gaten</small></button>
                 </div>
             </div>
-
             <div class="bottom-actions">
                 <button id="vang-start-btn" class="start-btn" onclick="initWhackGame()" disabled>Kies eerst een speler...</button>
                 <button class="tool-btn" onclick="location.reload()">⬅ Menu</button>
             </div>
-        </div>
-    `;
-    whackState.difficulty = 'medium'; // Reset naar medium
-    whackState.player = null;
+        </div>`;
+    whackState.difficulty = 'medium'; whackState.player = null;
 }
 
-// SETUP LOGICA
-function vangSelectPerson(name, icon, btn) { 
-    if(typeof playSound === 'function') playSound('click'); 
-    btn.parentElement.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending')); 
-    btn.classList.add('selected-pending'); 
-    whackState.pendingName = name; whackState.pendingIcon = icon; 
-    const c=document.getElementById('vang-colors'); c.style.animation="shake 0.5s"; setTimeout(()=>c.style.animation="",500); 
-}
+function vangSelectPerson(name, icon, btn) { if(typeof playSound === 'function') playSound('click'); btn.parentElement.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending')); btn.classList.add('selected-pending'); whackState.pendingName = name; whackState.pendingIcon = icon; const c=document.getElementById('vang-colors'); c.style.animation="shake 0.5s"; setTimeout(()=>c.style.animation="",500); }
+function vangSetColor(color, btn) { if(!whackState.pendingName) { alert("Kies eerst een naam!"); return; } if(typeof playSound === 'function') playSound('pop'); document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected-color')); btn.classList.add('selected-color'); whackState.player = { name: whackState.pendingName, icon: whackState.pendingIcon, color: color }; whackState.pendingName = null; document.querySelector('.setup-group .name-row').querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending')); document.getElementById('vang-active-players').innerHTML = `<div class="active-player-tag" style="background:${color}"><span>${whackState.player.icon} ${whackState.player.name}</span></div>`; const sBtn = document.getElementById('vang-start-btn'); sBtn.disabled = false; sBtn.innerText = "START SPEL ▶"; sBtn.style.transform = "scale(1.05)"; }
+function vangSetDiff(diff, btn) { if(typeof playSound === 'function') playSound('click'); whackState.difficulty = diff; btn.parentElement.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending')); btn.classList.add('selected-pending'); }
 
-function vangSetColor(color, btn) { 
-    if(!whackState.pendingName) { alert("Kies eerst een naam!"); return; } 
-    if(typeof playSound === 'function') playSound('pop'); 
-    document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected-color')); 
-    btn.classList.add('selected-color'); 
-    
-    whackState.player = { name: whackState.pendingName, icon: whackState.pendingIcon, color: color };
-    whackState.pendingName = null; 
-    
-    // UI Update
-    document.querySelector('.setup-group .name-row').querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending')); 
-    document.getElementById('vang-active-players').innerHTML = `<div class="active-player-tag" style="background:${color}"><span>${whackState.player.icon} ${whackState.player.name}</span></div>`;
-    
-    const sBtn = document.getElementById('vang-start-btn');
-    sBtn.disabled = false; sBtn.innerText = "START SPEL ▶"; sBtn.style.transform = "scale(1.05)";
-}
-
-function vangSetDiff(diff, btn) {
-    if(typeof playSound === 'function') playSound('click');
-    whackState.difficulty = diff;
-    btn.parentElement.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending'));
-    btn.classList.add('selected-pending');
-}
-
-// --- 3. GAME LOGICA ---
+// --- GAME LOGICA ---
 function initWhackGame() {
     if(typeof playSound === 'function') playSound('win');
     const board = document.getElementById('game-board');
-    whackState.score = 0;
-    whackState.timeUp = false;
+    whackState.score = 0; whackState.timeUp = false;
     
-    // Instellingen per niveau
-    let holesCount = 9;
-    let gridClass = 'medium';
-    
-    if (whackState.difficulty === 'easy') {
-        holesCount = 4; gridClass = 'easy'; whackState.speed = 1500; // Traag
-    } else if (whackState.difficulty === 'hard') {
-        holesCount = 12; gridClass = 'hard'; whackState.speed = 700; // Snel
-    } else {
-        whackState.speed = 1000; // Normaal
-    }
+    let holesCount = 9; let gridClass = 'medium';
+    if (whackState.difficulty === 'easy') { holesCount = 4; gridClass = 'easy'; whackState.speed = 1500; } 
+    else if (whackState.difficulty === 'hard') { holesCount = 12; gridClass = 'hard'; whackState.speed = 700; } 
+    else { whackState.speed = 1000; }
 
     let holesHTML = '';
     for(let i=0; i<holesCount; i++) {
-        holesHTML += `
-            <div class="hole" id="hole-${i}" onclick="bonk(this)">
-                <img src="" class="mole-img" id="img-${i}">
-            </div>`;
+        holesHTML += `<div class="hole" id="hole-${i}" onclick="bonk(this)"><img src="" class="mole-img" id="img-${i}"></div>`;
     }
 
     board.innerHTML = `
         <div class="whack-game-container">
             <div class="whack-header">
                 <button class="tool-btn" onclick="startWhackGame()">⬅ Stop</button>
-                
-                <div class="whack-score-box">
-                    <div class="player-icon-display" style="text-shadow: 2px 2px 0 ${whackState.player.color}">
-                        ${whackState.player.icon}
-                    </div>
-                    <div>Score: <span id="whack-score">0</span> / ${whackState.scoreGoal}</div>
-                </div>
+                <div class="whack-score-box"><div class="player-icon-display" style="text-shadow: 2px 2px 0 ${whackState.player.color}">${whackState.player.icon}</div><div>Score: <span id="whack-score">0</span> / ${whackState.scoreGoal}</div></div>
             </div>
-            
-            <div class="whack-grid ${gridClass}">
-                ${holesHTML}
-            </div>
-            
-            <div style="margin-top:10px; color:white; font-size:0.9rem; text-align:center;">
-                Vang de plaatjes! Pas op voor 💣 en 💩!
-            </div>
-        </div>
-    `;
-
+            <div class="whack-grid ${gridClass}">${holesHTML}</div>
+        </div>`;
     peep();
 }
 
@@ -220,78 +133,48 @@ function peep() {
     const holes = document.querySelectorAll('.hole');
     const hole = randomHole(holes);
     const imgEl = hole.querySelector('.mole-img');
-
-    // KIES: GOED of FOUT?
     const isBad = Math.random() < 0.3; 
 
     if (isBad) {
-        // BOM / DROL
         const isBomb = Math.random() > 0.5;
-        if(isBomb) {
-            imgEl.src = "assets/images/bomb.png"; 
-            imgEl.onerror = function(){ this.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💣</text></svg>'; };
-            imgEl.dataset.type = "bomb";
-        } else {
-            imgEl.src = "assets/images/poop.png"; 
-            imgEl.onerror = function(){ this.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💩</text></svg>'; };
-            imgEl.dataset.type = "poop";
-        }
+        if(isBomb) { imgEl.src = "assets/images/bomb.png"; imgEl.onerror = function(){ this.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💣</text></svg>'; }; imgEl.dataset.type = "bomb"; } 
+        else { imgEl.src = "assets/images/poop.png"; imgEl.onerror = function(){ this.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💩</text></svg>'; }; imgEl.dataset.type = "poop"; }
     } else {
-        // GOED PLAATJE (Uit de gefilterde lijst)
         const randomImg = whackState.validImages[Math.floor(Math.random() * whackState.validImages.length)];
-        imgEl.src = randomImg;
-        imgEl.dataset.type = "good";
+        imgEl.src = randomImg; imgEl.dataset.type = "good";
     }
 
     hole.classList.add('up');
-
-    // Snelheid aanpassen
-    let time = whackState.speed;
-    // Beetje variatie
-    time = time * (0.8 + Math.random() * 0.4); 
+    let time = whackState.speed * (0.8 + Math.random() * 0.4); 
 
     setTimeout(() => {
         hole.classList.remove('up');
-        if (!whackState.timeUp && whackState.score < whackState.scoreGoal) {
-            peep();
-        }
+        if (!whackState.timeUp && whackState.score < whackState.scoreGoal) peep();
     }, time);
 }
 
 function bonk(hole) {
+    // Check of de mol omhoog is
     if(!hole.classList.contains('up')) return; 
     
     const imgEl = hole.querySelector('.mole-img');
     const type = imgEl.dataset.type;
 
     if(type === "bomb" || type === "poop") {
-        // AU! FOUT!
-        if(typeof playSound === 'function') playSound('error'); // GELUID!
+        if(typeof playSound === 'function') playSound('error'); 
         hole.classList.remove('up'); 
         whackState.score = Math.max(0, whackState.score - 1);
-        document.getElementById('whack-score').innerText = whackState.score;
-        
-        // Rood knipperen
         document.querySelector('.whack-game-container').style.backgroundColor = "#F44336";
         setTimeout(()=>document.querySelector('.whack-game-container').style.backgroundColor = "", 200);
-
     } else {
-        // GOED!
-        if(typeof playSound === 'function') playSound('pop'); // GELUID!
+        if(typeof playSound === 'function') playSound('pop'); 
         hole.classList.remove('up'); 
-        
         whackState.score++;
-        document.getElementById('whack-score').innerText = whackState.score;
-        
-        // Ietsje sneller na elke hit
         whackState.speed = Math.max(400, whackState.speed - 20);
-
-        // GEWONNEN?
         if(whackState.score >= whackState.scoreGoal) {
             whackState.timeUp = true;
-            setTimeout(() => {
-                if(typeof showWinnerModal === 'function') showWinnerModal(whackState.player.name);
-            }, 500);
+            setTimeout(() => { if(typeof showWinnerModal === 'function') showWinnerModal(whackState.player.name); }, 500);
         }
     }
+    document.getElementById('whack-score').innerText = whackState.score;
 }
