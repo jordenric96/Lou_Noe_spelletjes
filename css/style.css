@@ -1,214 +1,133 @@
-/* STYLE.CSS - HOOFDMENU, MODALS & ALGEMENE STIJLEN */
+/* STYLE.CSS - ALGEMENE STIJLEN & REGENBOOG WINNAAR */
 
-/* --- 1. ALGEMENE BASIS & REGENBOOG ACHTERGROND --- */
+/* --- 1. REGENBOOG ACHTERGROND --- */
 body, html {
     margin: 0; padding: 0; 
     width: 100%; height: 100%;
     font-family: 'Fredoka One', cursive;
-    overflow: hidden; /* Voorkomt dubbele scrollbalken */
-    
-    /* De bewegende kleuren (Regenboog) */
+    overflow: hidden;
     background: linear-gradient(-45deg, #FFEB3B, #8BC34A, #4CAF50, #00BCD4, #2196F3, #9C27B0, #E91E63, #FF9800);
     background-size: 400% 400%;
     animation: gradientBG 20s ease infinite;
 }
-
 @keyframes gradientBG {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
 }
 
-/* --- 2. HOOFDMENU CONTAINER --- */
+/* --- 2. HOOFDMENU --- */
 #main-menu {
-    position: absolute; top: 0; left: 0; 
-    width: 100%; height: 100%;
-    overflow-y: auto; /* Zorgt dat je kunt scrollen */
-    -webkit-overflow-scrolling: touch;
-    
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
     display: flex; flex-direction: column; align-items: center;
-    padding: 20px 15px; 
-    box-sizing: border-box;
+    padding: 20px 15px; box-sizing: border-box;
 }
 
-/* --- 3. DE TITEL (Lou & Noé) --- */
 h1 { 
-    color: white; 
-    font-size: 3rem; 
-    margin: 20px 0 30px 0; 
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    line-height: 1.1; /* Zorgt dat namen mooi onder elkaar staan */
-    
-    /* Dikke schaduw voor leesbaarheid */
+    color: white; font-size: 3rem; margin: 20px 0 30px 0; 
+    text-align: center; text-transform: uppercase; letter-spacing: 2px; line-height: 1.1;
     text-shadow: 4px 4px 0px rgba(0,0,0,0.2), 0 0 20px rgba(255,255,255,0.4);
-    
-    /* Stuiter animatie */
     animation: floatTitle 3s ease-in-out infinite;
 }
+@keyframes floatTitle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-@keyframes floatTitle {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-}
-
-/* --- 4. HET GRID (De Knoppen) --- */
 .game-selection { 
-    display: grid;
-    /* Automatisch kolommen maken, minimaal 130px breed */
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 20px; 
-    
-    width: 100%; 
-    max-width: 600px; /* Niet te breed op desktop */
-    padding-bottom: 50px; 
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 20px; width: 100%; max-width: 600px; padding-bottom: 50px; 
 }
 
-/* --- 5. DE GAME CARDS (App Icoontjes) --- */
 .game-card { 
-    background: white; 
-    border-radius: 25px; 
-    aspect-ratio: 1 / 1; /* Maakt ze vierkant */
-    display: flex; flex-direction: column; 
-    align-items: center; justify-content: center; 
-    
-    /* Schaduw en Diepte */
+    background: white; border-radius: 25px; aspect-ratio: 1 / 1; 
+    display: flex; flex-direction: column; align-items: center; justify-content: center; 
     box-shadow: 0 10px 0 rgba(0,0,0,0.1), 0 10px 20px rgba(0,0,0,0.15);
-    cursor: pointer; 
-    transition: transform 0.2s, box-shadow 0.2s;
-    
-    /* Pop-in animatie bij laden */
+    cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
     animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
 }
-
-/* Iedere kaart komt iets later binnen */
 .game-card:nth-child(1) { animation-delay: 0.1s; }
 .game-card:nth-child(2) { animation-delay: 0.2s; }
 .game-card:nth-child(3) { animation-delay: 0.3s; }
 .game-card:nth-child(4) { animation-delay: 0.4s; }
 .game-card:nth-child(5) { animation-delay: 0.5s; }
-.game-card:nth-child(6) { animation-delay: 0.6s; }
-.game-card:nth-child(7) { animation-delay: 0.7s; }
+.game-card:active { transform: translateY(6px); box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
+.game-icon { font-size: 3.5rem; margin-bottom: 10px; filter: drop-shadow(0 4px 2px rgba(0,0,0,0.1)); }
+.game-title { font-size: 1.1rem; color: #444; font-weight: bold; text-align: center; }
 
-/* Klik effect */
-.game-card:active { 
-    transform: translateY(6px); 
-    box-shadow: 0 4px 0 rgba(0,0,0,0.1); 
-}
+@keyframes popIn { 0% { opacity: 0; transform: scale(0.5) translateY(50px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
 
-.game-icon { 
-    font-size: 3.5rem; 
-    margin-bottom: 10px; 
-    filter: drop-shadow(0 4px 2px rgba(0,0,0,0.1));
-    transition: transform 0.2s;
-}
+#game-board { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 20; display: none; }
 
-.game-card:hover .game-icon {
-    transform: scale(1.1) rotate(5deg);
-}
-
-.game-title { 
-    font-size: 1.1rem; 
-    color: #444; 
-    font-weight: bold;
-    text-align: center;
-}
-
-@keyframes popIn {
-    0% { opacity: 0; transform: scale(0.5) translateY(50px); }
-    100% { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-/* --- 6. SPELBORD CONTAINER --- */
-#game-board {
-    position: absolute; 
-    top: 0; left: 0; 
-    width: 100%; height: 100%;
-    z-index: 20;
-    display: none; /* Verborgen tot spel start */
-}
-
-/* --- 7. WINNAAR POP-UP (MODAL) --- */
+/* --- 3. HET NIEUWE WINNAARSSCHERM (Regenboog Stijl) --- */
 .winner-modal-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.8); z-index: 1000;
-    display: flex; justify-content: center; align-items: center;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+    z-index: 1000; display: flex; justify-content: center; align-items: center;
     animation: fadeIn 0.3s ease-out;
 }
 
 .winner-modal-content {
-    background: white;
+    /* Regenboog Gradient Achtergrond */
+    background: linear-gradient(135deg, #FFEB3B, #4CAF50, #2196F3, #9C27B0, #E91E63);
+    background-size: 300% 300%;
+    animation: gradientBG 10s ease infinite, popUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
     width: 90%; max-width: 400px;
-    border-radius: 25px;
-    padding: 25px;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    border: 5px solid #FFD700; /* Gouden rand */
-    animation: popUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border-radius: 30px; padding: 30px;
+    text-align: center; color: white;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    border: 5px solid white;
     max-height: 90vh; overflow-y: auto;
 }
 
-.trophy-icon { font-size: 5rem; margin-bottom: 10px; display: block; }
-.winner-title { font-size: 2rem; color: #333; margin: 10px 0; }
-.winner-name { color: #4CAF50; font-size: 2.5rem; font-weight: bold; }
+.trophy-icon { 
+    font-size: 6rem; margin-bottom: 10px; display: block; 
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+    animation: bounce 2s infinite;
+}
+@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 
-/* Klassement lijst */
+.winner-title { font-size: 2.2rem; color: white; margin: 10px 0; text-shadow: 2px 2px 0 rgba(0,0,0,0.2); }
+.winner-name { color: #FFF176; font-size: 3rem; font-weight: bold; text-shadow: 3px 3px 0 rgba(0,0,0,0.3); margin-bottom: 20px; }
+
+/* Klassement in wit blokje */
 .leaderboard-list {
-    margin: 20px 0; padding: 15px; background: #f5f5f5; border-radius: 15px;
-    text-align: left;
+    margin: 20px 0; padding: 15px; 
+    background: rgba(255,255,255,0.9); border-radius: 20px;
+    text-align: left; color: #333;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
 }
-.leaderboard-item {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 8px 0; border-bottom: 2px solid #eee; font-size: 1.1rem;
-}
+.leaderboard-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 2px solid #eee; font-size: 1.1rem; }
 .leaderboard-item:last-child { border-bottom: none; }
-.pos-1 { color: #FFD700; font-weight: bold; } 
-.pos-2 { color: #C0C0C0; font-weight: bold; } 
-.pos-3 { color: #CD7F32; font-weight: bold; } 
+.pos-1 { color: #FFD700; font-weight: bold; }
 
-/* Sticker beloning sectie */
+/* Sticker Box */
 .sticker-reward-box {
     margin: 20px 0; padding: 15px;
-    background: #E3F2FD; border: 3px dashed #2196F3; border-radius: 15px;
+    background: rgba(255,255,255,0.2); border: 3px dashed white; border-radius: 20px;
 }
-.sticker-reward-box h4 { margin: 0 0 10px 0; color: #1565C0; }
-.new-sticker-img { 
-    width: 100px; height: 100px; object-fit: contain; 
-    filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2));
-    animation: floatTitle 3s ease-in-out infinite;
+.sticker-reward-box h4 { margin: 0 0 10px 0; color: white; font-size: 1.2rem; }
+.new-sticker-img { width: 100px; height: 100px; object-fit: contain; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2)); animation: floatTitle 3s ease-in-out infinite; }
+
+/* Leuke Knoppen */
+.modal-actions { display: flex; gap: 15px; justify-content: center; margin-top: 25px; }
+.restart-btn, .menu-btn {
+    flex: 1; padding: 15px; border-radius: 20px; border: none;
+    font-family: 'Fredoka One'; font-size: 1.2rem; cursor: pointer;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.2); transition: transform 0.1s;
+    color: #333;
 }
+.restart-btn { background: #fff; color: #4CAF50; }
+.menu-btn { background: #333; color: white; }
+.restart-btn:active, .menu-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.2); }
 
-/* Modal Knoppen */
-.modal-actions { display: flex; gap: 10px; justify-content: center; margin-top: 25px; }
-.restart-btn { flex: 1; padding: 12px; border-radius: 15px; border: none; background: #4CAF50; color: white; font-family: 'Fredoka One'; font-size: 1.1rem; cursor: pointer; }
-.menu-btn { flex: 1; padding: 12px; border-radius: 15px; border: none; background: #FF9800; color: white; font-family: 'Fredoka One'; font-size: 1.1rem; cursor: pointer; }
-
-/* Animaties */
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes popUp { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-/* --- 8. ALGEMENE ELEMENTEN (Kleurenbolletjes, Tags) --- */
-/* Zorgt dat kleuren altijd zichtbaar zijn, ook als andere CSS faalt */
-.color-dot {
-    width: 35px; height: 35px; 
-    border-radius: 50%; border: 3px solid white; 
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2); 
-    cursor: pointer; display: inline-block;
-}
-.active-player-tag {
-    display: inline-block; padding: 5px 12px; margin: 3px; 
-    border-radius: 15px; color: white; font-weight: bold; 
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
+/* Globale UI */
+.color-dot { width: 35px; height: 35px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer; display: inline-block; }
+.active-player-tag { display: inline-block; padding: 5px 12px; margin: 3px; border-radius: 15px; color: white; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
-/* --- 9. MOBIELE AANPASSINGEN --- */
 @media (max-width: 400px) {
     h1 { font-size: 2.2rem; margin: 15px 0; }
-    .game-selection { 
-        gap: 15px; 
-        grid-template-columns: repeat(2, 1fr); /* Altijd 2 naast elkaar op klein scherm */
-    }
-    .game-icon { font-size: 3rem; }
-    .game-title { font-size: 1rem; }
+    .game-selection { gap: 15px; grid-template-columns: repeat(2, 1fr); }
 }
