@@ -1,22 +1,20 @@
-// VANG.JS - NO GLITCH, 10 STARS
-console.log("Vang.js geladen (Stars & Anti-Glitch)...");
+// VANG.JS - SIMPEL MENU + GELUIDEN FIX
+console.log("Vang.js geladen (Simple & Sounds)...");
 
 let whackState = {
     score: 0, lastHole: null, timeUp: false, 
-    scoreGoal: 10, // DOEL = 10 STERREN
+    scoreGoal: 10, // 10 Sterren om te winnen
     speed: 1000,
-    difficulty: 'medium', player: { name: '', color: '#333', icon: '👤' },
-    pendingName: null, pendingIcon: null, validImages: [],
-    peepTimer: null // Om de loop netjes te stoppen
+    difficulty: 'medium', 
+    validImages: [],
+    peepTimer: null
 };
 
-const vangColors = ['#F44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#00BCD4', '#009688', '#4CAF50', '#8BC34A', '#FFC107', '#FF9800'];
-
-// Directe SVG data voor Bom en Drol (Geen laadtijd = Geen geflits!)
+// SVG codes (geen laadtijd)
 const bombSVG = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💣</text></svg>`;
 const poopSVG = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💩</text></svg>`;
 
-// --- FILTER FUNCTIE ---
+// --- FILTER ---
 function isCutout(src) {
     return new Promise((resolve) => {
         const img = new Image(); img.src = src; img.crossOrigin = "Anonymous"; 
@@ -35,13 +33,12 @@ function isCutout(src) {
     });
 }
 
-// --- SETUP START ---
+// --- SETUP ---
 async function startWhackGame() {
-    // Reset timer als die nog loopt
     if(whackState.peepTimer) clearTimeout(whackState.peepTimer);
 
     const board = document.getElementById('game-board');
-    board.innerHTML = `<div style="display:flex; height:100%; justify-content:center; align-items:center; color:white; font-size:1.5rem;">Even wachten... 🔨</div>`;
+    board.innerHTML = `<div style="display:flex; height:100%; justify-content:center; align-items:center; color:white; font-size:1.5rem;">Laden... 🔨</div>`;
 
     whackState.validImages = [];
     if(typeof memThemes !== 'undefined') {
@@ -67,43 +64,49 @@ async function startWhackGame() {
 function renderWhackSetup(board) {
     board.innerHTML = `
         <div class="memory-setup">
+            
             <div class="setup-group">
-                <h3>1. Wie gaat er vangen?</h3>
-                <div class="name-row">
-                    <button class="player-btn" onclick="vangSelectPerson('Lou', '👦🏼', this)">👦🏼 Lou</button>
-                    <button class="player-btn" onclick="vangSelectPerson('Noé', '👶🏼', this)">👶🏼 Noé</button>
-                    <button class="player-btn" onclick="vangSelectPerson('Mama', '👩🏻', this)">👩🏻 Mama</button>
-                    <button class="player-btn" onclick="vangSelectPerson('Papa', '👨🏻', this)">👨🏻 Papa</button>
+                <h3>Kies een Niveau</h3>
+                <div class="level-row">
+                    <div class="level-card-btn easy" onclick="vangSetDiff('easy', this)">
+                        <div class="level-icon">🟢</div>
+                        <div class="level-text">Makkelijk</div>
+                        <div class="level-sub">4 Gaten</div>
+                    </div>
+                    
+                    <div class="level-card-btn medium selected" onclick="vangSetDiff('medium', this)">
+                        <div class="level-icon">🟠</div>
+                        <div class="level-text">Normaal</div>
+                        <div class="level-sub">9 Gaten</div>
+                    </div>
+                    
+                    <div class="level-card-btn hard" onclick="vangSetDiff('hard', this)">
+                        <div class="level-icon">🔴</div>
+                        <div class="level-text">Moeilijk</div>
+                        <div class="level-sub">12 Gaten</div>
+                    </div>
                 </div>
-                <div class="color-grid-6" id="vang-colors">
-                    ${vangColors.map(c => `<div class="color-dot" style="background:${c}" onclick="vangSetColor('${c}', this)"></div>`).join('')}
-                </div>
-                <div id="vang-active-players" style="margin-top:10px; min-height:30px;"></div>
             </div>
-            <div class="setup-group">
-                <h3>2. Moeilijkheid</h3>
-                <div class="name-row" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
-                    <button class="player-btn" onclick="vangSetDiff('easy', this)"><div>🟢</div>Makkelijk<br><small>4 gaten</small></button>
-                    <button class="player-btn selected-pending" onclick="vangSetDiff('medium', this)"><div>🟠</div>Medium<br><small>9 gaten</small></button>
-                    <button class="player-btn" onclick="vangSetDiff('hard', this)"><div>🔴</div>Moeilijk<br><small>12 gaten</small></button>
-                </div>
-            </div>
+
             <div class="bottom-actions">
-                <button id="vang-start-btn" class="start-btn" onclick="initWhackGame()" disabled>Kies eerst een speler...</button>
+                <button id="vang-start-btn" class="start-btn" onclick="initWhackGame()">START SPEL ▶</button>
                 <button class="tool-btn" onclick="location.reload()">⬅ Menu</button>
             </div>
         </div>`;
-    whackState.difficulty = 'medium'; whackState.player = null;
+    whackState.difficulty = 'medium'; 
 }
 
-function vangSelectPerson(name, icon, btn) { if(typeof playSound === 'function') playSound('click'); btn.parentElement.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending')); btn.classList.add('selected-pending'); whackState.pendingName = name; whackState.pendingIcon = icon; const c=document.getElementById('vang-colors'); c.style.animation="shake 0.5s"; setTimeout(()=>c.style.animation="",500); }
-function vangSetColor(color, btn) { if(!whackState.pendingName) { alert("Kies eerst een naam!"); return; } if(typeof playSound === 'function') playSound('pop'); document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected-color')); btn.classList.add('selected-color'); whackState.player = { name: whackState.pendingName, icon: whackState.pendingIcon, color: color }; whackState.pendingName = null; document.querySelector('.setup-group .name-row').querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending')); document.getElementById('vang-active-players').innerHTML = `<div class="active-player-tag" style="background:${color}"><span>${whackState.player.icon} ${whackState.player.name}</span></div>`; const sBtn = document.getElementById('vang-start-btn'); sBtn.disabled = false; sBtn.innerText = "START SPEL ▶"; sBtn.style.transform = "scale(1.05)"; }
-function vangSetDiff(diff, btn) { if(typeof playSound === 'function') playSound('click'); whackState.difficulty = diff; btn.parentElement.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending')); btn.classList.add('selected-pending'); }
+function vangSetDiff(diff, btn) { 
+    if(typeof playSound === 'function') playSound('click'); 
+    whackState.difficulty = diff; 
+    document.querySelectorAll('.level-card-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+}
 
 // --- GAME ---
 function initWhackGame() {
     if(typeof playSound === 'function') playSound('win');
-    if(whackState.peepTimer) clearTimeout(whackState.peepTimer); // Timer reset
+    if(whackState.peepTimer) clearTimeout(whackState.peepTimer);
 
     const board = document.getElementById('game-board');
     whackState.score = 0; whackState.timeUp = false; whackState.scoreGoal = 10;
@@ -118,7 +121,6 @@ function initWhackGame() {
         holesHTML += `<div class="hole" id="hole-${i}" onclick="bonk(this)"><img src="" class="mole-img" id="img-${i}"></div>`;
     }
 
-    // STERREN GENEREREN (10 stuks)
     let starsHTML = '';
     for(let i=1; i<=10; i++) starsHTML += `<span id="star-${i}" class="star-icon">★</span>`;
 
@@ -127,16 +129,13 @@ function initWhackGame() {
             <div class="whack-header">
                 <div class="header-top">
                     <button class="tool-btn" onclick="startWhackGame()">⬅ Stop</button>
-                    <div class="player-icon-display" style="text-shadow: 2px 2px 0 ${whackState.player.color}">
-                        ${whackState.player.icon}
-                    </div>
+                    <div style="font-weight:bold; color:#333;">Vang ze!</div>
                 </div>
                 <div class="star-tracker">${starsHTML}</div>
             </div>
             <div class="whack-grid ${gridClass}">${holesHTML}</div>
         </div>`;
     
-    // Start de loop
     peep();
 }
 
@@ -165,30 +164,20 @@ function peep() {
     const holes = document.querySelectorAll('.hole');
     const hole = randomHole(holes);
     const imgEl = hole.querySelector('.mole-img');
-    
     const isBad = Math.random() < 0.3; 
 
     if (isBad) {
-        // GEBRUIK DIRECT DE SVG (Geen knipperen meer!)
         const isBomb = Math.random() > 0.5;
-        if(isBomb) { 
-            imgEl.src = bombSVG; 
-            imgEl.dataset.type = "bomb"; 
-        } else { 
-            imgEl.src = poopSVG; 
-            imgEl.dataset.type = "poop"; 
-        }
+        if(isBomb) { imgEl.src = bombSVG; imgEl.dataset.type = "bomb"; } 
+        else { imgEl.src = poopSVG; imgEl.dataset.type = "poop"; }
     } else {
         const randomImg = whackState.validImages[Math.floor(Math.random() * whackState.validImages.length)];
-        imgEl.src = randomImg; 
-        imgEl.dataset.type = "good";
+        imgEl.src = randomImg; imgEl.dataset.type = "good";
     }
 
     hole.classList.add('up');
-    
     let time = whackState.speed * (0.8 + Math.random() * 0.4); 
 
-    // Sla de timer ID op zodat we hem kunnen stoppen
     whackState.peepTimer = setTimeout(() => {
         hole.classList.remove('up');
         if (!whackState.timeUp && whackState.score < whackState.scoreGoal) peep();
@@ -202,7 +191,9 @@ function bonk(hole) {
     const type = imgEl.dataset.type;
 
     if(type === "bomb" || type === "poop") {
+        // --- FOUT GELUID (Bom/Drol) ---
         if(typeof playSound === 'function') playSound('error'); 
+        
         hole.classList.remove('up'); 
         whackState.score = Math.max(0, whackState.score - 1);
         
@@ -210,22 +201,20 @@ function bonk(hole) {
         document.querySelector('.whack-game-container').style.backgroundColor = "#F44336";
         setTimeout(()=>document.querySelector('.whack-game-container').style.backgroundColor = "", 200);
     } else {
+        // --- GOED GELUID (Plaatje) ---
         if(typeof playSound === 'function') playSound('pop'); 
+        
         hole.classList.remove('up'); 
         whackState.score++;
-        
-        // Versnellen!
         whackState.speed = Math.max(400, whackState.speed - 20);
         
         if(whackState.score >= whackState.scoreGoal) {
             whackState.timeUp = true;
-            updateVangStars(); // Laatste ster vullen
-            setTimeout(() => { 
-                if(typeof showWinnerModal === 'function') showWinnerModal(whackState.player.name); 
-            }, 500);
+            updateVangStars(); 
+            setTimeout(() => { if(typeof showWinnerModal === 'function') showWinnerModal("Jij"); }, 500);
             return;
         }
     }
     
-    updateVangStars(); // Update de sterrenbalk
+    updateVangStars(); 
 }
