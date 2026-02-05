@@ -1,4 +1,4 @@
-/* VANG.CSS - MET CLICK FIX */
+/* VANG.CSS - VOLLEDIG (SETUP + GAME + FIXES) */
 
 /* --- 1. SETUP SCHERM --- */
 .memory-setup {
@@ -6,6 +6,7 @@
     height: 100%; width: 100%;
     padding: 15px; box-sizing: border-box;
     background: #E3F2FD; overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .setup-group {
@@ -19,6 +20,7 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
 
 /* SPELERS & KNOPPEN */
 .name-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; }
+
 .player-btn {
     flex: 1; min-width: 80px;
     background: #f0f0f0; border: 2px solid #ddd;
@@ -27,6 +29,7 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
     transition: all 0.2s; white-space: nowrap;
     opacity: 0.7; font-size: 1rem; position: relative;
 }
+
 .player-btn.selected-pending {
     background: #4CAF50 !important; border-color: #2E7D32 !important; color: white !important;
     transform: scale(1.05); box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
@@ -37,6 +40,7 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
     filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
 }
 
+/* KLEUREN GRID */
 .color-grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 10px; width: 100%; }
 .color-dot {
     width: 100% !important; max-width: 55px; aspect-ratio: 1 / 1; height: auto !important;
@@ -48,10 +52,12 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
 /* FOOTER */
 #vang-active-players { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 10px; min-height: 30px; }
 .active-player-tag { display: inline-block; padding: 5px 12px; margin: 3px; border-radius: 15px; color: white; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2); border: 2px solid white; }
+
 .bottom-actions { margin-top: auto; display: flex; flex-direction: column; gap: 8px; padding-top: 20px; }
 .start-btn { width: 100%; padding: 15px; font-size: 1.2rem; border-radius: 15px; background: #4CAF50; color: white; border: none; font-family: 'Fredoka One'; box-shadow: 0 4px 0 #2E7D32; transition: 0.3s; }
 .start-btn:disabled { background: #ccc; box-shadow: none; color: #666; }
 .tool-btn { border: none; background: #90A4AE; color: white; padding: 10px; border-radius: 10px; font-family: 'Fredoka One'; }
+
 
 /* --- 2. GAMEPLAY SCHERM --- */
 .whack-game-container {
@@ -59,8 +65,7 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
     width: 100%; height: 100%;
     background: linear-gradient(180deg, #81C784 0%, #4CAF50 100%);
     padding: 10px; box-sizing: border-box; overflow: hidden; 
-    user-select: none;
-    -webkit-tap-highlight-color: transparent; /* Geen blauwe flits op mobiel */
+    user-select: none; -webkit-tap-highlight-color: transparent;
 }
 
 .whack-header {
@@ -77,7 +82,7 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
 }
 .player-icon-display { font-size: 1.5rem; }
 
-/* ROOSTER */
+/* HET SPELBORD */
 .whack-grid {
     display: grid; gap: 10px;
     width: 100%; max-width: 500px;
@@ -87,7 +92,7 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
 .whack-grid.medium { grid-template-columns: repeat(3, 1fr); }
 .whack-grid.hard { grid-template-columns: repeat(3, 1fr); } 
 
-/* HET GAT (Dit vangt de klik!) */
+/* HET GAT */
 .hole {
     aspect-ratio: 1 / 1;
     background: #5D4037;
@@ -95,19 +100,17 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
     position: relative; overflow: hidden;
     box-shadow: inset 0 10px 20px rgba(0,0,0,0.5), 0 5px 0 rgba(255,255,255,0.2);
     border-bottom: 5px solid #3E2723;
-    cursor: pointer; /* Handje */
-    touch-action: manipulation; /* Sneller reageren op touch */
+    cursor: pointer; touch-action: manipulation;
 }
 
-/* HET PLAATJE (Klik gaat hier dwars doorheen!) */
+/* HET PLAATJE */
 .mole-img {
     width: 80%; height: 80%;
     position: absolute; bottom: -120%; left: 10%;
     transition: bottom 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    object-fit: contain;
-    filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
+    object-fit: contain; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
     
-    /* DE FIX: Zorgt dat je de hole erachter aanklikt */
+    /* BELANGRIJK: Zorgt dat klikken ALTIJD werkt */
     pointer-events: none !important; 
 }
 
