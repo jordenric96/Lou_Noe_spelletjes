@@ -1,9 +1,9 @@
-/* VIEROPEENRIJ.CSS - FINAL STABLE VERSION */
+/* VIEROPEENRIJ.CSS - FINAL STATE VERSION */
 
 img { max-width: 100%; display: block; }
 * { box-sizing: border-box; }
 
-/* --- 1. SETUP SCHERM (WIZARD) --- */
+/* --- 1. SETUP SCHERM --- */
 .c4-setup-container {
     display: flex; flex-direction: column; align-items: center;
     width: 100%; height: 100%;
@@ -78,101 +78,112 @@ img { max-width: 100%; display: block; }
 .tool-btn { border: none; background: #90A4AE; color: white; padding: 10px; border-radius: 10px; font-family: 'Fredoka One'; width: 100%; margin-top: 5px; }
 
 
-/* --- 2. GAME INTERFACE (NIEUWE LAYOUT) --- */
+/* --- 2. GAME INTERFACE (CENTRAAL & NIEUW) --- */
 .c4-game-container {
     display: flex; flex-direction: column; 
     width: 100%; height: 100%; 
     background: #E0F7FA; overflow: hidden;
 }
 
-/* SPELER ZONES (Centraal) */
-.player-zone {
-    flex: 0 0 auto; padding: 15px; background: white;
+/* SCORE BORDEN (Centraal) */
+.player-score-card {
+    flex: 0 0 auto; padding: 10px; background: white;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 20; position: relative;
     transition: background 0.3s;
 }
-.player-zone.top { border-bottom: 2px solid #eee; border-radius: 0 0 25px 25px; }
-.player-zone.bottom { border-top: 2px solid #eee; margin-top: auto; border-radius: 25px 25px 0 0; }
-.player-zone.active-turn { background: #E8F5E9; border-color: #4CAF50; z-index: 25; box-shadow: 0 0 20px rgba(76, 175, 80, 0.2); }
+.player-score-card.top { border-bottom: 2px solid #eee; border-radius: 0 0 25px 25px; }
+.player-score-card.bottom { border-top: 2px solid #eee; margin-top: auto; border-radius: 25px 25px 0 0; }
 
-/* Naam Groot & Centraal */
-.pz-name { 
-    font-size: 1.8rem; font-weight: 900; color: #333; 
+/* Actieve Beurt Highlight */
+.player-score-card.active-turn { 
+    background: #E8F5E9; border-color: #4CAF50; z-index: 25; 
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.2); 
+}
+
+/* Naam: Leuk lettertype, centraal */
+.psc-name { 
+    font-size: 1.6rem; font-weight: 900; color: #333; 
     text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;
+    text-shadow: 1px 1px 0 rgba(255,255,255,1);
 }
 
-/* Score Chips (Nieuw!) */
-.score-chips-row {
-    display: flex; gap: 8px;
-    background: rgba(0,0,0,0.05); padding: 5px 10px; border-radius: 20px;
+/* De Chips als Score (Transparant vs Solid) */
+.psc-chips-row {
+    display: flex; gap: 8px; justify-content: center;
+    background: rgba(0,0,0,0.03); padding: 5px 15px; border-radius: 20px;
 }
-.score-chip {
-    width: 30px; height: 30px; border-radius: 50%;
+
+.score-token {
+    width: 40px; height: 40px; border-radius: 50%;
     border: 2px solid #DDD; overflow: hidden;
-    /* Standaard: doorzichtig en grijs */
-    opacity: 0.3; filter: grayscale(1); transition: 0.3s;
+    /* STANDAARD: 80% Doorzichtig (Opacity 0.2) */
+    opacity: 0.2; filter: grayscale(1); 
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: white;
 }
-.score-chip img { width: 100%; height: 100%; object-fit: cover; }
-/* Gewonnen: zichtbaar en kleur */
-.score-chip.won {
+.score-token img { width: 100%; height: 100%; object-fit: cover; }
+
+/* GEWONNEN: Volledig zichtbaar & Gouden rand */
+.score-token.earned {
     opacity: 1; filter: grayscale(0);
-    border-color: #FFD700; box-shadow: 0 0 8px #FFD700;
+    border-color: #FFD700; box-shadow: 0 0 10px #FFD700;
     transform: scale(1.1);
 }
 
 
-/* --- HET BORD (MIDDEN & ROBUUST) --- */
+/* --- HET BORD (HET ROOSTER) --- */
 .board-area {
     flex: 1; display: flex; flex-direction: column; 
     justify-content: center; align-items: center;
     position: relative; padding: 10px; overflow: hidden;
 }
 
-.board-wrapper {
-    position: relative; /* HIER DRAAIT HET OM: HET REFERENTIEPUNT */
+.c4-grid-table {
+    position: relative;
+    /* Dwing 7 breed, 6 hoog af */
     width: 95%; max-width: 450px;
-    aspect-ratio: 7 / 6; 
+    aspect-ratio: 7 / 6;
     
-    /* BODEM: Witte achtergrond */
-    background: #FFFFFF; 
+    /* Het Plastic Bord */
+    background: #0277BD; 
     border-radius: 15px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.15), 0 5px 0 #0277BD;
-    overflow: hidden; /* Chips blijven binnen boord */
-}
-
-/* Masker (Het Blauwe Bord) - Ligt BOVENOP (z-10) */
-.c4-grid-mask {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 10; pointer-events: none;
+    padding: 10px; /* De rand van het bord */
+    box-shadow: 0 10px 0 #01579B, 0 20px 20px rgba(0,0,0,0.2);
+    
+    /* Grid layout */
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     grid-template-rows: repeat(6, 1fr);
-    gap: 0;
+    gap: 6px; /* Ruimte tussen gaten */
 }
-.c4-hole {
+
+/* Een enkel vakje in het rooster */
+.c4-slot {
     width: 100%; height: 100%;
-    /* Midden transparant, Buiten Blauw */
-    background: radial-gradient(circle, transparent 62%, #29B6F6 63%);
+    background: #FFFFFF; /* Het gat is wit als het leeg is */
+    border-radius: 50%; /* Rondje */
+    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3); /* Diepte in het gat */
+    overflow: hidden; position: relative;
 }
 
-/* Klik Zones (Bovenop alles, z-20) */
-.click-layer {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 20; display: flex;
+/* De chip IN het rooster (als hij gevallen is) */
+.slotted-chip {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    animation: landInSlot 0.2s ease-out;
 }
-.c4-col-click { flex: 1; cursor: pointer; }
-.c4-col-click:hover { background: rgba(255,255,255,0.15); }
+@keyframes landInSlot { from { transform: scale(1.1); } to { transform: scale(1); } }
 
-/* DE VALLENDE CHIP (Tussenin, z-5) */
-.game-chip {
-    position: absolute; border-radius: 50%;
-    z-index: 5; /* CRUCIAAL: Tussen wit en blauw masker */
-    box-shadow: inset -2px -2px 5px rgba(0,0,0,0.3);
+/* De vallende animatie chip (bovenop alles) */
+.anim-chip {
+    position: absolute; width: 50px; height: 50px; border-radius: 50%;
+    z-index: 100; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    pointer-events: none;
 }
-@keyframes dropBounce {
-    0% { top: -100px; }
-    60% { top: var(--final-top); }
-    80% { top: calc(var(--final-top) - 20px); }
-    100% { top: var(--final-top); }
+
+/* Klikzone Kolommen */
+.column-clicker {
+    position: absolute; top: 0; bottom: 0; width: 14.28%; z-index: 50; cursor: pointer;
 }
+.column-clicker:hover { background: rgba(255,255,255,0.1); border-radius: 10px; }
