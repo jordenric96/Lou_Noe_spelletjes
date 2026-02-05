@@ -1,11 +1,12 @@
-/* TEKENEN.CSS - SETUP & CANVAS */
+/* TEKENEN.CSS - VOLLEDIG (SETUP + GAME) */
 
 /* --- 1. SETUP SCHERM (Uniforme Stijl) --- */
 .memory-setup {
     display: flex; flex-direction: column;
     height: 100%; width: 100%;
     padding: 15px; box-sizing: border-box;
-    background: #E3F2FD; overflow-y: auto; -webkit-overflow-scrolling: touch;
+    background: #E3F2FD; /* Lichtblauw */
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
 }
 
 .setup-group {
@@ -13,12 +14,21 @@
     padding: 15px; margin-bottom: 15px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     width: 100%; box-sizing: border-box;
+    
+    /* Animatie voor het wisselen van schermen */
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Helper om groepen te verbergen (voor het submenu) */
+.hidden {
+    display: none !important;
 }
 
 h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
 
-/* SPELERS */
+/* SPELERS KIEZEN */
 .name-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; }
+
 .player-btn {
     flex: 1; min-width: 70px;
     background: #f0f0f0; border: 2px solid #ddd;
@@ -26,6 +36,7 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
     font-family: 'Fredoka One'; cursor: pointer;
     transition: all 0.2s; white-space: nowrap; opacity: 0.7;
 }
+
 .player-btn.selected-pending {
     background: #4CAF50 !important; border-color: #2E7D32 !important; color: white !important;
     transform: scale(1.05); box-shadow: 0 4px 10px rgba(0,0,0,0.3); opacity: 1; font-weight: bold;
@@ -34,36 +45,59 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
     content: '✅'; position: absolute; top: -5px; right: -5px; font-size: 1rem;
 }
 
-/* FOOTER */
+
+/* --- 2. THEMA & PLAATJES GRID --- */
+.theme-grid-wrapper {
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); 
+    gap: 10px;
+}
+
+.theme-card-btn {
+    aspect-ratio: 4/3; background: white; border: 3px solid #eee;
+    border-radius: 12px; overflow: hidden;
+    position: relative; display: flex; flex-direction: column; cursor: pointer;
+    opacity: 0.9; transition: all 0.2s;
+}
+.theme-card-btn:active { transform: scale(0.95); }
+
+/* Geselecteerde staat */
+.theme-card-btn.selected { 
+    border-color: #4CAF50; border-width: 4px; transform: scale(1.05); opacity: 1; z-index: 2;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+.theme-card-btn.selected::after { 
+    content: '✅'; position: absolute; top: 5px; right: 5px; font-size: 1.5rem; 
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
+}
+
+.theme-img-container { width: 100%; height: 75%; }
+.theme-img-container img { width: 100%; height: 100%; object-fit: cover; }
+.btn-label { height: 25%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; background: #fafafa; width: 100%; font-weight: bold; }
+
+/* VARIANT: VOLLEDIG PLAATJE (Voor in het submenu) */
+/* Hier willen we geen label tekst, alleen het plaatje groot */
+.theme-card-btn.full-img .theme-img-container {
+    height: 100%; width: 100%;
+}
+
+
+/* --- 3. FOOTER --- */
 .bottom-actions { margin-top: auto; display: flex; flex-direction: column; gap: 8px; padding-top: 20px; }
 .start-btn { width: 100%; padding: 15px; font-size: 1.2rem; border-radius: 15px; background: #4CAF50; color: white; border: none; font-family: 'Fredoka One'; box-shadow: 0 4px 0 #2E7D32; transition: 0.3s; }
 .start-btn:disabled { background: #ccc; box-shadow: none; color: #666; }
 .tool-btn { border: none; background: #90A4AE; color: white; padding: 10px; border-radius: 10px; font-family: 'Fredoka One'; }
 
-/* THEMA GRID */
-.theme-grid-wrapper { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
-.theme-card-btn {
-    aspect-ratio: 4/3; background: white; border: 3px solid #eee;
-    border-radius: 12px; overflow: hidden;
-    position: relative; display: flex; flex-direction: column; cursor: pointer;
-    opacity: 0.8; transition: all 0.2s;
-}
-.theme-card-btn.selected { border-color: #4CAF50; border-width: 4px; transform: scale(1.05); opacity: 1; }
-.theme-card-btn.selected::after { content: '✅'; position: absolute; top: 5px; right: 5px; font-size: 1.5rem; }
-.theme-img-container { width: 100%; height: 75%; }
-.theme-img-container img { width: 100%; height: 100%; object-fit: cover; }
-.btn-label { height: 25%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; background: #fafafa; width: 100%; font-weight: bold; }
 
-/* --- 2. TEKEN GEBIED --- */
+/* --- 4. TEKEN GEBIED (GAME) --- */
 .drawing-container {
     display: flex; flex-direction: column;
     width: 100%; height: 100%;
     background: #FAFAFA;
-    position: relative;
-    overflow: hidden;
+    position: relative; overflow: hidden;
 }
 
-/* HEADER */
+/* Header */
 .drawing-header {
     display: flex; justify-content: space-between; align-items: center;
     padding: 10px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -71,32 +105,32 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
 }
 .player-tag { font-size: 1.2rem; font-weight: bold; color: #333; }
 
-/* CANVAS WRAPPER */
+/* Canvas */
 .canvas-wrapper {
     flex: 1; position: relative;
     margin: 10px; border-radius: 15px;
     background: white;
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     overflow: hidden;
-    touch-action: none; /* Belangrijk voor tekenen */
+    touch-action: none; /* Cruciaal: voorkomt scrollen tijdens tekenen */
 }
 
 #draw-canvas {
     width: 100%; height: 100%;
     touch-action: none; cursor: crosshair;
-    position: relative; z-index: 2; /* Bovenop de achtergrond */
+    position: relative; z-index: 2; /* Tekenen gebeurt hierop */
 }
 
-/* Achtergrond plaatje (om over te trekken) */
+/* Achtergrond (Tracing Image) */
 .tracing-bg {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    object-fit: contain;
-    opacity: 0.3; /* Lichtjes zichtbaar */
+    object-fit: contain; /* Zorg dat het hele plaatje zichtbaar is */
+    opacity: 0.3; /* Lichtjes doorzichtig om over te trekken */
     z-index: 1;
     pointer-events: none;
 }
 
-/* TOOLBAR ONDERAAN */
+/* Toolbar (Onderaan) */
 .drawing-toolbar {
     background: white; padding: 10px;
     border-top-left-radius: 20px; border-top-right-radius: 20px;
@@ -118,7 +152,7 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
 }
 .paint-btn.active { transform: scale(1.2); border-color: #333; z-index: 5; }
 
-/* Gum & Diktes */
+/* Gereedschappen */
 .tools-row {
     display: flex; justify-content: space-between; align-items: center;
 }
@@ -137,3 +171,8 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
 }
 .eraser-btn { background: #E91E63; }
 .clear-btn { background: #F44336; }
+
+/* Visuele feedback voor actieve gum */
+.active-tool {
+    border: 2px solid #333; transform: scale(1.05); box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
