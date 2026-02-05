@@ -1,9 +1,8 @@
-// VIEROPEENRIJ.JS - NO JUMPING FIX
-console.log("4-op-een-rij geladen (No Jump Fix)...");
+// VIEROPEENRIJ.JS - ROBUST RESIZE
+console.log("4-op-een-rij geladen (Robust Resize)...");
 
 let c4State = {
-    step: 0, // 0=P1, 1=P2, 2=Game
-    winsNeeded: 3,
+    step: 0, winsNeeded: 3,
     p1: { name: 'Speler 1', img: '', color: '#F44336', wins: 0 },
     p2: { name: 'Speler 2', img: '', color: '#2196F3', wins: 0 },
     board: [], currentPlayer: 1, gameActive: false, isDropping: false
@@ -14,8 +13,7 @@ const c4Colors = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#00BCD4', '#4CAF5
 
 // --- SETUP ---
 function startConnect4() {
-    c4State.step = 0;
-    c4State.p1.wins = 0; c4State.p2.wins = 0;
+    c4State.step = 0; c4State.p1.wins = 0; c4State.p2.wins = 0;
     c4State.p1.name = ''; c4State.p1.img = ''; c4State.p1.color = '#F44336';
     c4State.p2.name = ''; c4State.p2.img = ''; c4State.p2.color = '#2196F3';
     renderSetup();
@@ -27,7 +25,6 @@ function renderSetup() {
     const isP1 = pNum === 1;
     const currPlayer = isP1 ? c4State.p1 : c4State.p2;
     
-    // Thema Chips
     let chipsHTML = '';
     if(typeof memThemes !== 'undefined') {
         Object.values(memThemes).forEach(t => {
@@ -41,12 +38,10 @@ function renderSetup() {
         });
     }
 
-    // Kleuren
     let colorsHTML = c4Colors.map(c => 
         `<div class="c4-color-dot ${currPlayer.color===c?'active':''}" style="background:${c}" onclick="c4SetColor('${c}', this)"></div>`
     ).join('');
 
-    // Goal Section (Alleen bij P1)
     let goalSection = '';
     if (c4State.step === 0) {
         goalSection = `
@@ -65,37 +60,29 @@ function renderSetup() {
             <div class="c4-step-box">
                 ${goalSection}
                 <div class="c4-title">Wie is Speler ${pNum}?</div>
-                
                 <div class="preset-row">
                     <button class="preset-btn" onclick="c4SetName('Lou', this)">👦🏼 Lou</button>
                     <button class="preset-btn" onclick="c4SetName('Noé', this)">👶🏼 Noé</button>
                     <button class="preset-btn" onclick="c4SetName('Mama', this)">👩🏻 Mama</button>
                     <button class="preset-btn" onclick="c4SetName('Papa', this)">👨🏻 Papa</button>
                 </div>
-
                 <input type="text" id="c4-name" placeholder="Of typ een naam..." value="${currPlayer.name}" oninput="c4UpdateName(this.value)"
                     style="width:90%; padding:10px; border-radius:10px; border:1px solid #ccc; font-family:'Fredoka One'; text-align:center;">
-
                 <div class="c4-subtitle" style="margin-top:15px">Kies je kleur & chip:</div>
                 <div class="color-picker-row">${colorsHTML}</div>
                 <div class="chip-grid" id="c4-chip-grid">${chipsHTML}</div>
-
                 ${isP1 ? `<button class="start-btn" style="margin-top:15px; background:#2196F3;" onclick="c4NextStep()">VOLGENDE ➡</button>` : ''}
                 
                 <div class="vs-preview-box">
                     <div class="c4-subtitle">De Strijd:</div>
                     <div class="vs-container">
                         <div class="vs-player">
-                            <div class="vs-chip-big" id="prev-p1-chip" style="background:${c4State.p1.color}">
-                                ${c4State.p1.img ? `<img src="${c4State.p1.img}">` : '1'}
-                            </div>
+                            <div class="vs-chip-big" id="prev-p1-chip" style="background:${c4State.p1.color}">${c4State.p1.img ? `<img src="${c4State.p1.img}">` : '1'}</div>
                             <div class="vs-name" id="prev-p1-name">${c4State.p1.name || 'Speler 1'}</div>
                         </div>
                         <div class="vs-mid">VS</div>
                         <div class="vs-player">
-                            <div class="vs-chip-big" id="prev-p2-chip" style="background:${c4State.p2.color}">
-                                ${c4State.p2.img ? `<img src="${c4State.p2.img}">` : (c4State.step===0 ? '?' : '2')}
-                            </div>
+                            <div class="vs-chip-big" id="prev-p2-chip" style="background:${c4State.p2.color}">${c4State.p2.img ? `<img src="${c4State.p2.img}">` : (c4State.step===0 ? '?' : '2')}</div>
                             <div class="vs-name" id="prev-p2-name">${c4State.p2.name || 'Speler 2'}</div>
                         </div>
                     </div>
@@ -107,10 +94,8 @@ function renderSetup() {
     `;
 }
 
-// --- SLIMME UPDATE FUNCTIES (Geen refresh = Geen verspringen) ---
-
+// SETUP ACTIONS
 function c4UpdateVs() {
-    // Update de VS box onderaan zonder de pagina te verversen
     document.getElementById('prev-p1-name').innerText = c4State.p1.name || 'Speler 1';
     document.getElementById('prev-p1-chip').style.background = c4State.p1.color;
     if(c4State.p1.img) document.getElementById('prev-p1-chip').innerHTML = `<img src="${c4State.p1.img}">`;
@@ -123,77 +108,26 @@ function c4UpdateVs() {
 
 function c4SetName(n, btn) { 
     if(typeof playSound==='function') playSound('click');
-    const p = c4State.step===0 ? c4State.p1 : c4State.p2; 
-    p.name = n; 
-    
-    // Update UI direct
+    const p = c4State.step===0 ? c4State.p1 : c4State.p2; p.name = n; 
     document.getElementById('c4-name').value = n;
-    
-    // Knoppen stijlen
     document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
     if(btn) btn.classList.add('active');
-    
     c4UpdateVs();
 }
+function c4UpdateName(val) { const p = c4State.step===0 ? c4State.p1 : c4State.p2; p.name = val; document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active')); c4UpdateVs(); }
+function c4SetColor(c, btn) { if(typeof playSound==='function') playSound('click'); const p = c4State.step===0 ? c4State.p1 : c4State.p2; p.color = c; document.querySelectorAll('.c4-color-dot').forEach(d => d.classList.remove('active')); if(btn) btn.classList.add('active'); document.querySelectorAll('.chip-option').forEach(co => co.style.background = c); c4UpdateVs(); }
+function c4SetChip(src, btn) { if(typeof playSound==='function') playSound('pop'); const p = c4State.step===0 ? c4State.p1 : c4State.p2; p.img = src; document.querySelectorAll('.chip-option').forEach(co => co.classList.remove('selected')); if(btn) btn.classList.add('selected'); c4UpdateVs(); }
+function c4SetGoal(n, btn) { if(typeof playSound==='function') playSound('click'); c4State.winsNeeded = n; document.querySelectorAll('.goal-btn').forEach(b => b.classList.remove('selected')); if(btn) btn.classList.add('selected'); }
+function c4NextStep() { if(!c4State.p1.name) c4State.p1.name = "Speler 1"; if(!c4State.p1.img) { alert("Kies eerst een plaatje!"); return; } c4State.step = 1; renderSetup(); }
 
-function c4UpdateName(val) { 
-    const p = c4State.step===0 ? c4State.p1 : c4State.p2; 
-    p.name = val; 
-    // Als er getypt wordt, halen we de selectie van de knoppen weg
-    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-    c4UpdateVs();
-}
-
-function c4SetColor(c, btn) { 
-    if(typeof playSound==='function') playSound('click'); 
-    const p = c4State.step===0 ? c4State.p1 : c4State.p2; 
-    p.color = c; 
-    
-    document.querySelectorAll('.c4-color-dot').forEach(d => d.classList.remove('active'));
-    if(btn) btn.classList.add('active');
-    
-    // Update ook de achtergrond van de chips in het grid
-    document.querySelectorAll('.chip-option').forEach(co => co.style.background = c);
-    
-    c4UpdateVs();
-}
-
-function c4SetChip(src, btn) { 
-    if(typeof playSound==='function') playSound('pop'); 
-    const p = c4State.step===0 ? c4State.p1 : c4State.p2; 
-    p.img = src; 
-    
-    document.querySelectorAll('.chip-option').forEach(co => co.classList.remove('selected'));
-    if(btn) btn.classList.add('selected');
-    
-    c4UpdateVs();
-}
-
-function c4SetGoal(n, btn) { 
-    if(typeof playSound==='function') playSound('click'); 
-    c4State.winsNeeded = n; 
-    document.querySelectorAll('.goal-btn').forEach(b => b.classList.remove('selected'));
-    if(btn) btn.classList.add('selected');
-}
-
-function c4NextStep() {
-    if(!c4State.p1.name) c4State.p1.name = "Speler 1";
-    if(!c4State.p1.img) { alert("Kies eerst een plaatje!"); return; }
-    c4State.step = 1; 
-    renderSetup(); // Hier wel refreshen want we gaan naar speler 2
-}
-
-// --- GAME LOGIC ---
+// --- GAME ---
 function c4InitGame() {
     if(!c4State.p2.name) c4State.p2.name = "Speler 2";
     if(!c4State.p2.img) { alert("Kies een plaatje voor speler 2!"); return; }
     if(typeof playSound==='function') playSound('win');
     
     c4State.board = Array(COLS).fill(null).map(() => Array(ROWS).fill(0));
-    c4State.gameActive = true;
-    c4State.isDropping = false;
-    c4State.currentPlayer = 1;
-    
+    c4State.gameActive = true; c4State.isDropping = false; c4State.currentPlayer = 1;
     renderBoard();
 }
 
@@ -218,17 +152,11 @@ function renderBoard() {
             <div class="c4-header">
                 <div class="score-pill ${c4State.currentPlayer===1?'active-turn':''}" style="border-left:5px solid ${c4State.p1.color}">
                     <div class="mini-chip" style="background:${c4State.p1.color}"><img src="${c4State.p1.img}"></div>
-                    <div>
-                        <div style="font-weight:bold; font-size:0.8rem;">${c4State.p1.name}</div>
-                        <div class="wins-dots">${makeDots(c4State.p1.wins)}</div>
-                    </div>
+                    <div><div style="font-weight:bold; font-size:0.8rem;">${c4State.p1.name}</div><div class="wins-dots">${makeDots(c4State.p1.wins)}</div></div>
                 </div>
                 <button class="tool-btn" onclick="startConnect4()">Stop</button>
                 <div class="score-pill ${c4State.currentPlayer===2?'active-turn':''}" style="border-right:5px solid ${c4State.p2.color}">
-                    <div style="text-align:right;">
-                        <div style="font-weight:bold; font-size:0.8rem;">${c4State.p2.name}</div>
-                        <div class="wins-dots" style="justify-content:flex-end">${makeDots(c4State.p2.wins)}</div>
-                    </div>
+                    <div style="text-align:right;"><div style="font-weight:bold; font-size:0.8rem;">${c4State.p2.name}</div><div class="wins-dots" style="justify-content:flex-end">${makeDots(c4State.p2.wins)}</div></div>
                     <div class="mini-chip" style="background:${c4State.p2.color}"><img src="${c4State.p2.img}"></div>
                 </div>
             </div>
@@ -242,22 +170,37 @@ function renderBoard() {
         </div>
     `;
 
-    setTimeout(c4Resize, 10);
+    // BELANGRIJK: Forceer resize na het renderen om 0px te voorkomen
+    setTimeout(() => {
+        c4Resize();
+        // Dubbele check na 100ms voor tragere apparaten
+        setTimeout(c4Resize, 100);
+    }, 10);
     window.addEventListener('resize', c4Resize);
 }
 
 function c4Resize() {
     const wrapper = document.getElementById('board-visual');
     if(!wrapper) return;
+    
+    // Bereken breedte van de wrapper
     const w = wrapper.clientWidth;
-    const totalGap = 6 * 8; const padding = 20; 
-    const cellSize = (w - padding - totalGap) / 7;
+    // Padding = 20px totaal, Gap = 5px * 6 = 30px
+    const totalGap = 30; 
+    const padding = 20; 
+    
+    // Bereken celgrootte (afronden naar beneden voor veiligheid)
+    const cellSize = Math.floor((w - padding - totalGap) / 7);
+    
+    // Update CSS variabele
     wrapper.style.setProperty('--cell-size', `${cellSize}px`);
     
+    // Update kolom posities (zodat klikken op de juiste plek gebeurt)
     for(let c=0; c<COLS; c++) {
         const colDiv = document.getElementById(`col-${c}`);
         if(colDiv) {
-            const left = 10 + (cellSize + 8) * c;
+            // 10px padding-left + (Size + Gap) * index
+            const left = 10 + (cellSize + 5) * c;
             colDiv.style.left = `${left}px`;
         }
     }
@@ -281,31 +224,25 @@ function c4Drop(col) {
     chip.style.background = p.color;
     chip.innerHTML = `<img src="${p.img}">`;
 
+    // Positie ophalen uit CSS var
     const wrapper = document.getElementById('board-visual');
-    const cellSize = parseFloat(wrapper.style.getPropertyValue('--cell-size'));
-    const leftPos = 10 + (cellSize + 8) * col;
+    const cellSize = parseFloat(wrapper.style.getPropertyValue('--cell-size')) || 40;
+    const leftPos = 10 + (cellSize + 5) * col;
     
     chip.style.left = `${leftPos}px`;
     chip.style.width = `${cellSize}px`;
     chip.style.height = `${cellSize}px`;
     
-    const targetTop = 10 + (5 - row) * (cellSize + 8);
+    // Animatie: Val van boven (rij 5) naar beneden (rij 0 is laag)
+    const targetTop = 10 + (5 - row) * (cellSize + 5);
     
     const animName = `bounce-${col}-${row}`;
-    const keyframes = `
-        @keyframes ${animName} {
-            0% { top: -80px; }
-            60% { top: ${targetTop}px; }
-            75% { top: ${targetTop - 20}px; }
-            100% { top: ${targetTop}px; }
-        }
-    `;
+    const keyframes = `@keyframes ${animName} { 0% { top: -80px; } 60% { top: ${targetTop}px; } 75% { top: ${targetTop - 15}px; } 100% { top: ${targetTop}px; } }`;
     const styleSheet = document.createElement("style");
     styleSheet.innerText = keyframes;
     document.head.appendChild(styleSheet);
     
     chip.style.animation = `${animName} 0.5s ease-in forwards`;
-    
     document.getElementById('chips-layer').appendChild(chip);
     
     setTimeout(() => { if(typeof playSound==='function') playSound('click'); }, 300);
@@ -348,7 +285,6 @@ function c4Win() {
     const p = c4State.currentPlayer === 1 ? c4State.p1 : c4State.p2;
     p.wins++;
     renderBoard(); 
-    
     if(p.wins >= c4State.winsNeeded) {
         setTimeout(() => { if(typeof showWinnerModal==='function') showWinnerModal(p.name); }, 1000);
     } else {
