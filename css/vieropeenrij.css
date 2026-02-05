@@ -1,145 +1,208 @@
-/* VIEROPEENRIJ.CSS - DUIDELIJKE BEVESTIGING */
+/* VIEROPEENRIJ.CSS - TOY STYLE & MOBILE FIX */
+
+/* ALGEMEEN: Voorkom dat afbeeldingen ontploffen */
+img { max-width: 100%; display: block; }
 
 /* --- SETUP SCHERM --- */
 .c4-setup-container {
     display: flex; flex-direction: column; align-items: center;
     width: 100%; height: 100%;
-    background: #E3F2FD;
+    /* Vrolijke achtergrond */
+    background: linear-gradient(135deg, #FFF9C4 0%, #B3E5FC 100%);
     padding: 10px; box-sizing: border-box; overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 }
 
 .c4-step-box {
-    background: white; border-radius: 20px;
-    padding: 15px; width: 100%; max-width: 500px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    background: white; border-radius: 25px;
+    padding: 15px; width: 100%; max-width: 450px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     text-align: center; margin-bottom: 10px;
     overflow: hidden; 
-    animation: fadeIn 0.4s ease-out;
-    display: flex; flex-direction: column; /* Zorgt dat inhoud onder elkaar blijft */
+    border: 4px solid white;
+    display: flex; flex-direction: column;
 }
-@keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-.c4-title { font-size: 1.4rem; color: #333; margin-bottom: 10px; text-transform: uppercase; font-weight: 900; }
-.c4-subtitle { font-size: 0.95rem; color: #666; margin: 10px 0 5px 0; font-weight: bold; }
+/* Header titels */
+.c4-title { font-size: 1.4rem; color: #0277BD; margin-bottom: 5px; text-transform: uppercase; font-weight: 900; }
+.c4-subtitle { font-size: 0.9rem; color: #555; margin: 10px 0 5px 0; font-weight: bold; }
 
-/* SPELERS KNOPPEN (Presets) */
-.preset-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; margin-bottom: 5px; justify-content: center; }
+/* SPELERS KNOPPEN (Flex wrap voor mobiel!) */
+.preset-row { 
+    display: flex; gap: 8px; flex-wrap: wrap; /* Belangrijk voor mobiel */
+    justify-content: center; padding-bottom: 5px; 
+}
 .preset-btn {
-    flex: 1; min-width: 60px; max-width: 90px;
-    background: #fafafa; border: 3px solid #eee;
-    border-radius: 12px; padding: 10px 5px; 
+    flex: 1 1 70px; /* Mag krimpen en groeien */
+    background: #FAFAFA; border: 2px solid #EEE;
+    border-radius: 12px; padding: 8px 4px; 
     cursor: pointer; transition: all 0.2s;
-    font-family: 'Fredoka One'; color: #555; font-size: 1rem;
+    font-family: 'Fredoka One'; color: #666; font-size: 0.9rem;
     display: flex; flex-direction: column; align-items: center; gap: 2px;
 }
 .preset-btn.active {
-    background: #E8F5E9; border-color: #4CAF50; color: #2E7D32;
-    transform: scale(1.1); box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3); z-index: 2;
+    background: #E1F5FE; border-color: #039BE5; color: #0277BD;
+    transform: scale(1.05); box-shadow: 0 4px 8px rgba(3, 155, 229, 0.2);
 }
 
 /* INPUT VELD */
 .custom-name-input {
-    width: 90%; padding: 10px; border-radius: 12px; border: 2px solid #ccc;
-    font-family: 'Fredoka One'; text-align: center; font-size: 1.1rem;
-    margin-bottom: 5px; transition: 0.3s;
+    width: 100%; padding: 10px; border-radius: 12px; border: 2px solid #ccc;
+    font-family: 'Fredoka One'; text-align: center; font-size: 1rem;
+    margin-bottom: 5px; box-sizing: border-box;
 }
-.custom-name-input:focus { border-color: #2196F3; outline: none; }
 
-/* KLEUREN KIEZER */
+/* KLEUREN */
 .color-picker-row { display: flex; gap: 8px; justify-content: center; margin: 5px 0; flex-wrap: wrap;}
 .c4-color-dot {
-    width: 40px; height: 40px; border-radius: 50%; border: 3px solid white;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer; transition: transform 0.2s;
+    width: 35px; height: 35px; border-radius: 50%; border: 3px solid white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer;
 }
 .c4-color-dot.active { transform: scale(1.2); border-color: #333; z-index: 2; box-shadow: 0 0 10px rgba(0,0,0,0.3); }
 
-/* CHIP GRID (Iets compacter gemaakt) */
+/* CHIP GRID (Veilig voor schapen) */
 .chip-grid {
     display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); 
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); 
     gap: 8px; 
-    max-height: 180px; /* Minder hoog zodat knop zichtbaar blijft */
-    overflow-y: auto; padding: 5px;
-    background: #f9f9f9; border-radius: 15px; border: 2px solid #eee;
+    max-height: 150px; overflow-y: auto; padding: 5px;
+    background: #F5F5F5; border-radius: 15px; border: 2px solid #EEE;
     margin-bottom: 10px;
 }
 
 .chip-option {
-    width: 60px; height: 60px; 
+    width: 50px; height: 50px; /* HARDE GROOTTE */
     border-radius: 50%;
-    border: 3px solid transparent; cursor: pointer;
+    border: 2px solid white; cursor: pointer;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     overflow: hidden; position: relative; background: white; 
-    margin: 0 auto; transition: 0.2s;
+    margin: 0 auto;
 }
-.chip-option img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.chip-option img { 
+    width: 100%; height: 100%; object-fit: cover; 
+}
 .chip-option.selected { 
     border-color: #4CAF50; transform: scale(1.1); 
     box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 5;
 }
-.chip-option.selected::after {
-    content: '✅'; position: absolute; top: 0; right: 0; background: rgba(255,255,255,0.8);
-    border-radius: 50%; padding: 1px; font-size: 0.9rem;
-}
 
-/* --- DE GROTE BEVESTIGINGSKNOP (Altijd Zichtbaar) --- */
+/* KNOPPEN */
 .confirm-action-btn {
-    width: 100%; padding: 18px; margin-top: 10px;
-    font-size: 1.3rem; border-radius: 18px; border: none;
-    font-family: 'Fredoka One'; cursor: pointer;
-    transition: all 0.3s;
-    
-    /* Standaard: Oranje/Geel (Aandacht vragend, maar 'niet klaar') */
-    background: #FFECB3; color: #8D6E63;
-    box-shadow: 0 4px 0 #D7CCC8;
+    width: 100%; padding: 15px; margin-top: 5px;
+    font-size: 1.2rem; border-radius: 15px; border: none;
+    font-family: 'Fredoka One'; cursor: pointer; transition: all 0.3s;
+    background: #FFE082; color: #795548; box-shadow: 0 4px 0 #FFCA28;
 }
-
-/* KLAAR = GROEN */
 .confirm-action-btn.ready {
-    background: #4CAF50; color: white;
-    box-shadow: 0 6px 0 #2E7D32, 0 10px 20px rgba(76, 175, 80, 0.4);
-    transform: scale(1.02);
+    background: #66BB6A; color: white;
+    box-shadow: 0 5px 0 #388E3C;
     animation: pulseBtn 1.5s infinite;
 }
-.confirm-action-btn.ready:active { transform: translateY(4px); box-shadow: 0 2px 0 #2E7D32; }
+.confirm-action-btn.ready:active { transform: translateY(4px); box-shadow: 0 0 0; }
+@keyframes pulseBtn { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
 
-@keyframes pulseBtn { 0% { transform: scale(1.02); } 50% { transform: scale(1.05); } 100% { transform: scale(1.02); } }
+.tool-btn { 
+    border: none; background: #90A4AE; color: white; padding: 10px; 
+    border-radius: 10px; font-family: 'Fredoka One'; width: 100%; margin-top: 5px; 
+}
 
-/* VS PREVIEW BOX */
-.vs-preview-box { margin-top: 10px; padding-top: 10px; border-top: 2px dashed #ddd; display: flex; justify-content: center; gap: 15px; align-items: center; opacity: 0.8; }
-.vs-mini-player { display: flex; flex-direction: column; align-items: center; }
-.vs-mini-chip { width: 35px; height: 35px; border-radius: 50%; background: #ccc; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); overflow: hidden; }
-.vs-mini-chip img { width: 100%; height: 100%; object-fit: cover; }
+/* VS PREVIEW */
+.vs-preview-box { margin-top: 10px; padding-top: 10px; border-top: 2px dashed #ddd; display: flex; justify-content: center; gap: 10px; align-items: center; opacity: 0.8; }
+.vs-mini-chip { width: 35px; height: 35px; border-radius: 50%; background: #ccc; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); overflow: hidden; flex-shrink: 0;}
 .vs-mini-name { font-size: 0.8rem; font-weight: bold; color: #777; margin-top: 2px; }
-.vs-mini-mid { font-weight: bold; color: #aaa; font-size: 0.9rem; }
-.vs-mini-player.active-setup .vs-mini-chip { border: 3px solid #2196F3; transform: scale(1.2); }
-.vs-mini-player.active-setup .vs-mini-name { color: #2196F3; font-weight: 900; }
+.vs-mini-player.active-setup .vs-mini-chip { border: 3px solid #039BE5; transform: scale(1.1); }
 
 /* Match Goal */
-.goal-btn-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; }
-.goal-btn { padding: 8px 12px; background: #eee; border: 2px solid #ddd; border-radius: 12px; font-family: 'Fredoka One'; cursor: pointer; transition: 0.2s; color: #555; }
-.goal-btn.selected { background: #2196F3; color: white; border-color: #1976D2; transform: scale(1.1); box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3); }
-.tool-btn { border: none; background: #90A4AE; color: white; padding: 10px; border-radius: 10px; font-family: 'Fredoka One'; width: 100%; margin-top: 10px; }
+.goal-btn-row { display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; }
+.goal-btn { padding: 8px 15px; background: #eee; border: 2px solid #ddd; border-radius: 10px; font-family: 'Fredoka One'; cursor: pointer; color: #555; }
+.goal-btn.selected { background: #039BE5; color: white; border-color: #0277BD; }
 
-/* GAME BOARD CSS (Ongewijzigd) */
-.c4-game-container { display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; background: #37474F; overflow: hidden; }
-.c4-header { width: 100%; padding: 8px; background: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 50; box-sizing: border-box; }
-.score-pill { display: flex; align-items: center; gap: 8px; background: #f0f0f0; padding: 4px 10px; border-radius: 20px; border: 2px solid transparent; transition: 0.3s; }
-.score-pill.active-turn { transform: scale(1.05); box-shadow: 0 0 10px rgba(255,255,255,0.5); border-color: #333; }
-.mini-chip { width: 30px; height: 30px; border-radius: 50%; overflow: hidden; border: 2px solid white; box-shadow: 0 2px 2px rgba(0,0,0,0.2); flex-shrink: 0; }
-.mini-chip img { width: 100%; height: 100%; object-fit: cover; }
+
+/* --- GAME BOARD (KINDERLIJKE STIJL) --- */
+.c4-game-container {
+    display: flex; flex-direction: column; align-items: center;
+    width: 100%; height: 100%; 
+    background: #FFFDE7; /* Zachte gele achtergrond */
+    overflow: hidden; position: relative;
+}
+
+/* Header */
+.c4-header { 
+    width: 100%; padding: 8px; background: white; 
+    display: flex; justify-content: space-between; align-items: center; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05); z-index: 50; box-sizing: border-box; 
+    border-bottom: 3px solid #eee;
+}
+
+.score-pill { 
+    display: flex; align-items: center; gap: 5px; background: #f9f9f9; padding: 4px 8px; border-radius: 20px; border: 2px solid transparent; transition: 0.3s; 
+}
+.score-pill.active-turn { transform: scale(1.05); background: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-color: #333; }
+.mini-chip { width: 28px; height: 28px; border-radius: 50%; overflow: hidden; border: 2px solid white; box-shadow: 0 2px 2px rgba(0,0,0,0.2); flex-shrink: 0; }
 .wins-dots { display: flex; gap: 3px; }
-.win-dot { width: 8px; height: 8px; background: #ccc; border-radius: 50%; }
-.win-dot.filled { background: #FFD700; box-shadow: 0 0 5px #FFD700; }
-.board-wrapper { position: relative; margin-top: 10px; width: 95%; max-width: 500px; aspect-ratio: 7 / 6; padding: 10px; box-sizing: border-box; background: #1976D2; border-radius: 10px 10px 0 0; box-shadow: inset 0 0 20px rgba(0,0,0,0.3), 0 10px 20px rgba(0,0,0,0.5); z-index: 10; display: flex; justify-content: center; }
-.board-legs { width: 90%; max-width: 480px; height: 30px; background: #1565C0; border-radius: 0 0 15px 15px; }
-.c4-grid { display: grid; width: 100%; height: 100%; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(6, 1fr); gap: 1%; }
-.c4-cell { width: 100%; height: 100%; position: relative; background: radial-gradient(circle, transparent 64%, #1565C0 65%); z-index: 20; pointer-events: none; }
-.c4-column { position: absolute; top: 0; bottom: 0; width: 14.28%; z-index: 30; cursor: pointer; }
-.c4-column:hover { background: rgba(255,255,255,0.1); }
-.game-chip { position: absolute; width: var(--cell-size, 40px); height: var(--cell-size, 40px); border-radius: 50%; z-index: 5; top: -150%; box-shadow: inset -3px -3px 5px rgba(0,0,0,0.4), inset 2px 2px 5px rgba(255,255,255,0.4); }
-.game-chip img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-.chip-falling { animation-fill-mode: forwards; animation-timing-function: cubic-bezier(0.6, 0.04, 0.98, 0.335); }
+.win-dot { width: 8px; height: 8px; background: #e0e0e0; border-radius: 50%; }
+.win-dot.filled { background: #FFC107; box-shadow: 0 0 5px #FFC107; }
+
+/* HET BORD (Het blauwe plastic) */
+.board-wrapper {
+    position: relative; margin-top: auto; margin-bottom: 20px;
+    width: 96%; max-width: 500px;
+    aspect-ratio: 7 / 6; /* Houdt vorm vast */
+    padding: 8px; box-sizing: border-box;
+    
+    /* Fel blauw plastic look */
+    background: #29B6F6; 
+    border-radius: 15px;
+    box-shadow: 
+        inset 0 0 15px rgba(255,255,255,0.3), /* Glans binnen */
+        0 10px 0 #0288D1, /* 3D Rand onder */
+        0 20px 20px rgba(0,0,0,0.2); /* Schaduw op tafel */
+    z-index: 10;
+}
+
+/* Grid Lagen */
+.c4-grid { 
+    display: grid; width: 100%; height: 100%;
+    grid-template-columns: repeat(7, 1fr); 
+    grid-template-rows: repeat(6, 1fr); 
+    gap: 1.5%; 
+    position: relative; z-index: 20; /* Masker ligt bovenop */
+}
+
+.c4-cell {
+    width: 100%; height: 100%; position: relative;
+    /* Het Gat: Transparant in het midden, Blauw eromheen */
+    background: radial-gradient(circle, transparent 62%, #29B6F6 63%);
+    pointer-events: none;
+}
+/* Extra glansje op elk gat */
+.c4-cell::after {
+    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4) 0%, transparent 20%);
+    border-radius: 50%; pointer-events: none;
+}
+
+/* Klikzones */
+.c4-column { 
+    position: absolute; top: 0; bottom: 0; width: 14.28%; z-index: 30; cursor: pointer; 
+}
+/* Hover effect: kolom licht op */
+.c4-column:hover { background: linear-gradient(to bottom, rgba(255,255,255,0.2), transparent); border-radius: 10px; }
+
+/* CHIPS */
+#chips-layer {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 5; /* ACHTER de c4-grid laag */
+    padding: 8px; box-sizing: border-box; /* Match padding board-wrapper */
+}
+
+.game-chip {
+    position: absolute; 
+    width: var(--chip-size); height: var(--chip-size); 
+    border-radius: 50%;
+    z-index: 5; top: -100px;
+    box-shadow: inset -2px -2px 5px rgba(0,0,0,0.3);
+}
+.chip-falling { animation-fill-mode: forwards; animation-timing-function: cubic-bezier(0.5, 0.05, 1, 0.5); }
 .winning-cell { animation: pulseWin 0.5s infinite alternate; }
-@keyframes pulseWin { from { filter: brightness(1); transform: scale(1); } to { filter: brightness(1.5); transform: scale(1.1); } }
+@keyframes pulseWin { from { opacity: 0.6; } to { opacity: 1; transform: scale(1.1); } }
