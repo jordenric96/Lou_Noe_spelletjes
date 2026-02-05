@@ -1,5 +1,5 @@
-// VIEROPEENRIJ.JS - KINDVRIENDELIJKE WIZARD
-console.log("4-op-een-rij geladen (Wizard Flow)...");
+// VIEROPEENRIJ.JS - BUTTON VISIBILITY FIX
+console.log("4-op-een-rij geladen (Button Fix)...");
 
 let c4State = {
     step: 0, winsNeeded: 3,
@@ -14,7 +14,6 @@ const c4Colors = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#00BCD4', '#4CAF5
 // --- SETUP START ---
 function startConnect4() {
     c4State.step = 0; c4State.p1.wins = 0; c4State.p2.wins = 0;
-    // Reset inputs
     c4State.p1.name = ''; c4State.p1.img = ''; c4State.p1.color = '#F44336';
     c4State.p2.name = ''; c4State.p2.img = ''; c4State.p2.color = '#2196F3';
     renderWizardStep();
@@ -25,10 +24,15 @@ function renderWizardStep() {
     const isP1 = c4State.step === 0;
     const currPlayer = isP1 ? c4State.p1 : c4State.p2;
     const title = isP1 ? "WIE IS SPELER 1?" : "WIE IS SPELER 2?";
-    const btnText = isP1 ? "NAAR SPELER 2 ➡" : "START HET SPEL! 🚀";
     
-    // Check of we klaar zijn om door te gaan (voor de knop status)
+    // Check of we klaar zijn
     const isReady = currPlayer.name !== '' && currPlayer.img !== '';
+    
+    // Knop Tekst (Dynamisch)
+    let btnText = "KIES NAAM & PLAATJE...";
+    if (isReady) {
+        btnText = isP1 ? "BEVESTIG SPELER 1 ➡" : "START HET SPEL! 🚀";
+    }
 
     // Genereer chips
     let chipsHTML = '';
@@ -37,9 +41,7 @@ function renderWizardStep() {
             if(!t.locked && !t.isMix) {
                 for(let i=1; i<=5; i++) {
                     const src = `${t.path}${i}.${t.extension}`;
-                    // Als P2 kiest, mag hij niet dezelfde chip als P1 kiezen
-                    if (!isP1 && src === c4State.p1.img) return; 
-                    
+                    if (!isP1 && src === c4State.p1.img) return; // Geen dubbele chips
                     const selected = currPlayer.img === src ? 'selected' : '';
                     chipsHTML += `<div class="chip-option ${selected}" style="background:${currPlayer.color}" onclick="c4SetChip('${src}')"><img src="${src}"></div>`;
                 }
@@ -52,7 +54,7 @@ function renderWizardStep() {
         `<div class="c4-color-dot ${currPlayer.color===c?'active':''}" style="background:${c}" onclick="c4SetColor('${c}')"></div>`
     ).join('');
 
-    // Goal Section (Alleen bij P1 tonen)
+    // Goal Section (Alleen P1)
     let goalSection = '';
     if (isP1) {
         goalSection = `
@@ -62,11 +64,11 @@ function renderWizardStep() {
                 <button class="goal-btn ${c4State.winsNeeded===5?'selected':''}" onclick="c4SetGoal(5)">5</button>
                 <button class="goal-btn ${c4State.winsNeeded===7?'selected':''}" onclick="c4SetGoal(7)">7</button>
             </div>
-            <hr style="border:0; border-top:2px dashed #eee; margin:20px 0;">
+            <hr style="border:0; border-top:2px dashed #eee; margin:10px 0;">
         `;
     }
 
-    // De HTML opbouw
+    // De HTML
     board.innerHTML = `
         <div class="c4-setup-container">
             <div class="c4-step-box">
@@ -74,7 +76,7 @@ function renderWizardStep() {
                 
                 <div class="c4-title" style="color:${currPlayer.color}">${title}</div>
                 
-                <div class="c4-subtitle">Kies je naam:</div>
+                <div class="c4-subtitle">Kies naam:</div>
                 <div class="preset-row">
                     <button class="preset-btn ${currPlayer.name==='Lou'?'active':''}" onclick="c4SetName('Lou')">👦🏼<br>Lou</button>
                     <button class="preset-btn ${currPlayer.name==='Noé'?'active':''}" onclick="c4SetName('Noé')">👶🏼<br>Noé</button>
@@ -84,7 +86,7 @@ function renderWizardStep() {
                 <input type="text" class="custom-name-input" placeholder="Of typ zelf..." value="${currPlayer.name}" 
                     oninput="c4UpdateName(this.value)" onclick="this.select()">
 
-                <div class="c4-subtitle">Kies je kleur & plaatje:</div>
+                <div class="c4-subtitle">Kies kleur & plaatje:</div>
                 <div class="color-picker-row">${colorsHTML}</div>
                 <div class="chip-grid" id="c4-chip-grid">${chipsHTML}</div>
 
@@ -110,42 +112,37 @@ function renderWizardStep() {
     `;
 }
 
-// --- SETUP ACTIES (Zonder volledige refresh) ---
+// --- SETUP ACTIES ---
 
 function c4UpdateBtn() {
-    // Check of knop groen mag worden
     const curr = c4State.step === 0 ? c4State.p1 : c4State.p2;
     const btn = document.querySelector('.confirm-action-btn');
+    const isP1 = c4State.step === 0;
+    
     if (curr.name && curr.img) {
         btn.classList.add('ready');
+        btn.innerText = isP1 ? "BEVESTIG SPELER 1 ➡" : "START HET SPEL! 🚀";
     } else {
         btn.classList.remove('ready');
+        btn.innerText = "KIES NAAM & PLAATJE...";
     }
 }
 
-function c4SetGoal(n) {
-    if(typeof playSound==='function') playSound('click');
-    c4State.winsNeeded = n;
-    renderWizardStep(); // Refresh nodig om knop status te zien
-}
+function c4SetGoal(n) { if(typeof playSound==='function') playSound('click'); c4State.winsNeeded = n; renderWizardStep(); }
 
 function c4SetName(n) {
     if(typeof playSound==='function') playSound('click');
     const p = c4State.step === 0 ? c4State.p1 : c4State.p2;
     p.name = n;
     
-    // UI Updates
     document.querySelector('.custom-name-input').value = n;
     document.querySelectorAll('.preset-btn').forEach(b => {
-        // Simpele check op tekstinhoud (bevat de naam)
-        if(b.innerText.includes(n)) b.classList.add('active');
-        else b.classList.remove('active');
+        if(b.innerText.includes(n)) b.classList.add('active'); else b.classList.remove('active');
     });
     
-    // Update VS box onderaan
+    // Update VS text
     const vsId = c4State.step === 0 ? '.vs-mini-player:first-child .vs-mini-name' : '.vs-mini-player:last-child .vs-mini-name';
     document.querySelector(vsId).innerText = n;
-    
     c4UpdateBtn();
 }
 
@@ -160,7 +157,7 @@ function c4SetColor(c) {
     if(typeof playSound==='function') playSound('click');
     const p = c4State.step === 0 ? c4State.p1 : c4State.p2;
     p.color = c;
-    renderWizardStep(); // Refresh nodig om kleuren op chips toe te passen
+    renderWizardStep(); 
 }
 
 function c4SetChip(src) {
@@ -168,36 +165,37 @@ function c4SetChip(src) {
     const p = c4State.step === 0 ? c4State.p1 : c4State.p2;
     p.img = src;
     
-    // Selectie verplaatsen
+    // Selecteer visueel (zonder refresh van hele pagina)
     document.querySelectorAll('.chip-option').forEach(el => el.classList.remove('selected'));
-    // We kunnen niet makkelijk de specifieke div vinden zonder ID, dus refresh is veiliger hier
-    // Maar voor 'geen verspringen' proberen we het lokaal:
-    // Zoek het element met de juiste src
     const allChips = document.querySelectorAll('.chip-option img');
     allChips.forEach(img => {
-        if(img.getAttribute('src') === src) {
-            img.parentElement.classList.add('selected');
-        }
+        if(img.getAttribute('src') === src) img.parentElement.classList.add('selected');
     });
 
-    // Update VS box
     const vsId = c4State.step === 0 ? '.vs-mini-player:first-child .vs-mini-chip' : '.vs-mini-player:last-child .vs-mini-chip';
     document.querySelector(vsId).innerHTML = `<img src="${src}">`;
-
     c4UpdateBtn();
 }
 
 function c4NextStep() {
-    if(typeof playSound==='function') playSound('win'); // Bevestiging geluid
+    const curr = c4State.step === 0 ? c4State.p1 : c4State.p2;
+    
+    // VALIDATIE: Mag niet doorgaan als niet klaar
+    if (!curr.name || !curr.img) {
+        if(typeof playSound==='function') playSound('error');
+        alert("Kies eerst een naam én een plaatje!");
+        return;
+    }
+
+    if(typeof playSound==='function') playSound('win');
     if (c4State.step === 0) {
-        c4State.step = 1; // Naar speler 2
-        renderWizardStep();
+        c4State.step = 1; renderWizardStep();
     } else {
-        c4InitGame(); // Start spel
+        c4InitGame(); 
     }
 }
 
-// --- GAME LOGIC (Ongewijzigd, werkt goed) ---
+// --- GAME LOGIC ---
 function c4InitGame() {
     c4State.board = Array(COLS).fill(null).map(() => Array(ROWS).fill(0));
     c4State.gameActive = true; c4State.isDropping = false; c4State.currentPlayer = 1;
@@ -209,9 +207,7 @@ function renderBoard() {
     const makeDots = (wins) => { let h=''; for(let i=0; i<c4State.winsNeeded; i++) h+=`<div class="win-dot ${i<wins?'filled':''}"></div>`; return h; };
 
     let gridHTML = '';
-    for(let r=ROWS-1; r>=0; r--) { 
-        for(let c=0; c<COLS; c++) gridHTML += `<div class="c4-cell" id="cell-${c}-${r}"></div>`;
-    }
+    for(let r=ROWS-1; r>=0; r--) { for(let c=0; c<COLS; c++) gridHTML += `<div class="c4-cell" id="cell-${c}-${r}"></div>`; }
     let colHTML = '';
     for(let c=0; c<COLS; c++) colHTML += `<div class="c4-column" id="col-${c}" onclick="c4Drop(${c})"></div>`;
 
@@ -222,7 +218,7 @@ function renderBoard() {
                     <div class="mini-chip" style="background:${c4State.p1.color}"><img src="${c4State.p1.img}"></div>
                     <div><div style="font-weight:bold; font-size:0.8rem;">${c4State.p1.name}</div><div class="wins-dots">${makeDots(c4State.p1.wins)}</div></div>
                 </div>
-                <button class="tool-btn" onclick="startConnect4()">Stop</button>
+                <button class="tool-btn" style="width:auto; margin:0;" onclick="startConnect4()">Stop</button>
                 <div class="score-pill ${c4State.currentPlayer===2?'active-turn':''}" style="border-right:5px solid ${c4State.p2.color}">
                     <div style="text-align:right;"><div style="font-weight:bold; font-size:0.8rem;">${c4State.p2.name}</div><div class="wins-dots" style="justify-content:flex-end">${makeDots(c4State.p2.wins)}</div></div>
                     <div class="mini-chip" style="background:${c4State.p2.color}"><img src="${c4State.p2.img}"></div>
