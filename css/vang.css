@@ -1,6 +1,6 @@
-/* VANG.CSS - SETUP & GAMEPLAY */
+/* VANG.CSS - MET CLICK FIX */
 
-/* --- 1. SETUP SCHERM (Uniforme Stijl) --- */
+/* --- 1. SETUP SCHERM --- */
 .memory-setup {
     display: flex; flex-direction: column;
     height: 100%; width: 100%;
@@ -17,35 +17,26 @@
 
 h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
 
-/* SPELERS & MOEILIJKHEID KNOPPEN */
+/* SPELERS & KNOPPEN */
 .name-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; }
-
 .player-btn {
     flex: 1; min-width: 80px;
     background: #f0f0f0; border: 2px solid #ddd;
     border-radius: 12px; padding: 15px 5px;
     font-family: 'Fredoka One'; cursor: pointer;
     transition: all 0.2s; white-space: nowrap;
-    opacity: 0.7; font-size: 1rem;
-    position: relative;
+    opacity: 0.7; font-size: 1rem; position: relative;
 }
-
-/* DUIDELIJKE SELECTIE STIJL (Groen + Vinkje) */
 .player-btn.selected-pending {
-    background: #4CAF50 !important; 
-    border-color: #2E7D32 !important; 
-    color: white !important;
-    transform: scale(1.05); 
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
+    background: #4CAF50 !important; border-color: #2E7D32 !important; color: white !important;
+    transform: scale(1.05); box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
     opacity: 1; font-weight: bold;
 }
-/* Vinkje icoon bij selectie */
 .player-btn.selected-pending::after {
     content: '✅'; position: absolute; top: -8px; right: -8px; font-size: 1.2rem;
     filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
 }
 
-/* KLEUREN GRID (Met max-width fix) */
 .color-grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 10px; width: 100%; }
 .color-dot {
     width: 100% !important; max-width: 55px; aspect-ratio: 1 / 1; height: auto !important;
@@ -62,13 +53,14 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
 .start-btn:disabled { background: #ccc; box-shadow: none; color: #666; }
 .tool-btn { border: none; background: #90A4AE; color: white; padding: 10px; border-radius: 10px; font-family: 'Fredoka One'; }
 
-
 /* --- 2. GAMEPLAY SCHERM --- */
 .whack-game-container {
     display: flex; flex-direction: column; align-items: center;
     width: 100%; height: 100%;
     background: linear-gradient(180deg, #81C784 0%, #4CAF50 100%);
-    padding: 10px; box-sizing: border-box; overflow: hidden; user-select: none;
+    padding: 10px; box-sizing: border-box; overflow: hidden; 
+    user-select: none;
+    -webkit-tap-highlight-color: transparent; /* Geen blauwe flits op mobiel */
 }
 
 .whack-header {
@@ -85,20 +77,17 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
 }
 .player-icon-display { font-size: 1.5rem; }
 
-/* HET ROOSTER (Variabel op basis van niveau) */
+/* ROOSTER */
 .whack-grid {
     display: grid; gap: 10px;
     width: 100%; max-width: 500px;
     margin-top: 10px; flex: 1; align-content: center;
 }
-
-/* Makkelijk: 2x2 = 4 gaten */
 .whack-grid.easy { grid-template-columns: repeat(2, 1fr); max-width: 400px; }
-/* Medium: 3x3 = 9 gaten */
 .whack-grid.medium { grid-template-columns: repeat(3, 1fr); }
-/* Moeilijk: 3x4 = 12 gaten */
 .whack-grid.hard { grid-template-columns: repeat(3, 1fr); } 
 
+/* HET GAT (Dit vangt de klik!) */
 .hole {
     aspect-ratio: 1 / 1;
     background: #5D4037;
@@ -106,17 +95,21 @@ h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #333; }
     position: relative; overflow: hidden;
     box-shadow: inset 0 10px 20px rgba(0,0,0,0.5), 0 5px 0 rgba(255,255,255,0.2);
     border-bottom: 5px solid #3E2723;
-    cursor: pointer;
+    cursor: pointer; /* Handje */
+    touch-action: manipulation; /* Sneller reageren op touch */
 }
 
-/* HET PLAATJE */
+/* HET PLAATJE (Klik gaat hier dwars doorheen!) */
 .mole-img {
     width: 80%; height: 80%;
     position: absolute; bottom: -120%; left: 10%;
-    transition: bottom 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Stuiter effect */
-    pointer-events: none; object-fit: contain;
+    transition: bottom 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    object-fit: contain;
     filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
+    
+    /* DE FIX: Zorgt dat je de hole erachter aanklikt */
+    pointer-events: none !important; 
 }
 
-.hole.up .mole-img { bottom: 0%; pointer-events: auto; }
+.hole.up .mole-img { bottom: 0%; }
 .hole.bonked .mole-img { transform: scale(0.9) rotate(10deg); filter: brightness(1.5) sepia(1); }
