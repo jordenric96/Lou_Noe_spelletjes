@@ -1,5 +1,5 @@
-// VIEROPEENRIJ.JS - THEME QUEUE & SOLID FIX
-console.log("4-op-een-rij geladen (Queue Edition)...");
+// VIEROPEENRIJ.JS - CENTRAL PLAYERS & SOLID CHIPS
+console.log("4-op-een-rij geladen (Final Fix)...");
 
 let c4State = {
     step: 0, winsNeeded: 3,
@@ -11,24 +11,6 @@ let c4State = {
 const ROWS = 6; const COLS = 7;
 const c4Colors = ['#F44336', '#E91E63', '#9C27B0', '#2196F3', '#00BCD4', '#4CAF50', '#FFEB3B', '#FF9800'];
 
-// --- HELPER: GENERATE QUEUE ---
-function generateQueue(themeKey) {
-    if (!memThemes || !memThemes[themeKey]) return Array(20).fill('assets/images/icon.png');
-    
-    const t = memThemes[themeKey];
-    const pool = [];
-    // Maak een lijst van alle beschikbare plaatjes in dit thema
-    for(let i=1; i<=15; i++) pool.push(`${t.path}${i}.${t.extension}`);
-    
-    // Shuffle en vul aan tot 25 (zodat je nooit op raakt)
-    const queue = [];
-    while(queue.length < 25) {
-        const item = pool[Math.floor(Math.random() * pool.length)];
-        queue.push(item);
-    }
-    return queue;
-}
-
 // --- SETUP ---
 function startConnect4() {
     c4State.step = 0; c4State.p1.wins = 0; c4State.p2.wins = 0;
@@ -37,27 +19,38 @@ function startConnect4() {
     renderWizardStep();
 }
 
+function generateQueue(themeKey) {
+    if (!memThemes || !memThemes[themeKey]) return Array(25).fill('assets/images/icon.png');
+    const t = memThemes[themeKey];
+    const pool = [];
+    for(let i=1; i<=15; i++) pool.push(`${t.path}${i}.${t.extension}`);
+    const queue = [];
+    // Shuffle en vul
+    while(queue.length < 30) {
+        queue.push(pool[Math.floor(Math.random() * pool.length)]);
+    }
+    return queue;
+}
+
 function renderWizardStep() {
     const board = document.getElementById('game-board');
     const isP1 = c4State.step === 0;
     const currPlayer = isP1 ? c4State.p1 : c4State.p2;
-    const title = isP1 ? "WIE IS SPELER 1?" : "WIE IS SPELER 2?";
+    const title = isP1 ? "SPELER 1" : "SPELER 2";
     const isReady = currPlayer.name !== '' && currPlayer.themeKey !== '';
     let btnText = "KIES NAAM & THEMA...";
     if (isReady) btnText = isP1 ? "BEVESTIG SPELER 1 ➡" : "START HET SPEL! 🚀";
 
-    // Thema opties genereren (Nu kiezen we een MAPJE, geen losse chip)
+    // Thema opties
     let themesHTML = '';
     if(typeof memThemes !== 'undefined') {
         Object.keys(memThemes).forEach(key => {
             const t = memThemes[key];
             if(!t.locked && !t.isMix) {
-                // Als P2 kiest, mag hij niet zelfde thema als P1? Nee, mag wel, is leuk.
-                // We tonen de cover image van het thema
                 const selected = currPlayer.themeKey === key ? 'selected' : '';
                 themesHTML += `
                     <div class="theme-option ${selected}" onclick="c4SetTheme('${key}')">
-                        <img src="${t.path}cover.png" class="theme-cover">
+                        <img src="${t.path}cover.png">
                         <div class="theme-name">${key}</div>
                     </div>`;
             }
@@ -87,7 +80,7 @@ function renderWizardStep() {
                 ${goalSection}
                 <div class="c4-title" style="color:${currPlayer.color}">${title}</div>
                 
-                <div class="c4-subtitle">Kies naam:</div>
+                <div class="c4-subtitle">Naam:</div>
                 <div class="preset-row">
                     <button class="preset-btn ${currPlayer.name==='Lou'?'active':''}" onclick="c4SetName('Lou')">👦🏼<br>Lou</button>
                     <button class="preset-btn ${currPlayer.name==='Noé'?'active':''}" onclick="c4SetName('Noé')">👶🏼<br>Noé</button>
@@ -97,23 +90,22 @@ function renderWizardStep() {
                 <input type="text" class="custom-name-input" placeholder="Of typ zelf..." value="${currPlayer.name}" 
                     oninput="c4UpdateName(this.value)" onclick="this.select()">
 
-                <div class="c4-subtitle">Kies kleur & thema:</div>
+                <div class="c4-subtitle">Kleur & Thema:</div>
                 <div class="color-picker-row">${colorsHTML}</div>
                 <div class="chip-grid" style="grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));">${themesHTML}</div>
 
                 <button class="confirm-action-btn ${isReady ? 'ready' : ''}" onclick="c4NextStep()">${btnText}</button>
             </div>
-            <button class="tool-btn" onclick="location.reload()">Stoppen</button>
+            <button class="tool-btn" onclick="location.reload()">Terug naar Menu</button>
         </div>
     `;
 }
 
-// SETUP FUNCTIONS
+// Setup Helpers
 function c4UpdateBtn() {
     const curr = c4State.step === 0 ? c4State.p1 : c4State.p2;
     const btn = document.querySelector('.confirm-action-btn');
-    const isReady = curr.name && curr.themeKey;
-    if (isReady) {
+    if (curr.name && curr.themeKey) {
         btn.classList.add('ready');
         btn.innerText = c4State.step === 0 ? "BEVESTIG SPELER 1 ➡" : "START HET SPEL! 🚀";
     } else {
@@ -141,22 +133,17 @@ function c4SetTheme(key) {
     if(typeof playSound==='function') playSound('pop');
     const p = c4State.step === 0 ? c4State.p1 : c4State.p2; p.themeKey = key;
     document.querySelectorAll('.theme-option').forEach(el => el.classList.remove('selected'));
-    // Visuele update zonder refresh (voor snelheid)
-    // Maar we hebben geen unieke ID op de div, dus refresh is veiliger
     renderWizardStep();
 }
 function c4NextStep() {
     const curr = c4State.step === 0 ? c4State.p1 : c4State.p2;
     if (!curr.name || !curr.themeKey) { if(typeof playSound==='function') playSound('error'); return; }
     if(typeof playSound==='function') playSound('win');
-    
-    // GENERATE QUEUE
     curr.queue = generateQueue(curr.themeKey);
-    
     if (c4State.step === 0) { c4State.step = 1; renderWizardStep(); } else { c4InitGame(); }
 }
 
-// --- GAME LOGIC ---
+// --- GAME ---
 function c4InitGame() {
     c4State.board = Array(COLS).fill(null).map(() => Array(ROWS).fill(0));
     c4State.gameActive = true; c4State.isDropping = false; c4State.currentPlayer = 1;
@@ -166,31 +153,29 @@ function c4InitGame() {
 function renderGame() {
     const board = document.getElementById('game-board');
     
-    // Functie om queue HTML te maken
-    const makeQueue = (player, isActive) => {
+    // Helper voor Queue en Stars
+    const makeQueue = (p, isActive) => {
         let h = `<div class="chip-queue">`;
-        // Toon eerste 6 chips
-        player.queue.slice(0, 6).forEach((src, i) => {
-            const cls = i === 0 ? (isActive ? 'queue-item next-up' : 'queue-item') : 'queue-item';
-            h += `<div class="${cls}" style="background:${player.color}"><img src="${src}"></div>`;
+        p.queue.slice(0, 5).forEach((src, i) => {
+            const cls = (i === 0 && isActive) ? 'queue-item next-up' : 'queue-item';
+            h += `<div class="${cls}" style="background:${p.color}"><img src="${src}"></div>`;
         });
         h += `</div>`;
         return h;
     };
-
     const makeStars = (p) => {
-        let h = '';
-        for(let i=0; i<c4State.winsNeeded; i++) {
-            h += `<div class="star-dot ${i < p.wins ? 'won' : ''}"></div>`;
-        }
-        return h;
+        let h = ''; for(let i=0; i<c4State.winsNeeded; i++) h += `<div class="star-dot ${i<p.wins?'won':''}"></div>`; return h;
     };
+
+    // Masker Grid (Gaten)
+    const maskCells = Array(ROWS*COLS).fill('<div class="c4-hole"></div>').join('');
+    // Klik Grid
+    const clickCols = Array(COLS).fill(0).map((_,i) => `<div class="c4-col-click" onclick="c4Drop(${i})"></div>`).join('');
 
     board.innerHTML = `
         <div class="c4-game-container">
-            
             <div class="player-zone top ${c4State.currentPlayer===1?'active-turn':''}">
-                <div class="pz-header">
+                <div class="pz-info">
                     <div class="pz-name" style="color:${c4State.p1.color}">${c4State.p1.name}</div>
                     <div class="pz-stars">${makeStars(c4State.p1)}</div>
                 </div>
@@ -199,22 +184,20 @@ function renderGame() {
 
             <div class="board-area">
                 <div class="board-wrapper" id="board-visual">
-                    <div id="chips-layer"></div>   <div class="c4-grid">          ${Array(ROWS*COLS).fill('<div class="c4-cell"></div>').join('')}
-                    </div>
-                    <div class="click-layer">      ${Array(COLS).fill(0).map((_,i) => `<div class="c4-column" onclick="c4Drop(${i})"></div>`).join('')}
-                    </div>
+                    <div class="layer-chips" id="chips-layer"></div>
+                    <div class="layer-mask">${maskCells}</div>
+                    <div class="layer-click">${clickCols}</div>
                 </div>
-                <button class="tool-btn" style="width:auto; margin-top:10px;" onclick="startConnect4()">Stoppen</button>
+                <button class="tool-btn" style="width:auto; margin-top:5px; padding:5px 20px; font-size:0.8rem;" onclick="startConnect4()">Stoppen</button>
             </div>
 
             <div class="player-zone bottom ${c4State.currentPlayer===2?'active-turn':''}">
-                <div class="pz-header">
+                ${makeQueue(c4State.p2, c4State.currentPlayer===2)}
+                <div class="pz-info">
                     <div class="pz-name" style="color:${c4State.p2.color}">${c4State.p2.name}</div>
                     <div class="pz-stars">${makeStars(c4State.p2)}</div>
                 </div>
-                ${makeQueue(c4State.p2, c4State.currentPlayer===2)}
             </div>
-
         </div>
     `;
 }
@@ -222,7 +205,7 @@ function renderGame() {
 function c4Drop(col) {
     if(!c4State.gameActive || c4State.isDropping) return;
     
-    // 1. Zoek rij
+    // Zoek rij
     let row = -1;
     for(let r=0; r<ROWS; r++) { if(c4State.board[col][r] === 0) { row = r; break; } }
     if(row === -1) { if(typeof playSound==='function') playSound('error'); return; }
@@ -231,90 +214,63 @@ function c4Drop(col) {
     c4State.board[col][row] = c4State.currentPlayer;
     
     const p = c4State.currentPlayer === 1 ? c4State.p1 : c4State.p2;
-    // 2. PAK EERSTE CHIP UIT QUEUE
-    const chipSrc = p.queue.shift(); 
-    // Vul queue aan (zodat hij nooit leeg raakt)
-    p.queue.push(generateQueue(p.themeKey)[0]);
+    const chipSrc = p.queue.shift(); // Pak chip
+    p.queue.push(generateQueue(p.themeKey)[0]); // Vul aan
+    renderGame(); // Update queue UI
 
-    // Update UI (queue schuift op)
-    renderGame(); 
-    // Door renderGame wordt DOM herbouwd, maar dat geeft niet, we injecteren de vallende chip nu.
+    // 1. Bereken Dimensies
+    const boardEl = document.getElementById('board-visual');
+    const boardRect = boardEl.getBoundingClientRect();
+    
+    // We weten: Bord is 7 kolommen breed, 6 rijen hoog.
+    // De breedte van één cel is BordBreedte / 7
+    const cellW = boardRect.width / 7;
+    const cellH = boardRect.height / 6;
+    
+    // Chip is ietsje kleiner dan de cel
+    const chipSize = cellW * 0.92;
+    const margin = (cellW - chipSize) / 2; // Centreren
+    
+    // Bereken posities relatief aan de chips-layer (0,0 is linksboven in het bord)
+    const finalLeft = (col * cellW) + margin;
+    
+    // Rij 0 (onderaan) = 5 * cellH (van bovenaf geteld)
+    // Rij 5 (boven) = 0 * cellH
+    // Formule: Y = (5 - row) * cellH + margin
+    const finalTop = ((5 - row) * cellH) + margin;
 
-    // 3. MAAK CHIP
+    // 2. Maak Chip
     const chip = document.createElement('div');
-    chip.className = 'game-chip chip-falling';
+    chip.className = 'game-chip';
+    chip.style.width = `${chipSize}px`;
+    chip.style.height = `${chipSize}px`;
+    chip.style.left = `${finalLeft}px`;
     chip.style.background = p.color;
-    chip.innerHTML = `<img src="${chipSrc}">`;
-
-    const chipsLayer = document.getElementById('chips-layer');
-    const boardWrapper = document.getElementById('board-visual');
+    chip.innerHTML = `<img src="${chipSrc}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
     
-    // BEREKEN AFMETINGEN (Dynamisch)
-    const wrapperWidth = boardWrapper.clientWidth;
-    const wrapperHeight = boardWrapper.clientHeight;
-    // Padding is 2% aan elke kant = 4% totaal.
-    // Effectieve breedte = 96%
-    const effW = wrapperWidth * 0.96;
-    const cellW = effW / 7;
-    const cellH = cellW; // Vierkant
+    // Stel CSS variabele in voor animatie (eindpunt)
+    chip.style.setProperty('--final-top', `${finalTop}px`);
+    chip.style.animation = `dropBounce 0.5s cubic-bezier(0.5, 0.05, 1, 0.5) forwards`;
     
-    // Left offset = 2% padding + (col * cellW)
-    const leftPos = (wrapperWidth * 0.02) + (col * cellW);
+    document.getElementById('chips-layer').appendChild(chip);
     
-    // Target Top = WrapperHeight - 2% PaddingBottom - (row+1)*cellH
-    // Of makkelijker: 2% PaddingTop + (5-row)*cellH
-    // Rij 0 (onder) = index 5 in visual grid (boven naar beneden)?
-    // Nee: Board array 0 = onder.
-    // Visual grid: Top (row 5) naar Bottom (row 0).
-    // CSS Grid in mask bouwt van linksboven.
-    // Laten we de "Top" berekenen:
-    // Bord is 6 hoog. Rij 0 (onder) is de 6e cel van boven.
-    // Top = PaddingTop + (5 - row) * cellH
-    const topPos = (wrapperHeight * 0.02) + ((5 - row) * cellH);
-    
-    // Stel grootte in (ietsje kleiner dan gat voor mooie fit)
-    const chipSize = cellW * 0.9;
-    const offset = (cellW - chipSize) / 2;
-    
-    chip.style.width = chipSize + 'px';
-    chip.style.height = chipSize + 'px';
-    chip.style.left = (leftPos + offset) + 'px';
-    
-    // Animatie
-    const animName = `drop-${Date.now()}`;
-    const keyframes = `@keyframes ${animName} { 
-        0% { top: -100px; } 
-        60% { top: ${topPos + offset}px; } 
-        80% { top: ${topPos + offset - 20}px; } 
-        100% { top: ${topPos + offset}px; } 
-    }`;
-    const style = document.createElement('style');
-    style.innerText = keyframes;
-    document.head.appendChild(style);
-    
-    chip.style.animation = `${animName} 0.5s ease-in forwards`;
-    chipsLayer.appendChild(chip);
-    
-    setTimeout(() => { if(typeof playSound==='function') playSound('click'); }, 300);
+    setTimeout(() => { if(typeof playSound==='function') playSound('click'); }, 350);
 
     setTimeout(() => {
         c4State.isDropping = false;
-        // FINAL POSITION LOCK
-        chip.style.top = (topPos + offset) + 'px';
-        chip.style.animation = 'none';
-        chip.classList.remove('chip-falling');
-        document.head.removeChild(style);
+        // FINAL FIX: Harde positie zetten
+        chip.style.top = `${finalTop}px`;
+        chip.style.animation = 'none'; // Stop animatie
         
         if (c4CheckWin(col, row)) c4Win();
         else if (c4CheckDraw()) { alert("Gelijkspel!"); c4InitGame(); }
         else {
             c4State.currentPlayer = c4State.currentPlayer===1?2:1;
-            renderGame(); // Update beurt visueel
+            renderGame(); 
         }
     }, 550);
 }
 
-// WIN & DRAW (Standaard)
 function c4CheckWin(c, r) {
     const p = c4State.board[c][r];
     const dirs = [[[0,1]], [[1,0]], [[1,1]], [[1,-1]]];
