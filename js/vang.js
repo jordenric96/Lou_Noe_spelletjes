@@ -1,5 +1,5 @@
-// VANG.JS - SIMPEL MENU + GELUIDEN FIX
-console.log("Vang.js geladen (Simple & Sounds)...");
+// VANG.JS - VEILIGE EASY MODE (GEEN BOMMEN)
+console.log("Vang.js geladen (Safe Easy Mode)...");
 
 let whackState = {
     score: 0, lastHole: null, timeUp: false, 
@@ -71,7 +71,7 @@ function renderWhackSetup(board) {
                     <div class="level-card-btn easy" onclick="vangSetDiff('easy', this)">
                         <div class="level-icon">🟢</div>
                         <div class="level-text">Makkelijk</div>
-                        <div class="level-sub">4 Gaten</div>
+                        <div class="level-sub">4 Gaten<br>(Geen 💣)</div>
                     </div>
                     
                     <div class="level-card-btn medium selected" onclick="vangSetDiff('medium', this)">
@@ -164,7 +164,14 @@ function peep() {
     const holes = document.querySelectorAll('.hole');
     const hole = randomHole(holes);
     const imgEl = hole.querySelector('.mole-img');
-    const isBad = Math.random() < 0.3; 
+    
+    // --- DE AANPASSING: GEEN BOMMEN BIJ EASY ---
+    let isBad = false;
+    
+    // Alleen bij Medium of Hard mag er een bom komen (30% kans)
+    if (whackState.difficulty !== 'easy') {
+        isBad = Math.random() < 0.3;
+    }
 
     if (isBad) {
         const isBomb = Math.random() > 0.5;
@@ -191,7 +198,7 @@ function bonk(hole) {
     const type = imgEl.dataset.type;
 
     if(type === "bomb" || type === "poop") {
-        // --- FOUT GELUID (Bom/Drol) ---
+        // FOUT GELUID
         if(typeof playSound === 'function') playSound('error'); 
         
         hole.classList.remove('up'); 
@@ -201,7 +208,7 @@ function bonk(hole) {
         document.querySelector('.whack-game-container').style.backgroundColor = "#F44336";
         setTimeout(()=>document.querySelector('.whack-game-container').style.backgroundColor = "", 200);
     } else {
-        // --- GOED GELUID (Plaatje) ---
+        // GOED GELUID
         if(typeof playSound === 'function') playSound('pop'); 
         
         hole.classList.remove('up'); 
