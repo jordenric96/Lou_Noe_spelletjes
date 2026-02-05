@@ -1,5 +1,5 @@
-// VIEROPEENRIJ.JS - BUTTON VISIBILITY FIX
-console.log("4-op-een-rij geladen (Button Fix)...");
+// VIEROPEENRIJ.JS - FINAL TOY VERSION
+console.log("4-op-een-rij geladen (Toy & Fix)...");
 
 let c4State = {
     step: 0, winsNeeded: 3,
@@ -24,24 +24,17 @@ function renderWizardStep() {
     const isP1 = c4State.step === 0;
     const currPlayer = isP1 ? c4State.p1 : c4State.p2;
     const title = isP1 ? "WIE IS SPELER 1?" : "WIE IS SPELER 2?";
-    
-    // Check of we klaar zijn
     const isReady = currPlayer.name !== '' && currPlayer.img !== '';
-    
-    // Knop Tekst (Dynamisch)
     let btnText = "KIES NAAM & PLAATJE...";
-    if (isReady) {
-        btnText = isP1 ? "BEVESTIG SPELER 1 ➡" : "START HET SPEL! 🚀";
-    }
+    if (isReady) btnText = isP1 ? "BEVESTIG SPELER 1 ➡" : "START HET SPEL! 🚀";
 
-    // Genereer chips
     let chipsHTML = '';
     if(typeof memThemes !== 'undefined') {
         Object.values(memThemes).forEach(t => {
             if(!t.locked && !t.isMix) {
                 for(let i=1; i<=5; i++) {
                     const src = `${t.path}${i}.${t.extension}`;
-                    if (!isP1 && src === c4State.p1.img) return; // Geen dubbele chips
+                    if (!isP1 && src === c4State.p1.img) return; 
                     const selected = currPlayer.img === src ? 'selected' : '';
                     chipsHTML += `<div class="chip-option ${selected}" style="background:${currPlayer.color}" onclick="c4SetChip('${src}')"><img src="${src}"></div>`;
                 }
@@ -49,12 +42,10 @@ function renderWizardStep() {
         });
     }
 
-    // Genereer Kleuren
     let colorsHTML = c4Colors.map(c => 
         `<div class="c4-color-dot ${currPlayer.color===c?'active':''}" style="background:${c}" onclick="c4SetColor('${c}')"></div>`
     ).join('');
 
-    // Goal Section (Alleen P1)
     let goalSection = '';
     if (isP1) {
         goalSection = `
@@ -68,12 +59,10 @@ function renderWizardStep() {
         `;
     }
 
-    // De HTML
     board.innerHTML = `
         <div class="c4-setup-container">
             <div class="c4-step-box">
                 ${goalSection}
-                
                 <div class="c4-title" style="color:${currPlayer.color}">${title}</div>
                 
                 <div class="c4-subtitle">Kies naam:</div>
@@ -90,22 +79,19 @@ function renderWizardStep() {
                 <div class="color-picker-row">${colorsHTML}</div>
                 <div class="chip-grid" id="c4-chip-grid">${chipsHTML}</div>
 
-                <button class="confirm-action-btn ${isReady ? 'ready' : ''}" onclick="c4NextStep()">
-                    ${btnText}
-                </button>
+                <button class="confirm-action-btn ${isReady ? 'ready' : ''}" onclick="c4NextStep()">${btnText}</button>
 
                 <div class="vs-preview-box">
                     <div class="vs-mini-player ${isP1?'active-setup':''}">
                         <div class="vs-mini-chip" style="background:${c4State.p1.color}">${c4State.p1.img?`<img src="${c4State.p1.img}">`:''}</div>
                         <div class="vs-mini-name">${c4State.p1.name||'...'}</div>
                     </div>
-                    <div class="vs-mini-mid">VS</div>
+                    <div style="font-weight:bold;color:#ccc">VS</div>
                     <div class="vs-mini-player ${!isP1?'active-setup':''}">
                         <div class="vs-mini-chip" style="background:${c4State.p2.color}">${c4State.p2.img?`<img src="${c4State.p2.img}">`:''}</div>
                         <div class="vs-mini-name">${c4State.p2.name||'...'}</div>
                     </div>
                 </div>
-
             </div>
             <button class="tool-btn" onclick="location.reload()">Stoppen</button>
         </div>
@@ -113,12 +99,10 @@ function renderWizardStep() {
 }
 
 // --- SETUP ACTIES ---
-
 function c4UpdateBtn() {
     const curr = c4State.step === 0 ? c4State.p1 : c4State.p2;
     const btn = document.querySelector('.confirm-action-btn');
     const isP1 = c4State.step === 0;
-    
     if (curr.name && curr.img) {
         btn.classList.add('ready');
         btn.innerText = isP1 ? "BEVESTIG SPELER 1 ➡" : "START HET SPEL! 🚀";
@@ -127,72 +111,40 @@ function c4UpdateBtn() {
         btn.innerText = "KIES NAAM & PLAATJE...";
     }
 }
-
 function c4SetGoal(n) { if(typeof playSound==='function') playSound('click'); c4State.winsNeeded = n; renderWizardStep(); }
-
 function c4SetName(n) {
     if(typeof playSound==='function') playSound('click');
-    const p = c4State.step === 0 ? c4State.p1 : c4State.p2;
-    p.name = n;
-    
+    const p = c4State.step === 0 ? c4State.p1 : c4State.p2; p.name = n;
     document.querySelector('.custom-name-input').value = n;
     document.querySelectorAll('.preset-btn').forEach(b => {
         if(b.innerText.includes(n)) b.classList.add('active'); else b.classList.remove('active');
     });
-    
-    // Update VS text
+    // VS Update
     const vsId = c4State.step === 0 ? '.vs-mini-player:first-child .vs-mini-name' : '.vs-mini-player:last-child .vs-mini-name';
     document.querySelector(vsId).innerText = n;
     c4UpdateBtn();
 }
-
-function c4UpdateName(val) {
-    const p = c4State.step === 0 ? c4State.p1 : c4State.p2;
-    p.name = val;
-    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-    c4UpdateBtn();
-}
-
+function c4UpdateName(val) { const p = c4State.step === 0 ? c4State.p1 : c4State.p2; p.name = val; document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active')); c4UpdateBtn(); }
 function c4SetColor(c) {
     if(typeof playSound==='function') playSound('click');
-    const p = c4State.step === 0 ? c4State.p1 : c4State.p2;
-    p.color = c;
+    const p = c4State.step === 0 ? c4State.p1 : c4State.p2; p.color = c;
     renderWizardStep(); 
 }
-
 function c4SetChip(src) {
     if(typeof playSound==='function') playSound('pop');
-    const p = c4State.step === 0 ? c4State.p1 : c4State.p2;
-    p.img = src;
-    
-    // Selecteer visueel (zonder refresh van hele pagina)
+    const p = c4State.step === 0 ? c4State.p1 : c4State.p2; p.img = src;
     document.querySelectorAll('.chip-option').forEach(el => el.classList.remove('selected'));
     const allChips = document.querySelectorAll('.chip-option img');
-    allChips.forEach(img => {
-        if(img.getAttribute('src') === src) img.parentElement.classList.add('selected');
-    });
-
+    allChips.forEach(img => { if(img.getAttribute('src') === src) img.parentElement.classList.add('selected'); });
     const vsId = c4State.step === 0 ? '.vs-mini-player:first-child .vs-mini-chip' : '.vs-mini-player:last-child .vs-mini-chip';
     document.querySelector(vsId).innerHTML = `<img src="${src}">`;
     c4UpdateBtn();
 }
-
 function c4NextStep() {
     const curr = c4State.step === 0 ? c4State.p1 : c4State.p2;
-    
-    // VALIDATIE: Mag niet doorgaan als niet klaar
-    if (!curr.name || !curr.img) {
-        if(typeof playSound==='function') playSound('error');
-        alert("Kies eerst een naam én een plaatje!");
-        return;
-    }
-
+    if (!curr.name || !curr.img) { if(typeof playSound==='function') playSound('error'); return; }
     if(typeof playSound==='function') playSound('win');
-    if (c4State.step === 0) {
-        c4State.step = 1; renderWizardStep();
-    } else {
-        c4InitGame(); 
-    }
+    if (c4State.step === 0) { c4State.step = 1; renderWizardStep(); } else { c4InitGame(); }
 }
 
 // --- GAME LOGIC ---
@@ -207,7 +159,10 @@ function renderBoard() {
     const makeDots = (wins) => { let h=''; for(let i=0; i<c4State.winsNeeded; i++) h+=`<div class="win-dot ${i<wins?'filled':''}"></div>`; return h; };
 
     let gridHTML = '';
-    for(let r=ROWS-1; r>=0; r--) { for(let c=0; c<COLS; c++) gridHTML += `<div class="c4-cell" id="cell-${c}-${r}"></div>`; }
+    // Let op: Grid cellen zijn alleen maar MASKERS. id is cell-k-r
+    for(let r=ROWS-1; r>=0; r--) { 
+        for(let c=0; c<COLS; c++) gridHTML += `<div class="c4-cell" id="cell-${c}-${r}"></div>`; 
+    }
     let colHTML = '';
     for(let c=0; c<COLS; c++) colHTML += `<div class="c4-column" id="col-${c}" onclick="c4Drop(${c})"></div>`;
 
@@ -224,13 +179,13 @@ function renderBoard() {
                     <div class="mini-chip" style="background:${c4State.p2.color}"><img src="${c4State.p2.img}"></div>
                 </div>
             </div>
+            
             <div class="board-wrapper" id="board-visual">
                 <div class="c4-grid">${gridHTML}</div>
                 <div id="col-layer">${colHTML}</div>
                 <div id="chips-layer"></div>
             </div>
-            <div class="board-legs"></div>
-        </div>
+            </div>
     `;
     setTimeout(c4Resize, 10);
     setTimeout(c4Resize, 200);
@@ -240,18 +195,21 @@ function renderBoard() {
 function c4Resize() {
     const wrapper = document.getElementById('board-visual');
     if(!wrapper) return;
+    
+    // Meet één cel in het grid (die wordt automatisch goed geschaald door CSS Grid)
     const cellRef = document.querySelector('.c4-cell');
     if(cellRef) {
         const cellSize = cellRef.clientWidth;
-        wrapper.style.setProperty('--cell-size', `${cellSize}px`);
+        // Zet de chip grootte gelijk aan de cel grootte
+        wrapper.style.setProperty('--chip-size', `${cellSize}px`);
+        
+        // Positie kolommen updaten
         for(let c=0; c<COLS; c++) {
             const colDiv = document.getElementById(`col-${c}`);
-            if(colDiv) {
-                const cell = document.getElementById(`cell-${c}-0`);
-                if(cell) {
-                    colDiv.style.left = cell.offsetLeft + 'px';
-                    colDiv.style.width = cell.clientWidth + 'px';
-                }
+            const cell = document.getElementById(`cell-${c}-0`);
+            if(colDiv && cell) {
+                colDiv.style.left = cell.offsetLeft + 'px';
+                colDiv.style.width = cell.clientWidth + 'px';
             }
         }
     }
@@ -273,17 +231,23 @@ function c4Drop(col) {
     chip.innerHTML = `<img src="${p.img}">`;
 
     const wrapper = document.getElementById('board-visual');
+    // Positie bepalen relative aan chips-layer (die is even groot als board-wrapper padding box)
     const targetCell = document.getElementById(`cell-${col}-${row}`);
-    const startCell = document.getElementById(`cell-${col}-${ROWS-1}`);
     
-    if(targetCell && startCell) {
-        chip.style.left = startCell.offsetLeft + 'px';
-        chip.style.width = startCell.clientWidth + 'px';
-        chip.style.height = startCell.clientHeight + 'px';
+    if(targetCell) {
+        // We gebruiken offsetLeft van de cel
+        chip.style.left = targetCell.offsetLeft + 'px';
+        // Top calculation: start bovenin (-100px) en val naar targetCell.offsetTop
         const targetTop = targetCell.offsetTop;
         
         const animName = `bounce-${col}-${row}-${Date.now()}`;
-        const keyframes = `@keyframes ${animName} { 0% { top: -150%; } 60% { top: ${targetTop}px; } 75% { top: ${targetTop - 15}px; } 100% { top: ${targetTop}px; } }`;
+        // Keyframes: Val naar beneden, stuiter iets omhoog, land
+        const keyframes = `@keyframes ${animName} { 
+            0% { top: -120%; } 
+            60% { top: ${targetTop}px; } 
+            80% { top: ${targetTop - 20}px; } 
+            100% { top: ${targetTop}px; } 
+        }`;
         const styleSheet = document.createElement("style");
         styleSheet.innerText = keyframes;
         document.head.appendChild(styleSheet);
@@ -295,6 +259,7 @@ function c4Drop(col) {
 
         setTimeout(() => {
             c4State.isDropping = false;
+            // DE FIX: Harde positie instellen
             chip.style.top = targetTop + 'px';
             chip.style.animation = 'none';
             chip.classList.remove('chip-falling');
