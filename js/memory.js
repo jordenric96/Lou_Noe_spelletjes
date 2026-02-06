@@ -50,9 +50,9 @@ function startMemorySetup() {
         <div class="setup-group">
             <h3>1. Spelers</h3>
             <div class="name-row">
-                <button class="player-btn" onclick="memSelectPerson('Lou', this)">👦🏼 Lou</button>
+                <button class="player-btn" onclick="memSelectPerson('Lou', this)">👦🏻 Lou</button>
                 <button class="player-btn" onclick="memSelectPerson('Noé', this)">👶🏼 Noé</button>
-                <button class="player-btn" onclick="memSelectPerson('Oliver', this)">👦🏻 Oliver</button>
+                <button class="player-btn" onclick="memSelectPerson('Oliver', this)">👦🏼 Oliver</button>
                 <button class="player-btn" onclick="memSelectPerson('Manon', this)">👧🏼 Manon</button>
                 
                 <button class="player-btn" onclick="memSelectPerson('Lore', this)">👩🏻 Lore</button>
