@@ -1,4 +1,4 @@
-/* VIEROPEENRIJ.CSS - FIXED BOARD & ANDROID */
+/* VIEROPEENRIJ.CSS - FIXED LAYERS & CLICKABLE */
 
 img { max-width: 100%; display: block; }
 * { box-sizing: border-box; }
@@ -41,7 +41,7 @@ img { max-width: 100%; display: block; }
 .c4-color-dot { width: 40px; height: 40px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer; }
 .c4-color-dot.active { transform: scale(1.2); border-color: #333; z-index: 2; }
 
-/* --- CHIP KIEZER (ANDROID FIX BEHOUDEN) --- */
+/* --- CHIP KIEZER --- */
 .chip-grid {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); 
     gap: 10px; max-height: 250px; overflow-y: auto; padding: 5px;
@@ -53,7 +53,6 @@ img { max-width: 100%; display: block; }
     border: 3px solid white; cursor: pointer;
     box-shadow: 0 3px 6px rgba(0,0,0,0.15);
     background: white; margin: 0 auto; position: relative;
-    /* Harde cirkel voor Android menu */
     clip-path: circle(50% at 50% 50%); -webkit-clip-path: circle(50% at 50% 50%);
 }
 .chip-option img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
@@ -136,7 +135,7 @@ img { max-width: 100%; display: block; }
 }
 
 
-/* --- HET BORD (HIER ZAT DE FOUT!) --- */
+/* --- HET BORD (LAAG-STRUCTUUR UPDATE) --- */
 .board-area {
     flex: 1; display: flex; flex-direction: column; 
     justify-content: center; align-items: center;
@@ -147,58 +146,65 @@ img { max-width: 100%; display: block; }
     position: relative;
     /* Tablet & Mobiel Schaling */
     height: 65vh; width: auto; aspect-ratio: 7 / 6; max-width: 95vw;
-    
-    background: #FFFFFF; /* Witte achtergrond achter de chips */
+    background: #FFFFFF;
     border-radius: 2vh; 
     box-shadow: 0 20px 40px rgba(0,0,0,0.15), 0 10px 0 #1565C0;
     
-    display: grid; grid-template-columns: 1fr; grid-template-rows: 1fr;
+    /* De wrapper houdt alles bij elkaar, layers zijn absoluut */
+    display: block; 
 }
 
-/* Masker (Het Blauwe Bord) */
-.c4-grid-mask {
+/* Laag 1: De Chips (Achtergrond) */
+.chips-layer {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 10; pointer-events: none;
+    z-index: 1; 
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     grid-template-rows: repeat(6, 1fr);
-    gap: 0;
 }
 
-/* DE REPARATIE: */
+/* Laag 2: Het Masker (De blauwe voorkant) */
+.c4-grid-mask {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 10; pointer-events: none; /* Laat kliks door */
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+}
+
+/* Laag 3: Klik Zones (Helemaal vooraan) */
+.click-layer {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 20; 
+}
+.column-clicker {
+    position: absolute; top: 0; bottom: 0;
+    width: 14.28%; /* 100% / 7 */
+    cursor: pointer;
+}
+.column-clicker:hover { background: rgba(255,255,255,0.2); }
+
+/* Stijl voor de Masker Slots */
 .c4-slot {
     width: 100%; height: 100%;
-    /* DIT maakt het bord blauw, met een doorzichtig gat in het midden */
+    /* Blauw met transparant cirkel gat */
     background: radial-gradient(circle, transparent 62%, #1976D2 63%);
-    /* Geen border-radius hier, anders wordt het hele vakje rond en zie je wit op de hoeken */
     overflow: hidden; 
 }
 
-/* Klik Zones */
-.click-layer {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 20; display: flex;
-}
-.c4-col-click { flex: 1; cursor: pointer; }
-.c4-col-click:hover { background: rgba(255,255,255,0.2); }
-
-/* VALLENDE & GELANDE CHIPS */
+/* Vallende Chip (Tussen laag 1 en 2) */
 .game-chip {
     position: absolute; border-radius: 50%;
-    z-index: 5; box-shadow: inset -2px -2px 5px rgba(0,0,0,0.3);
-}
-@keyframes dropBounce {
-    0% { top: -100px; }
-    60% { top: var(--final-top); }
-    80% { top: calc(var(--final-top) - 20px); }
-    100% { top: var(--final-top); }
+    z-index: 5; 
+    box-shadow: inset -2px -2px 5px rgba(0,0,0,0.3);
 }
 
+/* Gelande Chip (In laag 1) */
 .slotted-chip {
-    width: 100%; height: 100%; object-fit: cover;
-    border-radius: 50%; 
+    width: 90%; height: 90%; 
+    object-fit: cover; border-radius: 50%; 
     border: 4px solid var(--chip-color); 
-    box-sizing: border-box; 
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
     animation: landInSlot 0.2s ease-out;
 }
 @keyframes landInSlot { from { transform: scale(1.1); } to { transform: scale(1); } }
@@ -207,5 +213,6 @@ img { max-width: 100%; display: block; }
 .slotted-chip.winning-chip {
     animation: winnerPulse 0.5s infinite alternate !important;
     border-color: #FFD700 !important; filter: brightness(1.2);
+    z-index: 2; /* Iets naar voren in de chips-laag */
 }
 @keyframes winnerPulse { from { transform: scale(0.9); } to { transform: scale(1.05); } }
