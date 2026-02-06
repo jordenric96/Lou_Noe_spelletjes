@@ -1,5 +1,5 @@
-// VIEROPEENRIJ.JS - TABLET & ANDROID READY (FIXED)
-console.log("4-op-een-rij geladen (Layer Fix)...");
+// VIEROPEENRIJ.JS - UPDATE MET SAVE SCORE
+console.log("4-op-een-rij geladen...");
 
 let c4State = {
     step: 0, winsNeeded: 3,
@@ -28,7 +28,6 @@ function renderWizardStep() {
     let btnText = "KIES NAAM & PLAATJE...";
     if (isReady) btnText = isP1 ? "BEVESTIG SPELER 1 ➡" : "START HET SPEL! 🚀";
 
-    // Chip opties
     let chipsHTML = '';
     if(typeof memThemes !== 'undefined') {
         Object.values(memThemes).forEach(t => {
@@ -54,7 +53,6 @@ function renderWizardStep() {
             <div class="goal-btn-row">
                 <button class="goal-btn ${c4State.winsNeeded===3?'selected':''}" onclick="c4SetGoal(3)">3</button>
                 <button class="goal-btn ${c4State.winsNeeded===5?'selected':''}" onclick="c4SetGoal(5)">5</button>
-                <button class="goal-btn ${c4State.winsNeeded===7?'selected':''}" onclick="c4SetGoal(7)">7</button>
             </div>
             <hr style="border:0; border-top:2px dashed #eee; margin:10px 0;">
         `;
@@ -67,18 +65,14 @@ function renderWizardStep() {
                 <div class="c4-title" style="color:${currPlayer.color}">${title}</div>
                 
                 <div class="c4-subtitle">Naam:</div>
-               <div class="preset-row">
-    <button class="preset-btn ${currPlayer.name==='Lou'?'active':''}" onclick="c4SetName('Lou')">👦🏻<br>Lou</button>
-    <button class="preset-btn ${currPlayer.name==='Noé'?'active':''}" onclick="c4SetName('Noé')">👶🏼<br>Noé</button>
-    <button class="preset-btn ${currPlayer.name==='Oliver'?'active':''}" onclick="c4SetName('Oliver')">👦🏼<br>Oliver</button>
-    <button class="preset-btn ${currPlayer.name==='Manon'?'active':''}" onclick="c4SetName('Manon')">👧🏼<br>Manon</button>
-
-    <button class="preset-btn ${currPlayer.name==='Lore'?'active':''}" onclick="c4SetName('Lore')">👩🏻<br>Lore</button>
-    <button class="preset-btn ${currPlayer.name==='Karen'?'active':''}" onclick="c4SetName('Karen')">👩🏼<br>Karen</button>
-    
-    <button class="preset-btn ${currPlayer.name==='Jorden'?'active':''}" onclick="c4SetName('Jorden')">🧔🏻<br>Jorden</button>
-    <button class="preset-btn ${currPlayer.name==='Bert'?'active':''}" onclick="c4SetName('Bert')">👨🏻<br>Bert</button>
-</div>
+                <div class="preset-row">
+                    <button class="preset-btn ${currPlayer.name==='Lou'?'active':''}" onclick="c4SetName('Lou')">👦🏻<br>Lou</button>
+                    <button class="preset-btn ${currPlayer.name==='Noé'?'active':''}" onclick="c4SetName('Noé')">👶🏼<br>Noé</button>
+                    <button class="preset-btn ${currPlayer.name==='Oliver'?'active':''}" onclick="c4SetName('Oliver')">👦🏼<br>Oliver</button>
+                    <button class="preset-btn ${currPlayer.name==='Manon'?'active':''}" onclick="c4SetName('Manon')">👧🏼<br>Manon</button>
+                    <button class="preset-btn ${currPlayer.name==='Lore'?'active':''}" onclick="c4SetName('Lore')">👩🏻<br>Lore</button>
+                    <button class="preset-btn ${currPlayer.name==='Bert'?'active':''}" onclick="c4SetName('Bert')">👨🏻<br>Bert</button>
+                </div>
                 <input type="text" class="custom-name-input" placeholder="Of typ zelf..." value="${currPlayer.name}" 
                     oninput="c4UpdateName(this.value)" onclick="this.select()">
 
@@ -131,8 +125,6 @@ function renderGame() {
         return h;
     };
 
-    // 1. CHIPS LAAG (Achteraan)
-    // We geven deze divs de ID's (slot-c-r) zodat de animatie weet waar de posities zijn
     let chipsHTML = '';
     for(let r=ROWS-1; r>=0; r--) {
         for(let c=0; c<COLS; c++) {
@@ -140,25 +132,14 @@ function renderGame() {
             let content = '';
             if (val === 1) content = `<img src="${c4State.p1.img}" class="slotted-chip" style="background:${c4State.p1.color}; --chip-color:${c4State.p1.color}">`;
             if (val === 2) content = `<img src="${c4State.p2.img}" class="slotted-chip" style="background:${c4State.p2.color}; --chip-color:${c4State.p2.color}">`;
-            
             chipsHTML += `<div id="slot-${c}-${r}" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">${content}</div>`;
         }
     }
 
-    // 2. MASKER LAAG (Midden - Het blauwe bord)
     let maskHTML = '';
-    for(let r=ROWS-1; r>=0; r--) {
-        for(let c=0; c<COLS; c++) {
-            maskHTML += `<div class="c4-slot"></div>`; // Alleen blauwe achtergrond met gat
-        }
-    }
-
-    // 3. KLIK LAAG (Vooraan)
+    for(let r=ROWS-1; r>=0; r--) { for(let c=0; c<COLS; c++) { maskHTML += `<div class="c4-slot"></div>`; } }
     let clicksHTML = '';
-    for(let c=0; c<COLS; c++) {
-        const leftPct = c * 14.28;
-        clicksHTML += `<div class="column-clicker" style="left:${leftPct}%" onclick="c4Drop(${c})"></div>`;
-    }
+    for(let c=0; c<COLS; c++) { const leftPct = c * 14.28; clicksHTML += `<div class="column-clicker" style="left:${leftPct}%" onclick="c4Drop(${c})"></div>`; }
 
     boardDiv.innerHTML = `
         <div class="c4-game-container">
@@ -186,23 +167,18 @@ function renderGame() {
 
 function c4Drop(col) {
     if(!c4State.gameActive || c4State.isDropping) return;
-
     let row = -1;
     for(let r=0; r<ROWS; r++) { if(c4State.board[col][r] === 0) { row = r; break; } }
     if(row === -1) { if(typeof playSound==='function') playSound('error'); return; }
 
     c4State.isDropping = true;
-    
-    // Coordinaten ophalen (werkt omdat we ID's op de chips-layer hebben gezet)
     const targetSlot = document.getElementById(`slot-${col}-${row}`);
     const gridRect = document.getElementById('board-visual').getBoundingClientRect();
     const slotRect = targetSlot.getBoundingClientRect();
-
     const endTop = slotRect.top - gridRect.top;
     const endLeft = slotRect.left - gridRect.left;
     const startTop = -60;
 
-    // Animatie Chip
     const p = c4State.currentPlayer === 1 ? c4State.p1 : c4State.p2;
     const animChip = document.createElement('div');
     animChip.className = 'game-chip';
@@ -212,22 +188,18 @@ function c4Drop(col) {
     animChip.style.background = p.color;
     animChip.style.setProperty('--chip-color', p.color);
     animChip.innerHTML = `<img src="${p.img}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
-    
     const keyframes = [{ top: startTop + 'px' }, { top: endTop + 'px' }];
     const animation = animChip.animate(keyframes, { duration: 400, easing: 'cubic-bezier(0.5, 0, 0.75, 0)' });
-
     document.getElementById('board-visual').appendChild(animChip);
 
     animation.onfinish = () => {
         if(typeof playSound==='function') playSound('click');
         animChip.remove();
-        
         c4State.board[col][row] = c4State.currentPlayer;
-        
         const winResult = c4CheckWin(col, row);
         
         if (winResult) {
-            renderGame(); // Tekent de vaste chip
+            renderGame(); 
             c4HighlightWinners(winResult);
             setTimeout(c4Win, 1000);
         } else if (c4CheckDraw()) {
@@ -276,10 +248,15 @@ function c4Win() {
     const p = c4State.currentPlayer === 1 ? c4State.p1 : c4State.p2;
     p.wins++;
     renderGame(); 
-    
     c4State.isDropping = true; 
 
     if(p.wins >= c4State.winsNeeded) {
+        // --- NIEUWE TOEVOEGING: SLA UITSLAG OP ---
+        if(typeof saveDuelResult === 'function') {
+            saveDuelResult('vieropeenrij', c4State.p1.name, c4State.p2.name, p.name);
+        }
+        // ------------------------------------------
+
         setTimeout(() => { if(typeof showWinnerModal==='function') showWinnerModal(p.name); }, 500);
     } else {
         setTimeout(() => { 
