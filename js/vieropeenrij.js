@@ -68,9 +68,9 @@ function renderWizardStep() {
                 
                 <div class="c4-subtitle">Naam:</div>
                <div class="preset-row">
-    <button class="preset-btn ${currPlayer.name==='Lou'?'active':''}" onclick="c4SetName('Lou')">👦🏼<br>Lou</button>
+    <button class="preset-btn ${currPlayer.name==='Lou'?'active':''}" onclick="c4SetName('Lou')">👦🏻<br>Lou</button>
     <button class="preset-btn ${currPlayer.name==='Noé'?'active':''}" onclick="c4SetName('Noé')">👶🏼<br>Noé</button>
-    <button class="preset-btn ${currPlayer.name==='Oliver'?'active':''}" onclick="c4SetName('Oliver')">👦🏻<br>Oliver</button>
+    <button class="preset-btn ${currPlayer.name==='Oliver'?'active':''}" onclick="c4SetName('Oliver')">👦🏼<br>Oliver</button>
     <button class="preset-btn ${currPlayer.name==='Manon'?'active':''}" onclick="c4SetName('Manon')">👧🏼<br>Manon</button>
 
     <button class="preset-btn ${currPlayer.name==='Lore'?'active':''}" onclick="c4SetName('Lore')">👩🏻<br>Lore</button>
