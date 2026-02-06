@@ -1,5 +1,5 @@
-// VIEROPEENRIJ.JS - TABLET & ANDROID READY
-console.log("4-op-een-rij geladen (Tablet Fix)...");
+// VIEROPEENRIJ.JS - TABLET & ANDROID READY (FIXED)
+console.log("4-op-een-rij geladen (Layer Fix)...");
 
 let c4State = {
     step: 0, winsNeeded: 3,
@@ -125,17 +125,29 @@ function renderGame() {
         return h;
     };
 
-    let gridHTML = '';
+    // 1. CHIPS LAAG (Achteraan)
+    // We geven deze divs de ID's (slot-c-r) zodat de animatie weet waar de posities zijn
+    let chipsHTML = '';
     for(let r=ROWS-1; r>=0; r--) {
         for(let c=0; c<COLS; c++) {
             const val = c4State.board[c][r];
             let content = '';
             if (val === 1) content = `<img src="${c4State.p1.img}" class="slotted-chip" style="background:${c4State.p1.color}; --chip-color:${c4State.p1.color}">`;
             if (val === 2) content = `<img src="${c4State.p2.img}" class="slotted-chip" style="background:${c4State.p2.color}; --chip-color:${c4State.p2.color}">`;
-            gridHTML += `<div class="c4-slot" id="slot-${c}-${r}">${content}</div>`;
+            
+            chipsHTML += `<div id="slot-${c}-${r}" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">${content}</div>`;
         }
     }
 
+    // 2. MASKER LAAG (Midden - Het blauwe bord)
+    let maskHTML = '';
+    for(let r=ROWS-1; r>=0; r--) {
+        for(let c=0; c<COLS; c++) {
+            maskHTML += `<div class="c4-slot"></div>`; // Alleen blauwe achtergrond met gat
+        }
+    }
+
+    // 3. KLIK LAAG (Vooraan)
     let clicksHTML = '';
     for(let c=0; c<COLS; c++) {
         const leftPct = c * 14.28;
@@ -151,7 +163,8 @@ function renderGame() {
 
             <div class="board-area">
                 <div class="board-wrapper" id="board-visual">
-                    <div class="c4-grid-mask">${gridHTML}</div>
+                    <div class="chips-layer">${chipsHTML}</div>
+                    <div class="c4-grid-mask">${maskHTML}</div>
                     <div class="click-layer">${clicksHTML}</div>
                 </div>
                 <button class="tool-btn" style="width:auto; margin-top:10px;" onclick="startConnect4()">Stoppen</button>
@@ -174,7 +187,7 @@ function c4Drop(col) {
 
     c4State.isDropping = true;
     
-    // Coordinaten
+    // Coordinaten ophalen (werkt omdat we ID's op de chips-layer hebben gezet)
     const targetSlot = document.getElementById(`slot-${col}-${row}`);
     const gridRect = document.getElementById('board-visual').getBoundingClientRect();
     const slotRect = targetSlot.getBoundingClientRect();
@@ -208,7 +221,7 @@ function c4Drop(col) {
         const winResult = c4CheckWin(col, row);
         
         if (winResult) {
-            renderGame();
+            renderGame(); // Tekent de vaste chip
             c4HighlightWinners(winResult);
             setTimeout(c4Win, 1000);
         } else if (c4CheckDraw()) {
@@ -242,8 +255,10 @@ function c4CheckWin(c, r) {
 function c4HighlightWinners(cells) {
     cells.forEach(pos => {
         const slot = document.getElementById(`slot-${pos.c}-${pos.r}`);
-        const img = slot.querySelector('img');
-        if(img) img.classList.add('winning-chip');
+        if(slot) {
+            const img = slot.querySelector('img');
+            if(img) img.classList.add('winning-chip');
+        }
     });
     if(typeof memFireConfetti === 'function') memFireConfetti();
 }
