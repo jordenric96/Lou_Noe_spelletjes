@@ -70,8 +70,8 @@ function renderWizardStep() {
                     <button class="preset-btn ${currPlayer.name==='Noé'?'active':''}" onclick="c4SetName('Noé')">👶🏼<br>Noé</button>
                     <button class="preset-btn ${currPlayer.name==='Oliver'?'active':''}" onclick="c4SetName('Oliver')">👦🏼<br>Oliver</button>
                     <button class="preset-btn ${currPlayer.name==='Manon'?'active':''}" onclick="c4SetName('Manon')">👧🏼<br>Manon</button>
-                    <button class="preset-btn ${currPlayer.name==='Lore'?'active':''}" onclick="c4SetName('Lore')">👩🏽<br>Lore</button>
-                    <button class="preset-btn ${currPlayer.name==='Jorden'?'active':''}" onclick="c4SetName('Jorden')">🧔🏽<br>Jorden</button>
+                    <button class="preset-btn ${currPlayer.name==='Lore'?'active':''}" onclick="c4SetName('Lore')">👩🏻<br>Lore</button>
+                    <button class="preset-btn ${currPlayer.name==='Jorden'?'active':''}" onclick="c4SetName('Jorden')">🧔🏻<br>Jorden</button>
                     <button class="preset-btn ${currPlayer.name==='Karen'?'active':''}" onclick="c4SetName('Karen')">👱🏼‍♀️<br>Karen</button>
                     <button class="preset-btn ${currPlayer.name==='Bert'?'active':''}" onclick="c4SetName('Bert')">👨🏻<br>Bert</button>
                 </div>
@@ -253,12 +253,9 @@ function c4Win() {
     c4State.isDropping = true; 
 
     if(p.wins >= c4State.winsNeeded) {
-        // --- NIEUWE TOEVOEGING: SLA UITSLAG OP ---
         if(typeof saveDuelResult === 'function') {
-            saveDuelResult('vieropeenrij', c4State.p1.name, c4State.p2.name, p.name);
+            saveDuelResult('vieropeenrij', c4State.p1.name, c4State.p2.name, p.name, {});
         }
-        // ------------------------------------------
-
         setTimeout(() => { if(typeof showWinnerModal==='function') showWinnerModal(p.name); }, 500);
     } else {
         setTimeout(() => { 
