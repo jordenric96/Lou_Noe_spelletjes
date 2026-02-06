@@ -1,15 +1,12 @@
-// MEMORY.JS - VOLLEDIG (Met Tussenstand & Stats)
-console.log("Memory.js geladen (Fixed & Stats)...");
+// MEMORY.JS - VOLLEDIG (Met Scores)
+console.log("Memory.js geladen (Scores)...");
 
 let memoryState = { 
     theme: 'boerderij', gridSize: 30, playerNames: [], currentPlayerIndex: 0, scores: {}, 
     cards: [], flippedCards: [], lockBoard: false, matchedPairs: 0, pendingPlayer: null,
-    // NIEUW VOOR STATS
     currentTurnStreak: 0, maxStreakP1: 0, maxStreakP2: 0
 };
-
 const memPalette = ['#F44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#00BCD4', '#009688', '#4CAF50', '#8BC34A', '#FFC107', '#FF9800'];
-
 const memThemes = {
     'boerderij': { locked: false, extension: 'png', path: 'assets/images/memory/boerderij/' },
     'mario':     { locked: false, extension: 'png', path: 'assets/images/memory/mario/' },
@@ -22,7 +19,6 @@ const memThemes = {
     'toystory':  { locked: false, extension: 'png', path: 'assets/images/memory/toystory/' },
     'mix':       { locked: false, extension: 'png', path: '', isMix: true }
 };
-
 const mixCoverIcon = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23FF9800' stroke='white' stroke-width='5'/%3E%3Ctext x='50' y='70' font-family='Arial' font-size='60' font-weight='bold' fill='white' text-anchor='middle'%3E?%3C/text%3E%3C/svg%3E";
 
 function memFireConfetti() {
@@ -43,7 +39,6 @@ function memFireConfetti() {
 
 function startMemorySetup() {
     const board = document.getElementById('game-board'); if (!board) return;
-    
     let themeBtns = Object.keys(memThemes).map(key => {
         const t = memThemes[key]; const selected = memoryState.theme === key ? 'selected' : '';
         let imgTag = t.isMix ? `<img src="${mixCoverIcon}">` : `<img src="${t.path}cover.png" onerror="this.src='assets/images/icon.png'">`;
@@ -83,60 +78,22 @@ function startMemorySetup() {
     memRenderPalette(); memRenderActivePlayers(); memCheckStartButton();
 }
 
-function memSetTheme(name, btn) { 
-    if(memThemes[name].locked) return; 
-    if(typeof playSound === 'function') playSound('click');
-    memoryState.theme = name; 
-    document.querySelectorAll('.theme-card-btn').forEach(b => b.classList.remove('selected')); 
-    btn.classList.add('selected'); 
-}
-
-function memSelectPerson(name, btn) { 
-    if(typeof playSound === 'function') playSound('click');
-    document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending')); 
-    if(btn) btn.classList.add('selected-pending'); 
-    memoryState.pendingPlayer = name; 
-    const p = document.getElementById('mem-color-palette'); 
-    if(p) { p.style.animation="shake 0.5s"; setTimeout(()=>p.style.animation="",500); } 
-}
-
-function memAddCustomPerson() { 
-    const i = document.getElementById('mem-custom-name'); const n = i.value.trim(); 
-    if(n){ 
-        if(typeof playSound==='function') playSound('click');
-        memoryState.pendingPlayer=n; 
-        document.querySelectorAll('.player-btn').forEach(b=>b.classList.remove('selected-pending')); 
-        i.value=''; i.placeholder="Gekozen!"; memRenderPalette(); 
-    } 
-}
-
+function memSetTheme(name, btn) { if(memThemes[name].locked) return; if(typeof playSound === 'function') playSound('click'); memoryState.theme = name; document.querySelectorAll('.theme-card-btn').forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); }
+function memSelectPerson(name, btn) { if(typeof playSound === 'function') playSound('click'); document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending')); if(btn) btn.classList.add('selected-pending'); memoryState.pendingPlayer = name; const p = document.getElementById('mem-color-palette'); if(p) { p.style.animation="shake 0.5s"; setTimeout(()=>p.style.animation="",500); } }
+function memAddCustomPerson() { const i = document.getElementById('mem-custom-name'); const n = i.value.trim(); if(n){ if(typeof playSound==='function') playSound('click'); memoryState.pendingPlayer=n; document.querySelectorAll('.player-btn').forEach(b=>b.classList.remove('selected-pending')); i.value=''; i.placeholder="Gekozen!"; memRenderPalette(); } }
 function memRenderPalette() { const cp = document.getElementById('mem-color-palette'); if(!cp)return; const used = memoryState.playerNames.map(p => p.color); cp.innerHTML = memPalette.map(c => { const u = used.includes(c); return `<div class="color-dot" style="background:${c}; opacity:${u?0.2:1}" onclick="${u?'':`memSelectColor('${c}')`}"></div>`; }).join(''); }
-
-function memSelectColor(c) { 
-    if(!memoryState.pendingPlayer) return alert("Kies eerst een naam!"); 
-    if(typeof playSound==='function') playSound('pop');
-    memoryState.playerNames.push({name:memoryState.pendingPlayer, color:c}); 
-    memoryState.pendingPlayer=null; 
-    const inp = document.getElementById('mem-custom-name'); if(inp) inp.placeholder="Naam..."; 
-    memRenderPalette(); memRenderActivePlayers(); memCheckStartButton(); 
-}
-
+function memSelectColor(c) { if(!memoryState.pendingPlayer) return alert("Kies eerst een naam!"); if(typeof playSound==='function') playSound('pop'); memoryState.playerNames.push({name:memoryState.pendingPlayer, color:c}); memoryState.pendingPlayer=null; const inp = document.getElementById('mem-custom-name'); if(inp) inp.placeholder="Naam..."; memRenderPalette(); memRenderActivePlayers(); memCheckStartButton(); }
 function memRenderActivePlayers() { document.getElementById('mem-active-players').innerHTML = memoryState.playerNames.map(p=>`<div class="active-player-tag" style="background:${p.color}" onclick="memRemovePlayer('${p.name}')">${p.name} ×</div>`).join(''); }
-
 function memRemovePlayer(n) { memoryState.playerNames=memoryState.playerNames.filter(p=>p.name!==n); memRenderPalette(); memRenderActivePlayers(); memCheckStartButton(); }
-
 function memCheckStartButton() { const b=document.getElementById('mem-start-btn'); if(b){ b.disabled=memoryState.playerNames.length===0; b.innerText=b.disabled?"SPELERS KIEZEN...":"START SPEL ▶️"; } }
 
 function startMemoryGame() {
     if(typeof playSound === 'function') playSound('win');
     const board = document.getElementById('game-board'); 
-    memoryState.gridSize = 30; 
-    memoryState.scores = {}; 
+    memoryState.gridSize = 30; memoryState.scores = {}; 
     memoryState.playerNames.forEach(p => { memoryState.scores[p.name] = 0; });
-    
-    // RESET STATS
-    memoryState.currentTurnStreak = 0;
-    memoryState.maxStreakP1 = 0; memoryState.maxStreakP2 = 0;
+    // Reset stats
+    memoryState.currentTurnStreak = 0; memoryState.maxStreakP1 = 0; memoryState.maxStreakP2 = 0;
 
     let headerHTML = `<div class="memory-header-row"><div class="score-board">${memoryState.playerNames.map((p, i) => `<div class="player-badge" id="badge-${i}" style="border-color:${p.color}"><span style="color:${p.color}">${p.name}: <span id="score-${i}">0</span></span></div>`).join('')}</div></div>`;
     let footerHTML = `<div class="memory-footer"><button class="mini-back-btn" onclick="startMemorySetup()">⬅ Terug</button></div>`;
@@ -151,7 +108,6 @@ function memGenerateCards(totalCards) { const grid = document.getElementById('me
 
 function memFlipCard() {
     if (memoryState.lockBoard || this.classList.contains('flipped')) return;
-    
     if(typeof playSound === 'function') playSound('pop');
     
     this.classList.add('flipped'); memoryState.flippedCards.push(this);
@@ -161,8 +117,7 @@ function memFlipCard() {
         if (c1.dataset.value === c2.dataset.value) {
             let p = memoryState.playerNames[memoryState.currentPlayerIndex];
             memoryState.scores[p.name]++; 
-            
-            // STATS: STREAK UPDATE
+            // Streak
             memoryState.currentTurnStreak++;
             if (memoryState.currentPlayerIndex === 0) {
                 if (memoryState.currentTurnStreak > memoryState.maxStreakP1) memoryState.maxStreakP1 = memoryState.currentTurnStreak;
@@ -176,7 +131,6 @@ function memFlipCard() {
             c1.classList.add('matched'); c2.classList.add('matched');
             c1.querySelector('.card-back').style.borderColor = p.color; c2.querySelector('.card-back').style.borderColor = p.color;
             memoryState.flippedCards = []; memoryState.lockBoard = false;
-            
             if(typeof playSound === 'function') playSound('win');
             
             if (memoryState.matchedPairs === 15) {
@@ -184,41 +138,24 @@ function memFlipCard() {
                     let leaderboardData = memoryState.playerNames.map(pn => ({ name: pn.name, score: memoryState.scores[pn.name] }));
                     leaderboardData.sort((a,b) => b.score - a.score);
                     
-                    // SAVE DUEL RESULT + STATS
                     if(memoryState.playerNames.length === 2 && typeof saveDuelResult === 'function') {
-                        const p1 = leaderboardData[0].name;
-                        const p2 = leaderboardData[1].name;
+                        const p1 = leaderboardData[0].name; const p2 = leaderboardData[1].name;
+                        const s1 = leaderboardData[0].score; const s2 = leaderboardData[1].score;
                         let winner = 'draw';
-                        if(leaderboardData[0].score > leaderboardData[1].score) winner = leaderboardData[0].name;
+                        if(s1 > s2) winner = p1;
                         
+                        // AANGEPAST: Score meegeven (s1, s2)
                         const extraStats = { p1MaxStreak: memoryState.maxStreakP1, p2MaxStreak: memoryState.maxStreakP2 };
-                        saveDuelResult('memory', p1, p2, winner, extraStats);
+                        saveDuelResult('memory', p1, p2, winner, s1, s2, extraStats);
                     }
-
                     if(typeof showWinnerModal === 'function') { showWinnerModal(leaderboardData[0].name, leaderboardData); }
                 }, 1000);
             }
         } else {
-            // STATS: STREAK RESET
             memoryState.currentTurnStreak = 0;
             setTimeout(() => { c1.classList.remove('flipped'); c2.classList.remove('flipped'); memoryState.flippedCards = []; memoryState.lockBoard = false; memSwitchPlayer(); }, 1200);
         }
     }
 }
-
 function memSwitchPlayer() { memoryState.currentPlayerIndex = (memoryState.currentPlayerIndex + 1) % memoryState.playerNames.length; memUpdateActiveBadgeColor(); }
-
-function memUpdateActiveBadgeColor() { 
-    memoryState.playerNames.forEach((p, i) => { 
-        let b = document.getElementById(`badge-${i}`); 
-        if(b) { 
-            const active = i === memoryState.currentPlayerIndex; 
-            b.classList.toggle('active', active); 
-            if(active) {
-                b.style.borderColor = p.color; b.style.boxShadow = `0 0 15px ${p.color}`;
-            } else {
-                b.style.borderColor = 'transparent'; b.style.boxShadow = 'none';
-            }
-        } 
-    }); 
-}
+function memUpdateActiveBadgeColor() { memoryState.playerNames.forEach((p, i) => { let b = document.getElementById(`badge-${i}`); if(b) { const active = i === memoryState.currentPlayerIndex; b.classList.toggle('active', active); if(active) { b.style.borderColor = p.color; b.style.boxShadow = `0 0 15px ${p.color}`; } else { b.style.borderColor = 'transparent'; b.style.boxShadow = 'none'; } } }); }
