@@ -1,137 +1,75 @@
-/* TUSSENSTAND.CSS - Styling voor het leaderboard */
+/* TUSSENSTAND.CSS - Update met Versus Bar & Stats */
 
-/* De knop op de hoofdpagina */
-.leaderboard-btn-container {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    margin-bottom: 25px;
-}
-
-.leaderboard-btn {
-    background: #FFD700; 
-    color: #5D4037;
-    border: 4px solid white; 
-    border-radius: 20px;
-    padding: 12px 30px; 
-    font-size: 1.3rem;
-    font-family: 'Fredoka One', cursive; 
-    cursor: pointer;
-    box-shadow: 0 6px 0 #FFB300, 0 10px 20px rgba(0,0,0,0.2);
-    transition: transform 0.2s, box-shadow 0.2s;
-    animation: popIn 0.5s 0.6s backwards; /* Verschijnt net na de game icoontjes */
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.leaderboard-btn:hover { 
-    transform: scale(1.05); 
-}
-.leaderboard-btn:active { 
-    transform: translateY(4px); 
-    box-shadow: 0 2px 0 #FFB300; 
-}
+/* ... (Bovenste deel met knoppen en modal blijft hetzelfde, overschrijf alleen vanaf .duel-card) ... */
 
 /* De Modal (Popup) */
 #leaderboard-modal {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7); 
-    backdrop-filter: blur(8px);
-    z-index: 9999;
-    display: flex; justify-content: center; align-items: center;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+    z-index: 9999; display: flex; justify-content: center; align-items: center;
     animation: fadeIn 0.3s ease-out;
 }
-
 #leaderboard-modal.hidden { display: none; }
 
 .lb-content {
-    background: #FFF; 
-    width: 90%; max-width: 500px;
-    border-radius: 30px; 
-    padding: 25px;
-    max-height: 85vh; 
-    display: flex; flex-direction: column;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-    border: 6px solid #FFD700;
-    position: relative;
-    animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: #FFF; width: 95%; max-width: 550px;
+    border-radius: 30px; padding: 20px;
+    max-height: 90vh; display: flex; flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4); border: 6px solid #FFD700;
 }
 
-@keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.lb-header h2 { text-align: center; color: #333; margin: 0 0 10px 0; }
+.lb-close { position: absolute; top: 15px; right: 15px; background: #FF5252; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-weight: bold; cursor: pointer; }
+.lb-tabs { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; }
+.lb-tab { padding: 8px 15px; background: #eee; border: none; border-radius: 15px; font-family: 'Fredoka One'; cursor: pointer; color: #777; }
+.lb-tab.active { background: #2196F3; color: white; }
+.lb-list { overflow-y: auto; flex: 1; padding: 5px; scrollbar-width: thin; }
+.lb-reset-btn { align-self: center; margin-top: 10px; background: transparent; border: 2px dashed #ccc; color: #999; padding: 8px 15px; border-radius: 10px; cursor: pointer; }
 
-.lb-header h2 {
-    text-align: center;
-    color: #333;
-    margin: 0 0 15px 0;
-    font-size: 2rem;
-    text-transform: uppercase;
-}
-
-.lb-close {
-    position: absolute; top: 15px; right: 15px;
-    background: #FF5252; color: white; border: none;
-    width: 40px; height: 40px; border-radius: 50%;
-    font-size: 1.2rem; font-weight: bold; cursor: pointer;
-    box-shadow: 0 4px 0 #D32F2F;
-}
-.lb-close:active { transform: translateY(4px); box-shadow: none; }
-
-/* Tabs (Alles / Memory / 4-op-een-rij) */
-.lb-tabs { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap; }
-.lb-tab {
-    padding: 10px 15px; background: #eee; border: none;
-    border-radius: 15px; font-family: 'Fredoka One'; cursor: pointer;
-    color: #777; transition: all 0.2s;
-}
-.lb-tab.active { background: #2196F3; color: white; transform: scale(1.1); box-shadow: 0 4px 10px rgba(33, 150, 243, 0.4); }
-
-/* De lijst met uitslagen */
-.lb-list { 
-    overflow-y: auto; 
-    flex: 1; 
-    padding: 5px;
-    margin-bottom: 10px;
-    /* Mooie scrollbar */
-    scrollbar-width: thin;
-}
-
-/* Kaartje per duel */
+/* NIEUWE CARD STIJL */
 .duel-card {
     background: #FAFAFA; border-radius: 20px;
-    padding: 15px; margin-bottom: 12px;
-    border: 2px solid #EEE;
-    border-bottom: 4px solid #E0E0E0;
+    padding: 15px; margin-bottom: 15px;
+    border: 1px solid #EEE; box-shadow: 0 4px 0 #E0E0E0;
+    display: flex; flex-direction: column; gap: 10px;
+}
+
+/* De bovenste rij: Naam - Score - Naam */
+.duel-header {
     display: flex; align-items: center; justify-content: space-between;
+    font-size: 1.2rem; color: #444; font-weight: bold;
+}
+.p-left { text-align: left; color: #F44336; width: 35%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+.p-right { text-align: right; color: #2196F3; width: 35%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+.score-badge { 
+    background: #333; color: white; padding: 5px 12px; 
+    border-radius: 12px; font-size: 1rem;
 }
 
-.duel-players { 
-    display: flex; flex-direction: column; gap: 2px;
-    font-size: 1.1rem; color: #555;
-    flex: 1;
+/* De Progress Bar */
+.vs-bar-bg {
+    width: 100%; height: 12px;
+    background: #2196F3; /* Rechts kleur (Speler 2) */
+    border-radius: 6px; overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+.vs-bar-fill {
+    height: 100%;
+    background: #F44336; /* Links kleur (Speler 1) */
+    border-right: 2px solid white;
+    transition: width 0.5s ease-out;
 }
 
-.duel-vs {
-    font-size: 0.8rem; color: #BBB; font-weight: bold; text-transform: uppercase;
+/* Extra Statistieken */
+.stats-row {
+    display: flex; justify-content: space-between;
+    font-size: 0.75rem; color: #777;
+    background: #fff; padding: 8px; border-radius: 10px;
+    border: 1px solid #f0f0f0;
 }
-
-.duel-score-box { 
-    background: white; 
-    padding: 8px 15px; 
-    border-radius: 15px;
-    border: 2px solid #2196F3;
-    color: #1565C0;
-    font-size: 1.4rem; 
-    font-weight: 900; 
-    min-width: 80px;
-    text-align: center;
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
-}
-
-.lb-reset-btn {
-    align-self: center;
-    margin-top: 10px; background: transparent; border: 2px dashed #ccc;
-    color: #999; padding: 8px 15px; border-radius: 10px; 
-    cursor: pointer; font-size: 0.9rem; font-family: 'Fredoka One';
-}
-.lb-reset-btn:hover { border-color: #FF5252; color: #FF5252; }
+.stat-col { display: flex; flex-direction: column; gap: 2px; }
+.stat-col.left { text-align: left; }
+.stat-col.right { text-align: right; }
+.stat-label { font-size: 0.65rem; text-transform: uppercase; color: #aaa; }
+.stat-val { font-weight: bold; color: #555; }
