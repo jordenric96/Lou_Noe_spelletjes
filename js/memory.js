@@ -43,7 +43,41 @@ function startMemorySetup() {
         let imgTag = t.isMix ? `<img src="${mixCoverIcon}">` : `<img src="${t.path}cover.png" onerror="this.src='assets/images/icon.png'">`;
         return `<div class="theme-card-btn ${t.locked ? 'locked' : ''} ${selected}" onclick="memSetTheme('${key}', this)"><div class="theme-img-container">${imgTag}</div><div class="btn-label">${key.charAt(0).toUpperCase() + key.slice(1)}</div></div>`;
     }).join('');
-    board.innerHTML = `<div class="memory-setup"><div class="setup-group"><h3>1. Spelers</h3><div class="name-row"><button class="player-btn" onclick="memSelectPerson('Lou', this)">👦🏼 Lou</button><button class="player-btn" onclick="memSelectPerson('Noé', this)">👶🏼 Noé</button><button class="player-btn" onclick="memSelectPerson('Mama', this)">👩🏻 Mama</button><button class="player-btn" onclick="memSelectPerson('Papa', this)">👨🏻 Papa</button></div><div style="display:flex; gap:5px; margin-top:10px; justify-content:center;"><input type="text" id="mem-custom-name" placeholder="Naam..." style="width:100px; padding:8px; border-radius:10px; border:1px solid #ccc;"><button class="add-btn" onclick="memAddCustomPerson()" style="padding:8px 15px; border-radius:10px; background:#4CAF50; color:white; border:none;">OK</button></div><div class="color-grid-6" id="mem-color-palette"></div><div id="mem-active-players"></div></div><div class="setup-group"><h3>2. Thema</h3><div class="theme-grid-wrapper">${themeBtns}</div></div><div class="bottom-actions"><button id="mem-start-btn" class="start-btn" onclick="startMemoryGame()" disabled>Eerst spelers kiezen...</button><button class="tool-btn" onclick="location.reload()">⬅ Terug naar Menu</button></div></div>`;
+    
+    // HIERONDER ZIJN DE BUTTONS AANGEPAST MET DE NIEUWE NAMEN
+    board.innerHTML = `
+    <div class="memory-setup">
+        <div class="setup-group">
+            <h3>1. Spelers</h3>
+            <div class="name-row">
+                <button class="player-btn" onclick="memSelectPerson('Lou', this)">👦🏼 Lou</button>
+                <button class="player-btn" onclick="memSelectPerson('Noé', this)">👶🏼 Noé</button>
+                <button class="player-btn" onclick="memSelectPerson('Oliver', this)">👦🏻 Oliver</button>
+                <button class="player-btn" onclick="memSelectPerson('Manon', this)">👧🏼 Manon</button>
+                
+                <button class="player-btn" onclick="memSelectPerson('Lore', this)">👩🏻 Lore</button>
+                <button class="player-btn" onclick="memSelectPerson('Karen', this)">👩🏼 Karen</button>
+                
+                <button class="player-btn" onclick="memSelectPerson('Jorden', this)">🧔🏻 Jorden</button>
+                <button class="player-btn" onclick="memSelectPerson('Bert', this)">👨🏻 Bert</button>
+            </div>
+            <div style="display:flex; gap:5px; margin-top:10px; justify-content:center;">
+                <input type="text" id="mem-custom-name" placeholder="Naam..." style="width:100px; padding:8px; border-radius:10px; border:1px solid #ccc;">
+                <button class="add-btn" onclick="memAddCustomPerson()" style="padding:8px 15px; border-radius:10px; background:#4CAF50; color:white; border:none;">OK</button>
+            </div>
+            <div class="color-grid-6" id="mem-color-palette"></div>
+            <div id="mem-active-players"></div>
+        </div>
+        <div class="setup-group">
+            <h3>2. Thema</h3>
+            <div class="theme-grid-wrapper">${themeBtns}</div>
+        </div>
+        <div class="bottom-actions">
+            <button id="mem-start-btn" class="start-btn" onclick="startMemoryGame()" disabled>Eerst spelers kiezen...</button>
+            <button class="tool-btn" onclick="location.reload()">⬅ Terug naar Menu</button>
+        </div>
+    </div>`;
+    
     memRenderPalette(); memRenderActivePlayers(); memCheckStartButton();
 }
 
