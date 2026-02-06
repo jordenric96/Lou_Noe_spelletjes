@@ -48,14 +48,16 @@ function startMemorySetup() {
     <div class="memory-setup">
         <div class="setup-group">
             <h3>1. Spelers</h3>
-            <div class="name-row">
-                <button class="player-btn" onclick="memSelectPerson('Lou', this)">👦🏻 Lou</button>
-                <button class="player-btn" onclick="memSelectPerson('Noé', this)">👶🏼 Noé</button>
-                <button class="player-btn" onclick="memSelectPerson('Oliver', this)">👦🏼 Oliver</button>
-                <button class="player-btn" onclick="memSelectPerson('Manon', this)">👧🏼 Manon</button>
-                <button class="player-btn" onclick="memSelectPerson('Lore', this)">👩🏻 Lore</button>
-                <button class="player-btn" onclick="memSelectPerson('Bert', this)">👨🏻 Bert</button>
-            </div>
+            <div class="preset-row">
+                    <button class="preset-btn ${currPlayer.name==='Lou'?'active':''}" onclick="c4SetName('Lou')">👦🏻<br>Lou</button>
+                    <button class="preset-btn ${currPlayer.name==='Noé'?'active':''}" onclick="c4SetName('Noé')">👶🏼<br>Noé</button>
+                    <button class="preset-btn ${currPlayer.name==='Oliver'?'active':''}" onclick="c4SetName('Oliver')">👦🏼<br>Oliver</button>
+                    <button class="preset-btn ${currPlayer.name==='Manon'?'active':''}" onclick="c4SetName('Manon')">👧🏼<br>Manon</button>
+                    <button class="preset-btn ${currPlayer.name==='Lore'?'active':''}" onclick="c4SetName('Lore')">👩🏽<br>Lore</button>
+                    <button class="preset-btn ${currPlayer.name==='Jorden'?'active':''}" onclick="c4SetName('Jorden')">🧔🏽<br>Manon</button>
+                    <button class="preset-btn ${currPlayer.name==='Karen'?'active':''}" onclick="c4SetName('Karen')">👱🏼‍♀️<br>Manon</button>
+                    <button class="preset-btn ${currPlayer.name==='Bert'?'active':''}" onclick="c4SetName('Bert')">👨🏻<br>Bert</button>
+                </div>
             <div style="display:flex; gap:5px; margin-top:10px; justify-content:center;">
                 <input type="text" id="mem-custom-name" placeholder="Naam..." style="width:100px; padding:8px; border-radius:10px; border:1px solid #ccc;">
                 <button class="add-btn" onclick="memAddCustomPerson()" style="padding:8px 15px; border-radius:10px; background:#4CAF50; color:white; border:none;">OK</button>
