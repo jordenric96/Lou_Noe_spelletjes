@@ -73,10 +73,10 @@ function renderWizardStep() {
     <button class="preset-btn ${currPlayer.name==='Oliver'?'active':''}" onclick="c4SetName('Oliver')">👦🏻<br>Oliver</button>
     <button class="preset-btn ${currPlayer.name==='Manon'?'active':''}" onclick="c4SetName('Manon')">👧🏼<br>Manon</button>
 
-    <button class="preset-btn ${currPlayer.name==='Mama'?'active':''}" onclick="c4SetName('Mama')">👩🏻<br>Mama</button>
-    <button class="preset-btn ${currPlayer.name==='Mama'?'active':''}" onclick="c4SetName('Mama')">👩🏼<br>Mama</button>
+    <button class="preset-btn ${currPlayer.name==='Mama L'?'active':''}" onclick="c4SetName('Mama')">👩🏻<br>Mama</button>
+    <button class="preset-btn ${currPlayer.name==='Mama K'?'active':''}" onclick="c4SetName('Mama')">👩🏼<br>Mama</button>
     
-    <button class="preset-btn ${currPlayer.name==='Papa'?'active':''}" onclick="c4SetName('Papa')">🧔🏻<br>Papa</button>
+    <button class="preset-btn ${currPlayer.name==='Papa J'?'active':''}" onclick="c4SetName('Papa')">🧔🏻<br>Papa</button>
     <button class="preset-btn ${currPlayer.name==='Papa B'?'active':''}" onclick="c4SetName('Papa')">👨🏻<br>Papa B</button>
 </div>
                 <input type="text" class="custom-name-input" placeholder="Of typ zelf..." value="${currPlayer.name}" 
