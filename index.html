@@ -14,18 +14,28 @@
     <link rel="stylesheet" href="css/rekenen.css">
     <link rel="stylesheet" href="css/schaduw.css">
     <link rel="stylesheet" href="css/vang.css">
-    <link rel="stylesheet" href="css/vieropeenrij.css"> <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="css/vieropeenrij.css">
+    <link rel="stylesheet" href="css/tussenstand.css">
+
+    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4CAF50">
 </head>
 <body>
 
     <div id="main-menu">
         <h3>🚀 Lou & Noé & Oliver & Manon<br> spelletjes</h3>
+        
+        <div class="leaderboard-btn-container">
+            <button class="leaderboard-btn" onclick="openLeaderboard()">
+                🏆 Tussenstand
+            </button>
+        </div>
+
         <div class="game-selection">
             <div class="game-card" onclick="loadGame('memory')"><div class="game-icon">🧠</div><div class="game-title">Memory</div></div>
             <div class="game-card" onclick="loadGame('puzzel')"><div class="game-icon">🧩</div><div class="game-title">Puzzel</div></div>
             <div class="game-card" onclick="loadGame('vang')"><div class="game-icon">🔨</div><div class="game-title">Vang ze!</div></div>
-            <div class="game-card" onclick="loadGame('vieropeenrij')"><div class="game-icon">🔴</div><div class="game-title">4 op een Rij (nog af te werken)</div></div>
+            <div class="game-card" onclick="loadGame('vieropeenrij')"><div class="game-icon">🔴</div><div class="game-title">4 op een Rij</div></div>
             <div class="game-card" onclick="loadGame('schaduw')"><div class="game-icon">🌑</div><div class="game-title">Wie is het?</div></div>
             <div class="game-card" onclick="loadGame('tekenen')"><div class="game-icon">🎨</div><div class="game-title">Tekenen</div></div>
             <div class="game-card" onclick="loadGame('rekenen')"><div class="game-icon">🧮</div><div class="game-title">Tellen</div></div>
@@ -35,6 +45,24 @@
 
     <div id="game-board"></div>
 
+    <div id="leaderboard-modal" class="hidden">
+        <div class="lb-content">
+            <button class="lb-close" onclick="closeLeaderboard()">✕</button>
+            <div class="lb-header"><h2>🏆 Tussenstand</h2></div>
+            
+            <div class="lb-tabs">
+                <button class="lb-tab active" onclick="switchLbTab('all', this)">Alles</button>
+                <button class="lb-tab" onclick="switchLbTab('memory', this)">Memory</button>
+                <button class="lb-tab" onclick="switchLbTab('vieropeenrij', this)">4 op 'n Rij</button>
+            </div>
+    
+            <div id="lb-list" class="lb-list">
+                </div>
+            
+            <button class="lb-reset-btn" onclick="resetLeaderboard()">🗑️ Wis Geschiedenis</button>
+        </div>
+    </div>
+
     <script src="js/memory.js"></script>
     <script src="js/stickers.js"></script>
     <script src="js/puzzel.js"></script>
@@ -42,157 +70,7 @@
     <script src="js/rekenen.js"></script>
     <script src="js/schaduw.js"></script>
     <script src="js/vang.js"></script> 
-    <script src="js/vieropeenrij.js"></script> <script>
-        // --- 1. DE GELUIDSMACHINE ---
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        
-        function playSound(type) {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-
-            const osc = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            osc.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-
-            const now = audioCtx.currentTime;
-
-            if (type === 'pop' || type === 'click') {
-                // "Plop" geluidje
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(800, now);
-                osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
-                gainNode.gain.setValueAtTime(0.3, now);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-                osc.start(now);
-                osc.stop(now + 0.1);
-
-            } else if (type === 'win' || type === 'success') {
-                // "Ting!"
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(523.25, now); // C
-                osc.frequency.setValueAtTime(659.25, now + 0.1); // E
-                gainNode.gain.setValueAtTime(0.2, now);
-                gainNode.gain.linearRampToValueAtTime(0, now + 0.4);
-                osc.start(now);
-                osc.stop(now + 0.4);
-                
-                // Tweede toon
-                const osc2 = audioCtx.createOscillator();
-                const gain2 = audioCtx.createGain();
-                osc2.connect(gain2); gain2.connect(audioCtx.destination);
-                osc2.type = 'triangle';
-                osc2.frequency.setValueAtTime(1046.5, now);
-                gain2.gain.setValueAtTime(0.1, now);
-                gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-                osc2.start(now);
-                osc2.stop(now + 0.5);
-
-            } else if (type === 'error' || type === 'wrong') {
-                // "Womp womp"
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(200, now);
-                osc.frequency.linearRampToValueAtTime(100, now + 0.2);
-                gainNode.gain.setValueAtTime(0.2, now);
-                gainNode.gain.linearRampToValueAtTime(0, now + 0.2);
-                osc.start(now);
-                osc.stop(now + 0.2);
-
-            } else if (type === 'victory') {
-                // "Ta-daaa!"
-                const notes = [523.25, 659.25, 783.99, 1046.50]; // C E G C
-                notes.forEach((note, i) => {
-                    const o = audioCtx.createOscillator();
-                    const g = audioCtx.createGain();
-                    o.connect(g); g.connect(audioCtx.destination);
-                    o.type = 'square';
-                    o.frequency.value = note;
-                    g.gain.setValueAtTime(0.1, now + (i*0.1));
-                    g.gain.exponentialRampToValueAtTime(0.01, now + (i*0.1) + 0.4);
-                    o.start(now + (i*0.1));
-                    o.stop(now + (i*0.1) + 0.4);
-                });
-            }
-        }
-
-        // --- 2. DE FUNCTIE OM SPELLEN TE LADEN ---
-        function loadGame(gameType) {
-            document.getElementById('main-menu').style.display = 'none';
-            document.getElementById('game-board').style.display = 'block';
-            
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-
-            const oldModal = document.querySelector('.winner-modal-overlay');
-            if(oldModal) oldModal.remove();
-            
-            if(gameType === 'memory' && typeof startMemorySetup === 'function') startMemorySetup();
-            else if(gameType === 'puzzel' && typeof startPuzzleGame === 'function') startPuzzleGame();
-            else if(gameType === 'stickers' && typeof openStickerBook === 'function') openStickerBook();
-            else if(gameType === 'tekenen' && typeof startDrawingGame === 'function') startDrawingGame();
-            else if(gameType === 'rekenen' && typeof startMathGame === 'function') startMathGame();
-            else if(gameType === 'schaduw' && typeof startShadowGame === 'function') startShadowGame();
-            else if(gameType === 'vang' && typeof startWhackGame === 'function') startWhackGame();
-            else if(gameType === 'vieropeenrij' && typeof startConnect4 === 'function') startConnect4();
-        }
-
-        // --- 3. WINNAAR MODAL ---
-        function showWinnerModal(winnerName, allScores = []) {
-            playSound('victory'); 
-            if(typeof memFireConfetti === 'function') memFireConfetti();
-
-            let leaderboardHTML = '';
-            if (allScores.length > 1) {
-                allScores.sort((a, b) => b.score - a.score);
-                leaderboardHTML = '<div class="leaderboard-list">';
-                allScores.forEach((player, index) => {
-                    let posClass = index === 0 ? 'pos-1' : (index === 1 ? 'pos-2' : (index === 2 ? 'pos-3' : ''));
-                    let medal = index === 0 ? '🥇' : (index === 1 ? '🥈' : (index === 2 ? '🥉' : `${index + 1}.`));
-                    leaderboardHTML += `
-                        <div class="leaderboard-item">
-                            <span class="${posClass}">${medal} ${player.name}</span>
-                            <span>${player.score} pnt</span>
-                        </div>`;
-                });
-                leaderboardHTML += '</div>';
-            }
-
-            let stickerHTML = '';
-            if (typeof unlockRandomSticker === 'function') {
-                const newSticker = unlockRandomSticker();
-                if (newSticker) {
-                    stickerHTML = `
-                        <div class="sticker-reward-box">
-                            <h4>✨ NIEUWE STICKER! ✨</h4>
-                            <img src="${newSticker.src}" class="new-sticker-img">
-                            <p>Je hebt de <b>${newSticker.id.split('-')[0]}</b> sticker verdiend!</p>
-                        </div>`;
-                } else {
-                    stickerHTML = `
-                        <div class="sticker-reward-box" style="background:rgba(255,255,255,0.3); border-color:white;">
-                            <h4>Geen nieuwe sticker...</h4>
-                            <p>Probeer het nog eens!</p>
-                        </div>`;
-                }
-            }
-
-            const modalHTML = `
-                <div class="winner-modal-overlay">
-                    <div class="winner-modal-content">
-                        <span class="trophy-icon">🏆</span>
-                        <h2 class="winner-title">Goed gedaan!</h2>
-                        <div class="winner-name">${winnerName} wint!</div>
-                        
-                        ${leaderboardHTML}
-                        ${stickerHTML}
-                        
-                        <div class="modal-actions">
-                            <button class="restart-btn" onclick="location.reload()">Nog een keer!</button>
-                            <button class="menu-btn" onclick="location.reload()">Hoofdmenu</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', modalHTML);
-        }
-    </script>
+    <script src="js/vieropeenrij.js"></script> 
+    <script src="js/main.js"></script>
 </body>
 </html>
