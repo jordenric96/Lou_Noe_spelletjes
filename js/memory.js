@@ -1,5 +1,5 @@
-// MEMORY.JS - MET GELUID (Sound Enabled)
-console.log("Memory.js geladen (Sound Enabled)...");
+// MEMORY.JS - UPDATE MET SAVE SCORE
+console.log("Memory.js geladen...");
 
 let memoryState = { 
     theme: 'boerderij', gridSize: 30, playerNames: [], currentPlayerIndex: 0, scores: {}, 
@@ -44,7 +44,6 @@ function startMemorySetup() {
         return `<div class="theme-card-btn ${t.locked ? 'locked' : ''} ${selected}" onclick="memSetTheme('${key}', this)"><div class="theme-img-container">${imgTag}</div><div class="btn-label">${key.charAt(0).toUpperCase() + key.slice(1)}</div></div>`;
     }).join('');
     
-    // HIERONDER ZIJN DE BUTTONS AANGEPAST MET DE NIEUWE NAMEN
     board.innerHTML = `
     <div class="memory-setup">
         <div class="setup-group">
@@ -54,11 +53,7 @@ function startMemorySetup() {
                 <button class="player-btn" onclick="memSelectPerson('Noé', this)">👶🏼 Noé</button>
                 <button class="player-btn" onclick="memSelectPerson('Oliver', this)">👦🏼 Oliver</button>
                 <button class="player-btn" onclick="memSelectPerson('Manon', this)">👧🏼 Manon</button>
-                
                 <button class="player-btn" onclick="memSelectPerson('Lore', this)">👩🏻 Lore</button>
-                <button class="player-btn" onclick="memSelectPerson('Karen', this)">👩🏼 Karen</button>
-                
-                <button class="player-btn" onclick="memSelectPerson('Jorden', this)">🧔🏻 Jorden</button>
                 <button class="player-btn" onclick="memSelectPerson('Bert', this)">👨🏻 Bert</button>
             </div>
             <div style="display:flex; gap:5px; margin-top:10px; justify-content:center;">
@@ -83,14 +78,14 @@ function startMemorySetup() {
 
 function memSetTheme(name, btn) { 
     if(memThemes[name].locked) return; 
-    if(typeof playSound === 'function') playSound('click'); // GELUID!
+    if(typeof playSound === 'function') playSound('click');
     memoryState.theme = name; 
     document.querySelectorAll('.theme-card-btn').forEach(b => b.classList.remove('selected')); 
     btn.classList.add('selected'); 
 }
 
 function memSelectPerson(name, btn) { 
-    if(typeof playSound === 'function') playSound('click'); // GELUID!
+    if(typeof playSound === 'function') playSound('click');
     document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending')); 
     if(btn) btn.classList.add('selected-pending'); 
     memoryState.pendingPlayer = name; 
@@ -101,7 +96,7 @@ function memSelectPerson(name, btn) {
 function memAddCustomPerson() { 
     const i = document.getElementById('mem-custom-name'); const n = i.value.trim(); 
     if(n){ 
-        if(typeof playSound==='function') playSound('click'); // GELUID!
+        if(typeof playSound==='function') playSound('click');
         memoryState.pendingPlayer=n; 
         document.querySelectorAll('.player-btn').forEach(b=>b.classList.remove('selected-pending')); 
         i.value=''; i.placeholder="Gekozen!"; memRenderPalette(); 
@@ -112,7 +107,7 @@ function memRenderPalette() { const cp = document.getElementById('mem-color-pale
 
 function memSelectColor(c) { 
     if(!memoryState.pendingPlayer) return alert("Kies eerst een naam!"); 
-    if(typeof playSound==='function') playSound('pop'); // GELUID!
+    if(typeof playSound==='function') playSound('pop');
     memoryState.playerNames.push({name:memoryState.pendingPlayer, color:c}); 
     memoryState.pendingPlayer=null; 
     const inp = document.getElementById('mem-custom-name'); if(inp) inp.placeholder="Naam..."; 
@@ -126,7 +121,7 @@ function memRemovePlayer(n) { memoryState.playerNames=memoryState.playerNames.fi
 function memCheckStartButton() { const b=document.getElementById('mem-start-btn'); if(b){ b.disabled=memoryState.playerNames.length===0; b.innerText=b.disabled?"SPELERS KIEZEN...":"START SPEL ▶️"; } }
 
 function startMemoryGame() {
-    if(typeof playSound === 'function') playSound('win'); // START GELUID!
+    if(typeof playSound === 'function') playSound('win');
     const board = document.getElementById('game-board'); memoryState.gridSize = 30; memoryState.scores = {}; memoryState.playerNames.forEach(p => { memoryState.scores[p.name] = 0; });
     let headerHTML = `<div class="memory-header-row"><div class="score-board">${memoryState.playerNames.map((p, i) => `<div class="player-badge" id="badge-${i}" style="border-color:${p.color}"><span style="color:${p.color}">${p.name}: <span id="score-${i}">0</span></span></div>`).join('')}</div></div>`;
     let footerHTML = `<div class="memory-footer"><button class="mini-back-btn" onclick="startMemorySetup()">⬅ Terug</button></div>`;
@@ -142,7 +137,6 @@ function memGenerateCards(totalCards) { const grid = document.getElementById('me
 function memFlipCard() {
     if (memoryState.lockBoard || this.classList.contains('flipped')) return;
     
-    // 1. SPEEL POP GELUIDJE BIJ OMDRAAIEN
     if(typeof playSound === 'function') playSound('pop');
     
     this.classList.add('flipped'); memoryState.flippedCards.push(this);
@@ -150,7 +144,6 @@ function memFlipCard() {
         memoryState.lockBoard = true;
         const [c1, c2] = memoryState.flippedCards;
         if (c1.dataset.value === c2.dataset.value) {
-            // SETJE GEVONDEN!
             let p = memoryState.playerNames[memoryState.currentPlayerIndex];
             memoryState.scores[p.name]++; 
             const scoreEl = document.getElementById(`score-${memoryState.currentPlayerIndex}`);
@@ -160,19 +153,28 @@ function memFlipCard() {
             c1.querySelector('.card-back').style.borderColor = p.color; c2.querySelector('.card-back').style.borderColor = p.color;
             memoryState.flippedCards = []; memoryState.lockBoard = false;
             
-            // 2. SPEEL SUCCESS GELUIDJE
             if(typeof playSound === 'function') playSound('win');
             
             if (memoryState.matchedPairs === 15) {
                 setTimeout(() => { 
                     let leaderboardData = memoryState.playerNames.map(pn => ({ name: pn.name, score: memoryState.scores[pn.name] }));
                     leaderboardData.sort((a,b) => b.score - a.score);
-                    // Het winnaarsgeluid zit ingebouwd in showWinnerModal!
+                    
+                    // --- NIEUWE LOGICA: OPSLAAN UITSLAG ---
+                    if(memoryState.playerNames.length === 2 && typeof saveDuelResult === 'function') {
+                        const p1 = leaderboardData[0].name;
+                        const p2 = leaderboardData[1].name;
+                        // Wie heeft gewonnen?
+                        let winner = 'draw';
+                        if(leaderboardData[0].score > leaderboardData[1].score) winner = leaderboardData[0].name;
+                        saveDuelResult('memory', p1, p2, winner);
+                    }
+                    // --------------------------------------
+
                     if(typeof showWinnerModal === 'function') { showWinnerModal(leaderboardData[0].name, leaderboardData); }
                 }, 1000);
             }
         } else {
-            // FOUT GERADEN
             setTimeout(() => { c1.classList.remove('flipped'); c2.classList.remove('flipped'); memoryState.flippedCards = []; memoryState.lockBoard = false; memSwitchPlayer(); }, 1200);
         }
     }
