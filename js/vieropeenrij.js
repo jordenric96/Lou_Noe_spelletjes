@@ -1,5 +1,5 @@
-// VIEROPEENRIJ.JS - FINAL STABLE
-console.log("4-op-een-rij geladen (Android Fix)...");
+// VIEROPEENRIJ.JS - TABLET & ANDROID READY
+console.log("4-op-een-rij geladen (Tablet Fix)...");
 
 let c4State = {
     step: 0, winsNeeded: 3,
@@ -28,14 +28,14 @@ function renderWizardStep() {
     let btnText = "KIES NAAM & PLAATJE...";
     if (isReady) btnText = isP1 ? "BEVESTIG SPELER 1 ➡" : "START HET SPEL! 🚀";
 
-    // Chip opties (Eerste 5 van elk thema)
+    // Chip opties
     let chipsHTML = '';
     if(typeof memThemes !== 'undefined') {
         Object.values(memThemes).forEach(t => {
             if(!t.locked && !t.isMix) {
                 for(let i=1; i<=5; i++) {
                     const src = `${t.path}${i}.${t.extension}`;
-                    if (!isP1 && src === c4State.p1.img) return; // Geen dubbele
+                    if (!isP1 && src === c4State.p1.img) return; 
                     const selected = currPlayer.img === src ? 'selected' : '';
                     chipsHTML += `<div class="chip-option ${selected}" style="background:${currPlayer.color}" onclick="c4SetChip('${src}')"><img src="${src}"></div>`;
                 }
@@ -87,7 +87,6 @@ function renderWizardStep() {
     `;
 }
 
-// Setup Helpers
 function c4UpdateBtn() {
     const curr = c4State.step === 0 ? c4State.p1 : c4State.p2;
     const btn = document.querySelector('.confirm-action-btn');
@@ -100,35 +99,11 @@ function c4UpdateBtn() {
     }
 }
 function c4SetGoal(n) { if(typeof playSound==='function') playSound('click'); c4State.winsNeeded = n; renderWizardStep(); }
-function c4SetName(n) {
-    if(typeof playSound==='function') playSound('click');
-    const p = c4State.step === 0 ? c4State.p1 : c4State.p2; p.name = n;
-    document.querySelector('.custom-name-input').value = n;
-    document.querySelectorAll('.preset-btn').forEach(b => {
-        if(b.innerText.includes(n)) b.classList.add('active'); else b.classList.remove('active');
-    });
-    c4UpdateBtn();
-}
-function c4UpdateName(val) { const p = c4State.step === 0 ? c4State.p1 : c4State.p2; p.name = val; document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active')); c4UpdateBtn(); }
-function c4SetColor(c) {
-    if(typeof playSound==='function') playSound('click');
-    const p = c4State.step === 0 ? c4State.p1 : c4State.p2; p.color = c;
-    renderWizardStep(); 
-}
-function c4SetChip(src) {
-    if(typeof playSound==='function') playSound('pop');
-    const p = c4State.step === 0 ? c4State.p1 : c4State.p2; p.img = src;
-    document.querySelectorAll('.chip-option').forEach(el => el.classList.remove('selected'));
-    const allChips = document.querySelectorAll('.chip-option img');
-    allChips.forEach(img => { if(img.getAttribute('src') === src) img.parentElement.classList.add('selected'); });
-    c4UpdateBtn();
-}
-function c4NextStep() {
-    const curr = c4State.step === 0 ? c4State.p1 : c4State.p2;
-    if (!curr.name || !curr.img) { if(typeof playSound==='function') playSound('error'); return; }
-    if(typeof playSound==='function') playSound('win');
-    if (c4State.step === 0) { c4State.step = 1; renderWizardStep(); } else { c4InitGame(); }
-}
+function c4SetName(n) { if(typeof playSound==='function') playSound('click'); const p = c4State.step===0?c4State.p1:c4State.p2; p.name=n; document.querySelector('.custom-name-input').value=n; document.querySelectorAll('.preset-btn').forEach(b=>{if(b.innerText.includes(n))b.classList.add('active');else b.classList.remove('active');}); c4UpdateBtn(); }
+function c4UpdateName(val) { const p = c4State.step===0?c4State.p1:c4State.p2; p.name=val; document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active')); c4UpdateBtn(); }
+function c4SetColor(c) { if(typeof playSound==='function') playSound('click'); const p = c4State.step===0?c4State.p1:c4State.p2; p.color=c; renderWizardStep(); }
+function c4SetChip(src) { if(typeof playSound==='function') playSound('pop'); const p = c4State.step===0?c4State.p1:c4State.p2; p.img=src; document.querySelectorAll('.chip-option').forEach(el=>el.classList.remove('selected')); const allChips=document.querySelectorAll('.chip-option img'); allChips.forEach(img=>{if(img.getAttribute('src')===src)img.parentElement.classList.add('selected');}); c4UpdateBtn(); }
+function c4NextStep() { const curr=c4State.step===0?c4State.p1:c4State.p2; if(!curr.name||!curr.img){if(typeof playSound==='function')playSound('error');return;} if(typeof playSound==='function')playSound('win'); if(c4State.step===0){c4State.step=1;renderWizardStep();}else{c4InitGame();} }
 
 // --- GAME ---
 function c4InitGame() {
@@ -151,14 +126,12 @@ function renderGame() {
     };
 
     let gridHTML = '';
-    // Let op: we renderen rij 5 (boven) eerst, dan naar 0
     for(let r=ROWS-1; r>=0; r--) {
         for(let c=0; c<COLS; c++) {
             const val = c4State.board[c][r];
             let content = '';
             if (val === 1) content = `<img src="${c4State.p1.img}" class="slotted-chip" style="background:${c4State.p1.color}; --chip-color:${c4State.p1.color}">`;
             if (val === 2) content = `<img src="${c4State.p2.img}" class="slotted-chip" style="background:${c4State.p2.color}; --chip-color:${c4State.p2.color}">`;
-            
             gridHTML += `<div class="c4-slot" id="slot-${c}-${r}">${content}</div>`;
         }
     }
@@ -177,9 +150,9 @@ function renderGame() {
             </div>
 
             <div class="board-area">
-                <div class="c4-grid-table" id="visual-grid">
-                    ${gridHTML}
-                    ${clicksHTML}
+                <div class="board-wrapper" id="board-visual">
+                    <div class="c4-grid-mask">${gridHTML}</div>
+                    <div class="click-layer">${clicksHTML}</div>
                 </div>
                 <button class="tool-btn" style="width:auto; margin-top:10px;" onclick="startConnect4()">Stoppen</button>
             </div>
@@ -203,7 +176,7 @@ function c4Drop(col) {
     
     // Coordinaten
     const targetSlot = document.getElementById(`slot-${col}-${row}`);
-    const gridRect = document.getElementById('visual-grid').getBoundingClientRect();
+    const gridRect = document.getElementById('board-visual').getBoundingClientRect();
     const slotRect = targetSlot.getBoundingClientRect();
 
     const endTop = slotRect.top - gridRect.top;
@@ -213,23 +186,18 @@ function c4Drop(col) {
     // Animatie Chip
     const p = c4State.currentPlayer === 1 ? c4State.p1 : c4State.p2;
     const animChip = document.createElement('div');
-    animChip.className = 'anim-chip';
+    animChip.className = 'game-chip';
     animChip.style.width = slotRect.width + 'px';
     animChip.style.height = slotRect.height + 'px';
     animChip.style.left = endLeft + 'px';
     animChip.style.background = p.color;
-    // Set variable for border color
     animChip.style.setProperty('--chip-color', p.color);
     animChip.innerHTML = `<img src="${p.img}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
     
     const keyframes = [{ top: startTop + 'px' }, { top: endTop + 'px' }];
-    // Gebruik Web Animations API (gladder)
-    const animation = animChip.animate(keyframes, {
-        duration: 400,
-        easing: 'cubic-bezier(0.5, 0, 0.75, 0)' // Versnellen (zwaartekracht)
-    });
+    const animation = animChip.animate(keyframes, { duration: 400, easing: 'cubic-bezier(0.5, 0, 0.75, 0)' });
 
-    document.getElementById('visual-grid').appendChild(animChip);
+    document.getElementById('board-visual').appendChild(animChip);
 
     animation.onfinish = () => {
         if(typeof playSound==='function') playSound('click');
@@ -237,8 +205,7 @@ function c4Drop(col) {
         
         c4State.board[col][row] = c4State.currentPlayer;
         
-        // CHECK WINNAAR
-        const winResult = c4CheckWin(col, row); // Nu geeft dit de winnende cellen terug!
+        const winResult = c4CheckWin(col, row);
         
         if (winResult) {
             renderGame();
@@ -257,11 +224,9 @@ function c4Drop(col) {
 
 function c4CheckWin(c, r) {
     const p = c4State.board[c][r];
-    const dirs = [[[0,1]], [[1,0]], [[1,1]], [[1,-1]]]; // Richtingen
-    
+    const dirs = [[[0,1]], [[1,0]], [[1,1]], [[1,-1]]];
     for(let d of dirs) {
         let winningCells = [{c:c, r:r}]; 
-        
         for(let side of [-1,1]) {
             let dc=d[0][0]*side, dr=d[0][1]*side, nc=c+dc, nr=r+dr;
             while(nc>=0 && nc<COLS && nr>=0 && nr<ROWS && c4State.board[nc][nr]===p) {
@@ -269,7 +234,6 @@ function c4CheckWin(c, r) {
                 nc+=dc; nr+=dr;
             }
         }
-        
         if(winningCells.length >= 4) return winningCells; 
     }
     return null;
