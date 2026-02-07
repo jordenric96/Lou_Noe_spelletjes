@@ -148,3 +148,31 @@
 .p-name { color: #444; }
 .p-score { font-weight: bold; color: #2196F3; background: #E3F2FD; padding: 2px 8px; border-radius: 10px; font-size: 0.85rem; }
 .vang-col.green .p-score { color: #2E7D32; background: #E8F5E9; } /* Groen voor kliks */
+
+/* --- GESLACHT STIJLEN VOOR LEADERBOARD --- */
+
+/* Standaard Badge Styling override */
+.lb-badge {
+    padding: 3px 10px; border-radius: 12px;
+    font-weight: bold; font-size: 0.9rem;
+    display: inline-block; box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+}
+
+/* 🟣 BOYS: Super Geweldig Paars (Electric Violet -> Deep Purple) */
+.style-boy {
+    background: linear-gradient(135deg, #7C4DFF 0%, #651FFF 100%);
+    color: white !important;
+    border: 2px solid #6200EA;
+}
+
+/* 🌸 GIRLS: Flashy Stoer Roos (Neon Pink -> Reddish Pink) */
+.style-girl {
+    background: linear-gradient(135deg, #FF4081 0%, #F50057 100%);
+    color: white !important;
+    border: 2px solid #C51162;
+}
+
+/* In de Vang Ze lijst, maken we de naam dikgedrukt en gekleurd als tekst */
+.vang-row .style-boy-text { color: #6200EA; font-weight: 800; }
+.vang-row .style-girl-text { color: #C51162; font-weight: 800; }
