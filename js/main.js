@@ -1,6 +1,6 @@
 // MAIN.JS - FIREBASE EDITIE (Full Version)
 // - Wachtwoord: 0204
-// - Nieuw Design (Match Cards)
+// - Nieuw Design (Battle Cards)
 // - Gender Styles (Boys/Girls)
 
 // -------------------------------------------------------------
@@ -18,7 +18,7 @@ const firebaseConfig = {
 // Initialiseren
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-window.db = db; 
+window.db = db; // Maak db beschikbaar voor andere scripts
 
 console.log("🔥 Firebase Verbonden!");
 
@@ -37,7 +37,7 @@ function getPlayerStyleClass(name) {
     return ''; 
 }
 
-// Geeft de juiste CSS class terug voor gekleurde tekst
+// Geeft de juiste CSS class terug voor gekleurde tekst (bij Vang ze lijstjes)
 function getPlayerTextClass(name) {
     if (genderStyles.boys.includes(name)) return 'style-boy-text';
     if (genderStyles.girls.includes(name)) return 'style-girl-text';
@@ -257,9 +257,9 @@ function renderLeaderboard() {
             const classP1 = getPlayerStyleClass(d.p1Name);
             const classP2 = getPlayerStyleClass(d.p2Name);
 
-            // 2. BEPAAL BALK KLEUR (Volgt P1 stijl)
-            let barColor = 'linear-gradient(90deg, #651FFF, #7C4DFF)'; // Boy (Default)
-            if (classP1 === 'style-girl') barColor = 'linear-gradient(90deg, #F50057, #FF4081)'; // Girl
+            // 2. BEPAAL BALK KLEUR (Paars of Roze)
+            let barGradient = 'linear-gradient(90deg, #651FFF, #7C4DFF)'; // Default Boy
+            if (classP1 === 'style-girl') barGradient = 'linear-gradient(90deg, #D500F9, #FF4081)'; // Girl
 
             // 3. STATISTIEKEN BLOK
             let statsHTML = '';
@@ -287,23 +287,32 @@ function renderLeaderboard() {
 
             const gameIcon = currentLbFilter === 'all' ? (d.gameType==='memory' ? '🧠' : '🔴') : '';
 
-            // 4. DUEL CARD HTML (Nieuw Design)
+            // 4. DUEL CARD HTML (Nieuw Battle Design)
             html += `
             <div class="duel-card">
-                <div style="text-align:center; font-size:0.8rem; margin-bottom:5px; opacity:0.5;">${gameIcon}</div>
+                <div style="text-align:center; font-size:0.8rem; margin-bottom:10px; opacity:0.6;">${gameIcon}</div>
                 
                 <div class="duel-header">
-                    <div class="lb-badge ${classP1}">
-                        ${avatars[d.p1Name]||''} ${d.p1Name}
+                    <div class="lb-player-block">
+                        <div class="lb-badge ${classP1}">
+                            ${avatars[d.p1Name]||''} ${d.p1Name}
+                        </div>
                     </div>
-                    <div class="score-big">${d.wins1} - ${d.wins2}</div>
-                    <div class="lb-badge ${classP2}">
-                        ${d.p2Name} ${avatars[d.p2Name]||''}
+
+                    <div class="mid-score-box">
+                        <div class="vs-badge">VS</div>
+                        <div class="score-display">${d.wins1}-${d.wins2}</div>
+                    </div>
+
+                    <div class="lb-player-block">
+                        <div class="lb-badge ${classP2}">
+                            ${d.p2Name} ${avatars[d.p2Name]||''}
+                        </div>
                     </div>
                 </div>
 
                 <div class="vs-bar-container">
-                    <div class="vs-bar-fill" style="width: ${pct1}%; background: ${barColor};"></div>
+                    <div class="vs-bar-fill" style="width: ${pct1}%; background: ${barGradient};"></div>
                 </div>
 
                 ${statsHTML}
