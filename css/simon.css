@@ -1,0 +1,86 @@
+/* SIMON.CSS - Setup & Game Board */
+
+/* --- 1. SETUP SCHERM (Hergebruik van Memory stijl) --- */
+.simon-setup {
+    display: flex; flex-direction: column;
+    height: 100%; width: 100%;
+    padding: 15px; box-sizing: border-box;
+    background: #FFF3E0; /* Zacht oranje */
+    overflow-y: auto;
+}
+
+.setup-group {
+    background: white; border-radius: 20px;
+    padding: 20px; margin-bottom: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    width: 100%; box-sizing: border-box;
+    text-align: center;
+}
+
+.option-grid { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
+.option-btn {
+    background: #FAFAFA; border: 2px solid #EEE; border-radius: 15px;
+    padding: 15px; cursor: pointer; flex: 1;
+    display: flex; flex-direction: column; align-items: center;
+    transition: all 0.2s;
+}
+.option-btn span:first-child { font-size: 2rem; margin-bottom: 5px; }
+.option-btn.selected {
+    background: #FFF8E1; border-color: #FFC107; transform: scale(1.05);
+    box-shadow: 0 4px 0 #FFB300;
+}
+
+/* --- 2. GAME BOARD --- */
+.simon-container {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    width: 100%; height: 100%;
+    background: #263238; /* Donkergrijs voor contrast */
+    padding: 10px; box-sizing: border-box;
+}
+
+.simon-info {
+    width: 100%; max-width: 400px;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px; color: white;
+    font-size: 1.2rem;
+}
+.simon-score { background: #37474F; padding: 5px 15px; border-radius: 20px; }
+.simon-message { font-weight: bold; color: #FFEB3B; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+
+/* De 4 Knoppen */
+.simon-board {
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 15px; 
+    width: 100%; max-width: 400px; aspect-ratio: 1/1;
+    padding: 10px;
+}
+
+.simon-btn {
+    background-color: #555;
+    border-radius: 20px; border: none;
+    box-shadow: 0 8px 0 rgba(0,0,0,0.3), inset 0 0 20px rgba(0,0,0,0.2);
+    cursor: pointer; position: relative; overflow: hidden;
+    transition: transform 0.1s, filter 0.1s;
+}
+.simon-btn:active { transform: translateY(4px); box-shadow: 0 4px 0 rgba(0,0,0,0.3); }
+
+/* Kleuren & Afbeeldingen */
+.simon-btn::after {
+    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background-size: 70%; background-position: center; background-repeat: no-repeat;
+    opacity: 0.6; pointer-events: none;
+}
+
+/* Specifieke Kleuren */
+#sb-0 { background-color: #4CAF50; } /* Groen */
+#sb-1 { background-color: #F44336; } /* Rood */
+#sb-2 { background-color: #FFEB3B; } /* Geel */
+#sb-3 { background-color: #2196F3; } /* Blauw */
+
+/* OPLICHTEN (Animatie) */
+.simon-btn.lit {
+    filter: brightness(1.8);
+    transform: scale(0.98);
+    box-shadow: 0 0 30px currentColor;
+}
