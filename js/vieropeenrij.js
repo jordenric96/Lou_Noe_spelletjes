@@ -74,6 +74,8 @@ function renderWizardStep() {
                     <button class="preset-btn ${currPlayer.name==='Jorden'?'active':''}" onclick="c4SetName('Jorden')">🧔🏻<br>Jorden</button>
                     <button class="preset-btn ${currPlayer.name==='Karen'?'active':''}" onclick="c4SetName('Karen')">👱🏼‍♀️<br>Karen</button>
                     <button class="preset-btn ${currPlayer.name==='Bert'?'active':''}" onclick="c4SetName('Bert')">👨🏻<br>Bert</button>
+                    <button class="preset-btn ${currPlayer.name==='Vince'?'active':''}" onclick="c4SetName('Vince')">👩🏽‍🦱<br>Vince</button>
+                    <button class="preset-btn ${currPlayer.name==='Fran'?'active':''}" onclick="c4SetName('Fran')">👩🏻<br>Fran</button>
                 </div>
                 <input type="text" class="custom-name-input" placeholder="Of typ zelf..." value="${currPlayer.name}" 
                     oninput="c4UpdateName(this.value)" onclick="this.select()">
