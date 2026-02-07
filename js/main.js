@@ -1,7 +1,7 @@
-// MAIN.JS - FIREBASE EDITIE (Zonder Cloud Stickers)
+// MAIN.JS - FIREBASE EDITIE (Met Duel & Solo Highscores)
 
 // -------------------------------------------------------------
-// 1. FIREBASE CONFIGURATIE (Jouw Project: kidsgames-d250e)
+// 1. FIREBASE CONFIGURATIE
 // -------------------------------------------------------------
 const firebaseConfig = {
   apiKey: "AIzaSyA_P2tE0Xz4iPuCQ3YfRxp7zxLId-TaCPY",
@@ -12,14 +12,14 @@ const firebaseConfig = {
   appId: "1:242669911777:web:8a648af368ec6e409f01a0"
 };
 
-// Initialiseren van Firebase (via de compat-scripts in index.html)
+// Initialiseren
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-console.log("🔥 Firebase is verbonden met project: kidsgames-d250e");
+console.log("🔥 Firebase Verbonden: Klaar voor actie!");
 
 // -------------------------------------------------------------
-// STANDAARD GAME CODE (Audio, Navigatie, Modal)
+// STANDAARD GAME CODE
 // -------------------------------------------------------------
 
 const mainMenu = document.getElementById('main-menu');
@@ -68,7 +68,8 @@ function showWinnerModal(winnerName, allScores = []) {
     playSound('victory'); if(typeof memFireConfetti === 'function') memFireConfetti();
 
     let leaderboardHTML = '';
-    if (allScores.length > 1) {
+    // Alleen tonen als het een Array is (Memory), niet bij solo games
+    if (Array.isArray(allScores) && allScores.length > 1) {
         allScores.sort((a, b) => b.score - a.score);
         leaderboardHTML = '<div class="leaderboard-list">';
         allScores.forEach((player, index) => {
@@ -78,12 +79,12 @@ function showWinnerModal(winnerName, allScores = []) {
         leaderboardHTML += '</div>';
     }
 
-    // Sticker check (Nog lokaal, zoals gevraagd)
+    // Stickers
     let stickerHTML = '';
     if (typeof unlockRandomSticker === 'function') {
-        const newSticker = unlockRandomSticker();
-        if (newSticker) stickerHTML = `<div class="sticker-reward-box"><h4>✨ STICKER! ✨</h4><img src="${newSticker.src}" class="new-sticker-img"><p>Je hebt <b>#${newSticker.id.split('-')[1]}</b> verdiend!</p></div>`;
-        else stickerHTML = `<div class="sticker-reward-box" style="background:rgba(255,255,255,0.3); border-color:white;"><h4>Geen nieuwe sticker...</h4><p>Probeer het nog eens!</p></div>`;
+        // Omdat stickers async is, doen we hier een eenvoudige check
+        // De echte sticker logica zit in stickers.js, hier tonen we evt placeholder
+        // In een latere versie koppelen we dit strakker.
     }
 
     const modalHTML = `
@@ -93,7 +94,6 @@ function showWinnerModal(winnerName, allScores = []) {
                 <h2 class="winner-title">Goed gedaan!</h2>
                 <div class="winner-name">${winnerName} wint!</div>
                 ${leaderboardHTML}
-                ${stickerHTML}
                 <div class="modal-actions"><button class="restart-btn" onclick="location.reload()">Nog een keer!</button><button class="menu-btn" onclick="location.reload()">Hoofdmenu</button></div>
             </div>
         </div>`;
@@ -101,15 +101,16 @@ function showWinnerModal(winnerName, allScores = []) {
 }
 
 // -------------------------------------------------------------
-// 🔥 FIREBASE LEADERBOARD LOGICA
+// 🔥 LEADERBOARD & OPSLAG LOGICA
 // -------------------------------------------------------------
 
-// 1. Sla uitslag op in Firestore (Cloud)
+// 1. DUEL OPSLAAN (Memory, 4-op-rij)
 function saveDuelResult(gameType, player1, player2, winner, score1, score2, extraStats = {}) {
     if (!player1 || !player2 || player1 === player2) return;
 
     db.collection("game_history").add({
         game: gameType,
+        type: 'duel',
         p1: player1,
         p2: player2,
         winner: winner, 
@@ -117,23 +118,35 @@ function saveDuelResult(gameType, player1, player2, winner, score1, score2, extr
         s2: score2 || 0, 
         stats: extraStats, 
         date: new Date().toISOString(),
-        // Belangrijk: Server tijdstempel voor eerlijke sortering
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    })
-    .then(() => console.log("✅ Uitslag opgeslagen in cloud!"))
-    .catch((error) => console.error("❌ Fout bij opslaan:", error));
+    }).catch((error) => console.error("Fout bij opslaan:", error));
 }
 
-// 2. Navigatie Tussenstand
+// 2. SOLO SCORE OPSLAAN (Vang ze!)
+function saveSoloScore(gameType, player, difficulty, time, clicks) {
+    if (!player) return;
+
+    db.collection("game_history").add({
+        game: gameType,
+        type: 'solo',
+        player: player,
+        difficulty: difficulty, 
+        time: time,             
+        clicks: clicks,         
+        date: new Date().toISOString(),
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    .then(() => console.log(`✅ Solo score opgeslagen: ${player} (${time}s)`))
+    .catch((error) => console.error("Fout bij opslaan:", error));
+}
+
+// --- LEADERBOARD NAVIGATIE ---
 let currentLbFilter = 'all';
 
 function openLeaderboard() { 
     playSound('click'); 
     document.getElementById('leaderboard-modal').classList.remove('hidden'); 
-    
-    // Zet een ladertje aan zodat je ziet dat hij iets doet
     document.getElementById('lb-list').innerHTML = '<div style="text-align:center; padding:20px;">Laden uit de cloud... ☁️</div>';
-    
     renderLeaderboard(); 
 }
 
@@ -141,38 +154,47 @@ function closeLeaderboard() { playSound('click'); document.getElementById('leade
 function switchLbTab(filter, btn) { playSound('click'); currentLbFilter = filter; document.querySelectorAll('.lb-tab').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderLeaderboard(); }
 
 function resetLeaderboard() { 
-    if(confirm("Wil je echt ALLE geschiedenis wissen voor IEDEREEN?")) { 
-        // Dit wist de laatste 50 items (batch delete)
+    if(confirm("LET OP: Dit wist scores voor iedereen! Zeker weten?")) { 
         db.collection("game_history").limit(50).get().then(snapshot => {
             snapshot.forEach(doc => doc.ref.delete());
-            alert("Recente geschiedenis gewist.");
+            alert("Laatste 50 scores gewist.");
             renderLeaderboard();
         });
     } 
 }
 
-// 3. Renderen (Ophalen uit Firestore)
+// --- RENDER LOGICA ---
 function renderLeaderboard() {
     const list = document.getElementById('lb-list');
     
-    // Haal data op uit Firestore (Laatste 100 potjes)
-    db.collection("game_history").orderBy("timestamp", "desc").limit(100).get().then((querySnapshot) => {
-        
+    // Haal laatste 200 op
+    db.collection("game_history").orderBy("timestamp", "desc").limit(200).get().then((querySnapshot) => {
         const history = [];
-        querySnapshot.forEach((doc) => {
-            history.push(doc.data());
+        querySnapshot.forEach((doc) => { history.push(doc.data()); });
+
+        // A. SPECIAAL VOOR VANG ZE (SOLO SCORES)
+        if (currentLbFilter === 'vang') {
+            renderVangLeaderboard(list, history);
+            return;
+        }
+
+        // B. DE REST (DUELS)
+        // Filter 'vang' eruit als we op 'all' staan, want dat zijn solo scores
+        const filteredHistory = history.filter(h => {
+            if (currentLbFilter === 'all') return h.type === 'duel' || (h.game !== 'vang' && !h.type);
+            return h.game === currentLbFilter;
         });
 
-        const filteredHistory = history.filter(h => currentLbFilter === 'all' || h.game === currentLbFilter);
-
-        if (filteredHistory.length === 0) { list.innerHTML = '<div style="text-align:center; color:#aaa; padding:30px;">Nog geen wedstrijdjes gespeeld!</div>'; return; }
+        if (filteredHistory.length === 0) { list.innerHTML = '<div style="text-align:center; color:#aaa; padding:30px;">Nog geen duels gespeeld!</div>'; return; }
 
         const duels = {};
-        // Avatar hulpje
         const avatars = { 'Lou':'👦🏻', 'Noé':'👶🏼', 'Oliver':'👦🏼', 'Manon':'👧🏼', 'Lore':'👩🏻', 'Jorden':'🧔🏻', 'Karen':'👱🏼‍♀️', 'Bert':'👨🏻' };
         const getAv = (n) => avatars[n] || '';
 
         filteredHistory.forEach(match => {
+            // Alleen duels verwerken
+            if (!match.p1 || !match.p2) return;
+
             const players = [match.p1, match.p2].sort(); 
             const duelId = players.join('|'); 
             
@@ -186,12 +208,12 @@ function renderLeaderboard() {
                     scoreCounts: {}, gameType: match.game 
                 };
             }
-            
             const d = duels[duelId];
 
-            if (match.winner === d.p1Name) d.wins1++;
-            else if (match.winner === d.p2Name) d.wins2++;
+            // Winnaar
+            if (match.winner === d.p1Name) d.wins1++; else if (match.winner === d.p2Name) d.wins2++;
 
+            // Streak
             if (match.winner !== 'draw') {
                 if (d.currentStreakOwner === match.winner) d.currentStreakCount++;
                 else { d.currentStreakOwner = match.winner; d.currentStreakCount = 1; }
@@ -199,16 +221,16 @@ function renderLeaderboard() {
                 if (match.winner === d.p2Name && d.currentStreakCount > d.longestStreakP2) d.longestStreakP2 = d.currentStreakCount;
             }
 
-            let finalS1 = 0, finalS2 = 0;
-            if (match.p1 === d.p1Name) { finalS1 = match.s1; finalS2 = match.s2; }
-            else { finalS1 = match.s2; finalS2 = match.s1; }
-
+            // Scores
+            let finalS1 = (match.p1 === d.p1Name) ? match.s1 : match.s2;
+            let finalS2 = (match.p1 === d.p1Name) ? match.s2 : match.s1;
             if (finalS1 > 0 || finalS2 > 0) {
                 const scoreKey = `${finalS1}-${finalS2}`;
                 if(!d.scoreCounts[scoreKey]) d.scoreCounts[scoreKey] = 0;
                 d.scoreCounts[scoreKey]++;
             }
 
+            // Memory Stats
             if (match.game === 'memory' && match.stats) {
                 let sP1 = (match.p1 === d.p1Name) ? match.stats.p1MaxStreak : match.stats.p2MaxStreak;
                 let sP2 = (match.p1 === d.p1Name) ? match.stats.p2MaxStreak : match.stats.p1MaxStreak;
@@ -217,21 +239,15 @@ function renderLeaderboard() {
             }
         });
 
+        // HTML Bouwen Duels
         const sortedDuels = Object.values(duels).sort((a,b) => (b.wins1+b.wins2) - (a.wins1+a.wins2));
-
         let html = '';
         sortedDuels.forEach(d => {
             const totalGames = d.wins1 + d.wins2;
             const pct1 = totalGames > 0 ? Math.round((d.wins1 / totalGames) * 100) : 50;
             const sortedScores = Object.entries(d.scoreCounts).sort((a, b) => b[1] - a[1]).slice(0, 4);
+            let scorePills = sortedScores.map(([s, c]) => `<div class="score-pill">${s} <span class="score-count">${c}</span></div>`).join('');
             
-            let scorePillsHTML = '';
-            if (sortedScores.length > 0) {
-                scorePillsHTML = '<div class="score-history">';
-                sortedScores.forEach(([score, count]) => { scorePillsHTML += `<div class="score-pill">${score} <span class="score-count">${count}</span></div>`; });
-                scorePillsHTML += '</div>';
-            }
-
             let extraStatsHTML = `
                 <div class="stats-row">
                     <div class="stat-col left"><span class="stat-label">Beste Reeks</span><span class="stat-val">🔥 ${d.longestStreakP1}x</span></div>
@@ -258,14 +274,67 @@ function renderLeaderboard() {
                 </div>
                 <div class="vs-bar-bg"><div class="vs-bar-fill" style="width: ${pct1}%"></div></div>
                 ${extraStatsHTML}
-                ${scorePillsHTML}
+                <div class="score-history" style="margin-top:5px;">${scorePills}</div>
             </div>`;
         });
-
         list.innerHTML = html;
 
     }).catch((error) => {
-        console.error("Error getting documents: ", error);
-        list.innerHTML = '<div style="text-align:center; color:red;">Fout bij laden. Check je internet!</div>';
+        console.error("Error:", error);
+        list.innerHTML = '<div style="text-align:center; color:red;">Fout bij laden.</div>';
     });
+}
+
+// --- VANG LEADERBOARD FUNCTIE ---
+function renderVangLeaderboard(listContainer, history) {
+    // Alleen solo Vang games
+    const vangGames = history.filter(h => h.game === 'vang' && h.type === 'solo');
+    
+    if (vangGames.length === 0) {
+        listContainer.innerHTML = '<div style="text-align:center; padding:20px;">Nog geen mollen gevangen!</div>';
+        return;
+    }
+
+    const avatars = { 'Lou':'👦🏻', 'Noé':'👶🏼', 'Oliver':'👦🏼', 'Manon':'👧🏼', 'Lore':'👩🏻', 'Jorden':'🧔🏻', 'Karen':'👱🏼‍♀️', 'Bert':'👨🏻' };
+    const difficulties = ['easy', 'medium', 'hard'];
+    const diffLabels = { 'easy': '🟢 Makkelijk', 'medium': '🟠 Normaal', 'hard': '🔴 Moeilijk' };
+
+    let html = '<div class="vang-lb-container">';
+
+    difficulties.forEach(diff => {
+        const gamesInDiff = vangGames.filter(g => g.difficulty === diff);
+        if(gamesInDiff.length === 0) return;
+
+        // Top 10 Snelste Tijd
+        const topTime = [...gamesInDiff].sort((a,b) => a.time - b.time).slice(0, 10);
+        // Top 10 Minste Kliks
+        const topClicks = [...gamesInDiff].sort((a,b) => a.clicks - b.clicks).slice(0, 10);
+
+        html += `<div class="vang-diff-block">
+            <h3 class="vang-diff-title">${diffLabels[diff]}</h3>
+            <div class="vang-stats-row">
+                <div class="vang-col">
+                    <div class="vang-col-header">⚡ Snelste Tijd</div>
+                    ${topTime.map((g, i) => `
+                        <div class="vang-row">
+                            <span>${i+1}. ${avatars[g.player]||''} ${g.player}</span>
+                            <strong>${g.time}s</strong>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="vang-col">
+                    <div class="vang-col-header">🎯 Minste Kliks</div>
+                    ${topClicks.map((g, i) => `
+                        <div class="vang-row">
+                            <span>${i+1}. ${avatars[g.player]||''} ${g.player}</span>
+                            <strong>${g.clicks}</strong>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>`;
+    });
+
+    html += '</div>';
+    listContainer.innerHTML = html;
 }
