@@ -15,8 +15,7 @@
     <link rel="stylesheet" href="css/schaduw.css">
     <link rel="stylesheet" href="css/vang.css">
     <link rel="stylesheet" href="css/vieropeenrij.css">
-    <link rel="stylesheet" href="css/tussenstand.css">
-    <link rel="stylesheet" href="css/simon.css">
+    <link rel="stylesheet" href="css/simon.css"> <link rel="stylesheet" href="css/tussenstand.css">
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4CAF50">
@@ -37,9 +36,9 @@
 
         <div class="game-selection">
             <div class="game-card" onclick="loadGame('memory')"><div class="game-icon">🧠</div><div class="game-title">Memory</div></div>
-            <div class="game-card" onclick="loadGame('puzzel')"><div class="game-icon">🧩</div><div class="game-title">Puzzel</div></div>
-            <div class="game-card" onclick="loadGame('vang')"><div class="game-icon">🔨</div><div class="game-title">Vang ze!</div></div>
+            <div class="game-card" onclick="loadGame('simon')"><div class="game-icon">💡</div><div class="game-title">Simon</div></div> <div class="game-card" onclick="loadGame('vang')"><div class="game-icon">🔨</div><div class="game-title">Vang ze!</div></div>
             <div class="game-card" onclick="loadGame('vieropeenrij')"><div class="game-icon">🔴</div><div class="game-title">4 op een Rij</div></div>
+            <div class="game-card" onclick="loadGame('puzzel')"><div class="game-icon">🧩</div><div class="game-title">Puzzel</div></div>
             <div class="game-card" onclick="loadGame('schaduw')"><div class="game-icon">🌑</div><div class="game-title">Wie is het?</div></div>
             <div class="game-card" onclick="loadGame('tekenen')"><div class="game-icon">🎨</div><div class="game-title">Tekenen</div></div>
             <div class="game-card" onclick="loadGame('rekenen')"><div class="game-icon">🧮</div><div class="game-title">Tellen</div></div>
@@ -49,7 +48,7 @@
 
     <div id="game-board"></div>
 
-   <div id="leaderboard-modal" class="hidden">
+    <div id="leaderboard-modal" class="hidden">
         <div class="lb-content">
             <button class="lb-close" onclick="closeLeaderboard()">✕</button>
             <div class="lb-header"><h2>🏆 Tussenstand</h2></div>
@@ -77,8 +76,6 @@
     <script src="js/schaduw.js"></script>
     <script src="js/vang.js"></script> 
     <script src="js/vieropeenrij.js"></script> 
-    <script src="js/simon.js"></script>
-    
-    <script src="js/main.js"></script>
+    <script src="js/simon.js"></script> <script src="js/main.js"></script>
 </body>
 </html>
