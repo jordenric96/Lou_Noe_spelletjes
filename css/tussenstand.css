@@ -1,178 +1,111 @@
-/* TUSSENSTAND.CSS - Volledige versie met Versus Bar, Stats & Mooie Vang Ze */
+/* TUSSENSTAND.CSS - MODERNE MAKE-OVER */
 
-/* --- 1. KNOP OP DE HOOFDPAGINA --- */
-.leaderboard-btn-container {
-    width: 100%; display: flex; justify-content: center; margin-bottom: 25px;
-}
+/* --- ALGEMENE STIJL --- */
+.leaderboard-btn-container { width: 100%; display: flex; justify-content: center; margin-bottom: 25px; }
 .leaderboard-btn {
-    background: #FFD700; color: #5D4037;
-    border: 4px solid white; border-radius: 20px;
-    padding: 12px 30px; font-size: 1.3rem;
-    font-family: 'Fredoka One', cursive; cursor: pointer;
-    box-shadow: 0 6px 0 #FFB300, 0 10px 20px rgba(0,0,0,0.2);
-    transition: transform 0.2s, box-shadow 0.2s;
-    animation: popIn 0.5s 0.6s backwards; display: flex; align-items: center; gap: 10px;
+    background: #FFD700; color: #5D4037; border: 4px solid white; border-radius: 20px;
+    padding: 12px 30px; font-size: 1.3rem; font-family: 'Fredoka One', cursive; cursor: pointer;
+    box-shadow: 0 6px 0 #FFB300, 0 10px 20px rgba(0,0,0,0.2); transition: transform 0.2s;
 }
-.leaderboard-btn:hover { transform: scale(1.05); }
 .leaderboard-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #FFB300; }
 
-/* --- 2. DE MODAL --- */
+/* MODAL */
 #leaderboard-modal {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
     z-index: 9999; display: flex; justify-content: center; align-items: center;
-    animation: fadeIn 0.3s ease-out;
 }
 #leaderboard-modal.hidden { display: none; }
 
 .lb-content {
-    background: #FAFAFA; width: 95%; max-width: 600px; /* Iets breder voor Vang Ze */
+    background: #F0F4F8; /* Zachte achtergrond */
+    width: 95%; max-width: 500px;
     border-radius: 30px; padding: 20px;
-    max-height: 90vh; display: flex; flex-direction: column;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.4); border: 6px solid #FFD700;
-    position: relative; animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    max-height: 85vh; display: flex; flex-direction: column;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3); border: 5px solid #FFF;
+    position: relative;
 }
-@keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-.lb-header h2 { text-align: center; color: #333; margin: 0 0 10px 0; font-size: 2rem; text-transform: uppercase; }
-.lb-close { position: absolute; top: 15px; right: 15px; background: #FF5252; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 #D32F2F; }
-.lb-close:active { transform: translateY(4px); box-shadow: none; }
+.lb-header h2 { text-align: center; color: #37474F; margin: 0 0 15px 0; font-size: 1.8rem; text-transform: uppercase; letter-spacing: 1px; }
+.lb-close { position: absolute; top: 15px; right: 15px; background: #FF5252; color: white; border: none; width: 36px; height: 36px; border-radius: 50%; font-weight: bold; cursor: pointer; }
+.lb-list { overflow-y: auto; flex: 1; padding: 5px; }
 
+/* TABS */
 .lb-tabs { display: flex; gap: 8px; margin-bottom: 15px; justify-content: center; flex-wrap: wrap; }
-.lb-tab { padding: 8px 15px; background: #eee; border: none; border-radius: 15px; font-family: 'Fredoka One'; cursor: pointer; color: #777; transition: all 0.2s; }
-.lb-tab.active { background: #2196F3; color: white; transform: scale(1.1); box-shadow: 0 4px 10px rgba(33, 150, 243, 0.4); }
+.lb-tab { padding: 8px 16px; background: #FFF; border: 2px solid #EEE; border-radius: 20px; font-family: 'Fredoka One'; cursor: pointer; color: #90A4AE; transition: 0.2s; }
+.lb-tab.active { background: #2196F3; color: white; border-color: #2196F3; box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3); }
 
-.lb-list { overflow-y: auto; flex: 1; padding: 5px; scrollbar-width: thin; }
-.lb-reset-btn { align-self: center; margin-top: 10px; background: transparent; border: 2px dashed #ccc; color: #999; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-family: 'Fredoka One'; }
-.lb-reset-btn:hover { border-color: #FF5252; color: #FF5252; }
-
-/* --- 3. DUEL KAART (Memory / 4-op-rij) --- */
+/* --- NIEUW: DUEL KAART DESIGN --- */
 .duel-card {
-    background: #FFF; border-radius: 20px; padding: 15px; margin-bottom: 15px;
-    border: 1px solid #EEE; box-shadow: 0 4px 0 #E0E0E0;
-    display: flex; flex-direction: column; gap: 10px;
+    background: #FFF; border-radius: 24px;
+    padding: 15px 20px; margin-bottom: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    border: 1px solid #FFF;
+    position: relative; overflow: hidden;
 }
-.duel-header { display: flex; align-items: center; justify-content: space-between; font-size: 1.2rem; color: #444; font-weight: bold; }
-.p-left { text-align: left; color: #F44336; width: 35%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-.p-right { text-align: right; color: #2196F3; width: 35%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-.score-badge { background: #333; color: white; padding: 5px 12px; border-radius: 12px; font-size: 1rem; min-width: 60px; text-align: center; }
 
-/* VERSUS BALK */
-.vs-bar-bg {
-    width: 100%; height: 16px; background: #2196F3; border-radius: 8px; 
-    overflow: hidden; position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+/* Header: Speler VS Speler */
+.duel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+/* De Badges (Namen) */
+.lb-badge {
+    padding: 6px 14px; border-radius: 15px;
+    font-weight: 800; font-size: 0.95rem;
+    display: flex; align-items: center; gap: 6px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    white-space: nowrap;
+}
+
+/* Score in het midden (Groot) */
+.score-big {
+    font-size: 1.6rem; font-weight: 900; color: #37474F;
+    background: #ECEFF1; padding: 5px 15px; border-radius: 12px;
+    letter-spacing: 2px;
+}
+
+/* STIJLEN: BOYS & GIRLS (De kleuren die je wilde) */
+.style-boy {
+    background: linear-gradient(135deg, #651FFF 0%, #7C4DFF 100%);
+    color: white !important; border: 2px solid #512DA8;
+}
+.style-girl {
+    background: linear-gradient(135deg, #F50057 0%, #FF4081 100%);
+    color: white !important; border: 2px solid #C2185B;
+}
+
+/* VS BAR (Nu dun en subtiel) */
+.vs-bar-container {
+    width: 100%; height: 8px; background: #EDE7F6; /* Heel licht paars */
+    border-radius: 4px; margin-bottom: 15px; overflow: hidden;
+    position: relative;
 }
 .vs-bar-fill {
-    height: 100%; background: #F44336; border-right: 3px solid white;
-    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    height: 100%; background: linear-gradient(90deg, #651FFF, #7C4DFF); /* Boy kleur standaard */
+    border-radius: 4px; transition: width 0.5s ease;
 }
+/* Als Girl voor staat, veranderen we de bar kleur via JS of CSS trick, 
+   maar voor nu houden we het simpel: De balk toont het percentage van Speler 1 (Links) */
 
-/* EXTRA STATS & HISTORY */
-.stats-row {
-    display: flex; justify-content: space-between; font-size: 0.75rem; color: #777;
-    background: #F9F9F9; padding: 8px; border-radius: 10px; border: 1px solid #EEE; margin-top: 2px;
-}
-.stat-col { display: flex; flex-direction: column; gap: 2px; }
-.stat-col.left { text-align: left; }
-.stat-col.right { text-align: right; }
-.stat-label { font-size: 0.65rem; text-transform: uppercase; color: #aaa; letter-spacing: 0.5px; }
-.stat-val { font-weight: bold; color: #555; }
-
-.score-history { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; margin-top: 5px; }
-.score-pill {
-    background: #FFF3E0; border: 1px solid #FFCC80; color: #E65100;
-    font-size: 0.75rem; padding: 2px 8px; border-radius: 10px;
-    font-weight: bold; display: flex; align-items: center; gap: 4px;
-}
-.score-count {
-    background: #E65100; color: white; border-radius: 50%; width: 14px; height: 14px; 
-    display: flex; justify-content: center; align-items: center; font-size: 0.6rem;
-}
-
-/* --- 4. NIEUWE STIJL VOOR VANG ZE! & SIMON (Veel mooier) --- */
-
-.vang-lb-container {
-    display: flex; flex-direction: column; gap: 25px; padding-bottom: 20px;
-}
-
-.vang-diff-block {
-    background: white; border-radius: 20px; overflow: hidden;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.05); border: 2px solid #EEE;
-}
-
-/* Header per moeilijkheid */
-.vang-diff-header {
-    padding: 10px; text-align: center;
-    font-size: 1.2rem; color: white; font-weight: bold; text-transform: uppercase;
-    text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
-}
-.vang-diff-header.easy { background: linear-gradient(45deg, #66BB6A, #43A047); }
-.vang-diff-header.medium { background: linear-gradient(45deg, #FFA726, #FB8C00); }
-.vang-diff-header.hard { background: linear-gradient(45deg, #EF5350, #E53935); }
-.vang-diff-header.simon { background: linear-gradient(45deg, #7E57C2, #5E35B1); }
-
-/* Grid voor kolommen (Tijd & Kliks) */
-.vang-stats-grid {
+/* STATS GRID (Netjes blokje) */
+.stats-grid {
     display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; background: #F9FAFB;
+    border-radius: 15px; padding: 10px;
+    border: 1px solid #F0F0F0;
 }
-.vang-col { padding: 0; }
-.vang-col:first-child { border-right: 2px solid #F5F5F5; }
+.stat-box { text-align: center; }
+.stat-label { font-size: 0.65rem; color: #90A4AE; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 2px; }
+.stat-val { font-size: 0.9rem; font-weight: bold; color: #455A64; }
 
-/* Kolom Titel */
-.vang-col-title {
-    background: #FAFAFA; color: #888; font-size: 0.8rem; text-transform: uppercase;
-    text-align: center; padding: 8px; border-bottom: 2px solid #F5F5F5; font-weight: bold;
-    display: flex; align-items: center; justify-content: center; gap: 5px;
+/* RECENTE UITSLAGEN (Bolletjes) */
+.history-row {
+    display: flex; justify-content: center; gap: 6px; margin-top: 15px;
 }
-
-/* Score Rijtjes */
-.vang-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 8px 12px; border-bottom: 1px solid #F9F9F9; font-size: 0.95rem;
+.hist-pill {
+    font-size: 0.75rem; font-weight: bold;
+    background: #FFF; border: 1px solid #CFD8DC; color: #78909C;
+    padding: 3px 10px; border-radius: 20px;
 }
-.vang-row:last-child { border-bottom: none; }
-.vang-row:nth-child(even) { background: #FCFCFC; }
-
-/* Rank Badges (1, 2, 3) */
-.rank-badge {
-    width: 20px; height: 20px; border-radius: 50%;
-    background: #EEE; color: #777; font-size: 0.7rem;
-    display: flex; justify-content: center; align-items: center; margin-right: 8px; font-weight: bold;
-}
-.vang-row.top-1 .rank-badge { background: #FFD700; color: #795548; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transform: scale(1.1); }
-.vang-row.top-2 .rank-badge { background: #C0C0C0; color: #555; }
-.vang-row.top-3 .rank-badge { background: #CD7F32; color: white; }
-
-/* Player Name & Score */
-.p-name { color: #444; }
-.p-score { font-weight: bold; color: #2196F3; background: #E3F2FD; padding: 2px 8px; border-radius: 10px; font-size: 0.85rem; }
-.vang-col.green .p-score { color: #2E7D32; background: #E8F5E9; } /* Groen voor kliks */
-
-/* --- GESLACHT STIJLEN VOOR LEADERBOARD --- */
-
-/* Standaard Badge Styling override */
-.lb-badge {
-    padding: 3px 10px; border-radius: 12px;
-    font-weight: bold; font-size: 0.9rem;
-    display: inline-block; box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-    text-shadow: 0 1px 1px rgba(0,0,0,0.2);
-}
-
-/* 🟣 BOYS: Super Geweldig Paars (Electric Violet -> Deep Purple) */
-.style-boy {
-    background: linear-gradient(135deg, #7C4DFF 0%, #651FFF 100%);
-    color: white !important;
-    border: 2px solid #6200EA;
-}
-
-/* 🌸 GIRLS: Flashy Stoer Roos (Neon Pink -> Reddish Pink) */
-.style-girl {
-    background: linear-gradient(135deg, #FF4081 0%, #F50057 100%);
-    color: white !important;
-    border: 2px solid #C51162;
-}
-
-/* In de Vang Ze lijst, maken we de naam dikgedrukt en gekleurd als tekst */
-.vang-row .style-boy-text { color: #6200EA; font-weight: 800; }
-.vang-row .style-girl-text { color: #C51162; font-weight: 800; }
