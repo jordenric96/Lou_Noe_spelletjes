@@ -1,4 +1,4 @@
-/* TUSSENSTAND.CSS - Met Uitslagen Historie */
+/* TUSSENSTAND.CSS - Volledige versie met Versus Bar, Stats & Mooie Vang Ze */
 
 /* --- 1. KNOP OP DE HOOFDPAGINA --- */
 .leaderboard-btn-container {
@@ -26,7 +26,7 @@
 #leaderboard-modal.hidden { display: none; }
 
 .lb-content {
-    background: #FFF; width: 95%; max-width: 550px;
+    background: #FAFAFA; width: 95%; max-width: 600px; /* Iets breder voor Vang Ze */
     border-radius: 30px; padding: 20px;
     max-height: 90vh; display: flex; flex-direction: column;
     box-shadow: 0 20px 60px rgba(0,0,0,0.4); border: 6px solid #FFD700;
@@ -39,16 +39,17 @@
 .lb-close { position: absolute; top: 15px; right: 15px; background: #FF5252; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 #D32F2F; }
 .lb-close:active { transform: translateY(4px); box-shadow: none; }
 
-.lb-tabs { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; flex-wrap: wrap; }
+.lb-tabs { display: flex; gap: 8px; margin-bottom: 15px; justify-content: center; flex-wrap: wrap; }
 .lb-tab { padding: 8px 15px; background: #eee; border: none; border-radius: 15px; font-family: 'Fredoka One'; cursor: pointer; color: #777; transition: all 0.2s; }
 .lb-tab.active { background: #2196F3; color: white; transform: scale(1.1); box-shadow: 0 4px 10px rgba(33, 150, 243, 0.4); }
 
 .lb-list { overflow-y: auto; flex: 1; padding: 5px; scrollbar-width: thin; }
 .lb-reset-btn { align-self: center; margin-top: 10px; background: transparent; border: 2px dashed #ccc; color: #999; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-family: 'Fredoka One'; }
+.lb-reset-btn:hover { border-color: #FF5252; color: #FF5252; }
 
-/* --- 3. DUEL KAART --- */
+/* --- 3. DUEL KAART (Memory / 4-op-rij) --- */
 .duel-card {
-    background: #FAFAFA; border-radius: 20px; padding: 15px; margin-bottom: 15px;
+    background: #FFF; border-radius: 20px; padding: 15px; margin-bottom: 15px;
     border: 1px solid #EEE; box-shadow: 0 4px 0 #E0E0E0;
     display: flex; flex-direction: column; gap: 10px;
 }
@@ -67,10 +68,10 @@
     transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* EXTRA STATS */
+/* EXTRA STATS & HISTORY */
 .stats-row {
     display: flex; justify-content: space-between; font-size: 0.75rem; color: #777;
-    background: #fff; padding: 8px; border-radius: 10px; border: 1px solid #f0f0f0; margin-top: 2px;
+    background: #F9F9F9; padding: 8px; border-radius: 10px; border: 1px solid #EEE; margin-top: 2px;
 }
 .stat-col { display: flex; flex-direction: column; gap: 2px; }
 .stat-col.left { text-align: left; }
@@ -78,17 +79,72 @@
 .stat-label { font-size: 0.65rem; text-transform: uppercase; color: #aaa; letter-spacing: 0.5px; }
 .stat-val { font-weight: bold; color: #555; }
 
-/* --- NIEUW: SCORE HISTORIE (De bolletjes) --- */
-.score-history {
-    display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; margin-top: 5px;
-}
+.score-history { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; margin-top: 5px; }
 .score-pill {
     background: #FFF3E0; border: 1px solid #FFCC80; color: #E65100;
     font-size: 0.75rem; padding: 2px 8px; border-radius: 10px;
     font-weight: bold; display: flex; align-items: center; gap: 4px;
 }
 .score-count {
-    background: #E65100; color: white; border-radius: 50%;
-    width: 14px; height: 14px; display: flex; justify-content: center; align-items: center;
-    font-size: 0.6rem;
+    background: #E65100; color: white; border-radius: 50%; width: 14px; height: 14px; 
+    display: flex; justify-content: center; align-items: center; font-size: 0.6rem;
 }
+
+/* --- 4. NIEUWE STIJL VOOR VANG ZE! & SIMON (Veel mooier) --- */
+
+.vang-lb-container {
+    display: flex; flex-direction: column; gap: 25px; padding-bottom: 20px;
+}
+
+.vang-diff-block {
+    background: white; border-radius: 20px; overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05); border: 2px solid #EEE;
+}
+
+/* Header per moeilijkheid */
+.vang-diff-header {
+    padding: 10px; text-align: center;
+    font-size: 1.2rem; color: white; font-weight: bold; text-transform: uppercase;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
+}
+.vang-diff-header.easy { background: linear-gradient(45deg, #66BB6A, #43A047); }
+.vang-diff-header.medium { background: linear-gradient(45deg, #FFA726, #FB8C00); }
+.vang-diff-header.hard { background: linear-gradient(45deg, #EF5350, #E53935); }
+.vang-diff-header.simon { background: linear-gradient(45deg, #7E57C2, #5E35B1); }
+
+/* Grid voor kolommen (Tijd & Kliks) */
+.vang-stats-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+}
+.vang-col { padding: 0; }
+.vang-col:first-child { border-right: 2px solid #F5F5F5; }
+
+/* Kolom Titel */
+.vang-col-title {
+    background: #FAFAFA; color: #888; font-size: 0.8rem; text-transform: uppercase;
+    text-align: center; padding: 8px; border-bottom: 2px solid #F5F5F5; font-weight: bold;
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+}
+
+/* Score Rijtjes */
+.vang-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px; border-bottom: 1px solid #F9F9F9; font-size: 0.95rem;
+}
+.vang-row:last-child { border-bottom: none; }
+.vang-row:nth-child(even) { background: #FCFCFC; }
+
+/* Rank Badges (1, 2, 3) */
+.rank-badge {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: #EEE; color: #777; font-size: 0.7rem;
+    display: flex; justify-content: center; align-items: center; margin-right: 8px; font-weight: bold;
+}
+.vang-row.top-1 .rank-badge { background: #FFD700; color: #795548; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transform: scale(1.1); }
+.vang-row.top-2 .rank-badge { background: #C0C0C0; color: #555; }
+.vang-row.top-3 .rank-badge { background: #CD7F32; color: white; }
+
+/* Player Name & Score */
+.p-name { color: #444; }
+.p-score { font-weight: bold; color: #2196F3; background: #E3F2FD; padding: 2px 8px; border-radius: 10px; font-size: 0.85rem; }
+.vang-col.green .p-score { color: #2E7D32; background: #E8F5E9; } /* Groen voor kliks */
