@@ -17,14 +17,25 @@
     text-align: center;
 }
 
-.option-grid { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
+/* AANGEPAST: Zodat veel thema's netjes passen */
+.option-grid { 
+    display: flex; 
+    gap: 10px; 
+    justify-content: center; 
+    margin-top: 10px; 
+    flex-wrap: wrap; /* Belangrijk: hierdoor gaan ze naar de volgende regel */
+}
+
 .option-btn {
     background: #FAFAFA; border: 2px solid #EEE; border-radius: 15px;
-    padding: 15px; cursor: pointer; flex: 1;
+    padding: 10px; cursor: pointer; 
+    width: 80px; /* Vaste breedte zodat ze netjes uitlijnen */
     display: flex; flex-direction: column; align-items: center;
     transition: all 0.2s;
 }
-.option-btn span:first-child { font-size: 2rem; margin-bottom: 5px; }
+.option-btn img {
+    width: 40px; height: 40px; object-fit: contain; margin-bottom: 5px;
+}
 .option-btn.selected {
     background: #FFF8E1; border-color: #FFC107; transform: scale(1.05);
     box-shadow: 0 4px 0 #FFB300;
