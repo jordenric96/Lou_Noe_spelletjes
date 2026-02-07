@@ -94,19 +94,22 @@ function renderWhackSetup(board) {
         <div class="memory-setup">
             <div class="setup-group">
                 <h3>1. Wie gaat er meppen?</h3>
-                <div class="preset-row">
-                    <button class="preset-btn ${currPlayer.name==='Lou'?'active':''}" onclick="c4SetName('Lou')">👦🏻<br>Lou</button>
-                    <button class="preset-btn ${currPlayer.name==='Noé'?'active':''}" onclick="c4SetName('Noé')">👶🏼<br>Noé</button>
-                    <button class="preset-btn ${currPlayer.name==='Oliver'?'active':''}" onclick="c4SetName('Oliver')">👦🏼<br>Oliver</button>
-                    <button class="preset-btn ${currPlayer.name==='Manon'?'active':''}" onclick="c4SetName('Manon')">👧🏼<br>Manon</button>
-                    <button class="preset-btn ${currPlayer.name==='Lore'?'active':''}" onclick="c4SetName('Lore')">👩🏻<br>Lore</button>
-                    <button class="preset-btn ${currPlayer.name==='Jorden'?'active':''}" onclick="c4SetName('Jorden')">🧔🏻<br>Jorden</button>
-                    <button class="preset-btn ${currPlayer.name==='Karen'?'active':''}" onclick="c4SetName('Karen')">👱🏼‍♀️<br>Karen</button>
-                    <button class="preset-btn ${currPlayer.name==='Bert'?'active':''}" onclick="c4SetName('Bert')">👨🏻<br>Bert</button>
-                    <button class="preset-btn ${currPlayer.name==='Vince'?'active':''}" onclick="c4SetName('Vince')">👩🏽‍🦱<br>Vince</button>
-                    <button class="preset-btn ${currPlayer.name==='Fran'?'active':''}" onclick="c4SetName('Fran')">👩🏻<br>Fran</button>
+                <div class="name-row"> <button class="player-btn ${whackState.currentPlayer==='Lou'?'selected-pending':''}" onclick="vangSelectPlayer('Lou', this)">👦🏻<br>Lou</button>
+                    <button class="player-btn ${whackState.currentPlayer==='Noé'?'selected-pending':''}" onclick="vangSelectPlayer('Noé', this)">👶🏼<br>Noé</button>
+                    <button class="player-btn ${whackState.currentPlayer==='Oliver'?'selected-pending':''}" onclick="vangSelectPlayer('Oliver', this)">👦🏼<br>Oliver</button>
+                    <button class="player-btn ${whackState.currentPlayer==='Manon'?'selected-pending':''}" onclick="vangSelectPlayer('Manon', this)">👧🏼<br>Manon</button>
+                    <button class="player-btn ${whackState.currentPlayer==='Lore'?'selected-pending':''}" onclick="vangSelectPlayer('Lore', this)">👩🏻<br>Lore</button>
+                    <button class="player-btn ${whackState.currentPlayer==='Jorden'?'selected-pending':''}" onclick="vangSelectPlayer('Jorden', this)">🧔🏻<br>Jorden</button>
+                    <button class="player-btn ${whackState.currentPlayer==='Karen'?'selected-pending':''}" onclick="vangSelectPlayer('Karen', this)">👱🏼‍♀️<br>Karen</button>
+                    <button class="player-btn ${whackState.currentPlayer==='Bert'?'selected-pending':''}" onclick="vangSelectPlayer('Bert', this)">👨🏻<br>Bert</button>
+                    <button class="player-btn ${whackState.currentPlayer==='Vince'?'selected-pending':''}" onclick="vangSelectPlayer('Vince', this)">👩🏽‍🦱<br>Vince</button>
+                    <button class="player-btn ${whackState.currentPlayer==='Fran'?'selected-pending':''}" onclick="vangSelectPlayer('Fran', this)">👩🏻<br>Fran</button>
+
                 </div>
             </div>
+            
+            ```
+
 
             <div class="setup-group">
                 <h3>2. Kies Niveau</h3>
