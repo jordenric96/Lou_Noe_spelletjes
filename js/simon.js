@@ -1,40 +1,36 @@
-// SIMON.JS - Met Unieke Geluiden & Alle Memory Thema's
-console.log("Simon.js geladen (Pro Audio & Themes)...");
+// SIMON.JS - FIREBASE EDITIE (Correcte Spelers & Audio)
+console.log("Simon.js geladen (Fixed)...");
 
 let simonState = {
     sequence: [],
     playerSequence: [],
     level: 0,
     isActive: false, 
-    theme: 'mario', // Standaard
+    theme: 'mario', 
     currentPlayer: null,
-    // Specifieke frequenties voor Simon (Groen, Rood, Geel, Blauw)
-    // E4 (329.6), A3 (220), C#4 (277.2), E3 (164.8) - Klassieke Simon tonen
+    // Frequenties: Groen (E4), Rood (A3), Geel (C#4), Blauw (E3)
     frequencies: [329.63, 261.63, 220.00, 164.81] 
 };
 
-// We gebruiken memThemes uit memory.js. 
-// Als die nog niet geladen is, gebruiken we een fallback.
+// Haal thema's op uit Memory config (of fallback)
 const getThemes = () => (typeof memThemes !== 'undefined') ? memThemes : {
     'mario': { path: 'assets/images/memory/mario/', ext: 'png', locked: false },
     'pokemon': { path: 'assets/images/memory/pokemon/', ext: 'png', locked: false }
 };
 
-// --- 1. SETUP ---
+// --- 1. SETUP SCHERM ---
 function startSimonGame() {
     const board = document.getElementById('game-board');
     simonState.currentPlayer = null;
 
-    // Genereer Thema Knoppen op basis van Memory Thema's
+    // Genereer Thema Knoppen
     const themes = getThemes();
     let themeButtonsHTML = '';
     
     Object.keys(themes).forEach(key => {
         const t = themes[key];
-        // We slaan de 'mix' over en gelockte thema's
         if (!t.isMix && !t.locked) {
             const isSelected = simonState.theme === key ? 'selected' : '';
-            // Probeer cover.png, anders plaatje 1
             const imgIcon = `${t.path}cover.png`; 
             const fallbackIcon = `${t.path}1.${t.extension}`;
             
@@ -51,17 +47,17 @@ function startSimonGame() {
         <div class="simon-setup">
             <div class="setup-group">
                 <h3>1. Wie gaat er spelen?</h3>
-                <div class="preset-row">
-                    <button class="preset-btn ${currPlayer.name==='Lou'?'active':''}" onclick="c4SetName('Lou')">👦🏻<br>Lou</button>
-                    <button class="preset-btn ${currPlayer.name==='Noé'?'active':''}" onclick="c4SetName('Noé')">👶🏼<br>Noé</button>
-                    <button class="preset-btn ${currPlayer.name==='Oliver'?'active':''}" onclick="c4SetName('Oliver')">👦🏼<br>Oliver</button>
-                    <button class="preset-btn ${currPlayer.name==='Manon'?'active':''}" onclick="c4SetName('Manon')">👧🏼<br>Manon</button>
-                    <button class="preset-btn ${currPlayer.name==='Lore'?'active':''}" onclick="c4SetName('Lore')">👩🏻<br>Lore</button>
-                    <button class="preset-btn ${currPlayer.name==='Jorden'?'active':''}" onclick="c4SetName('Jorden')">🧔🏻<br>Jorden</button>
-                    <button class="preset-btn ${currPlayer.name==='Karen'?'active':''}" onclick="c4SetName('Karen')">👱🏼‍♀️<br>Karen</button>
-                    <button class="preset-btn ${currPlayer.name==='Bert'?'active':''}" onclick="c4SetName('Bert')">👨🏻<br>Bert</button>
-                    <button class="preset-btn ${currPlayer.name==='Vince'?'active':''}" onclick="c4SetName('Vince')">👩🏽‍🦱<br>Vince</button>
-                    <button class="preset-btn ${currPlayer.name==='Fran'?'active':''}" onclick="c4SetName('Fran')">👩🏻<br>Fran</button>
+                <div class="name-row">
+                    <button class="player-btn" onclick="simonSelectPlayer('Lou', this)">👦🏻<br>Lou</button>
+                    <button class="player-btn" onclick="simonSelectPlayer('Noé', this)">👶🏼<br>Noé</button>
+                    <button class="player-btn" onclick="simonSelectPlayer('Oliver', this)">👦🏼<br>Oliver</button>
+                    <button class="player-btn" onclick="simonSelectPlayer('Manon', this)">👧🏼<br>Manon</button>
+                    <button class="player-btn" onclick="simonSelectPlayer('Lore', this)">👩🏻<br>Lore</button>
+                    <button class="player-btn" onclick="simonSelectPlayer('Jorden', this)">🧔🏻<br>Jorden</button>
+                    <button class="player-btn" onclick="simonSelectPlayer('Bert', this)">👨🏻<br>Bert</button>
+                    <button class="player-btn" onclick="simonSelectPlayer('Karen', this)">👩🏼<br>Karen</button>
+                    <button class="player-btn" onclick="simonSelectPlayer('Vince', this)">👩🏽‍🦱<br>Vince</button>
+                    <button class="player-btn" onclick="simonSelectPlayer('Fran', this)">👩🏻<br>Fran</button>
                 </div>
             </div>
 
@@ -83,9 +79,12 @@ function startSimonGame() {
 function simonSelectPlayer(name, btn) {
     if(typeof playSound === 'function') playSound('click');
     simonState.currentPlayer = name;
+    
+    // Visuele update
     document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected-pending'));
     btn.classList.add('selected-pending');
     
+    // Knop aanzetten
     const startBtn = document.getElementById('simon-start-btn');
     if(startBtn) { startBtn.disabled = false; startBtn.innerText = "START SPEL ▶"; }
 }
@@ -97,7 +96,7 @@ function setSimonTheme(t, btn) {
     btn.classList.add('selected');
 }
 
-// --- 2. GAME ---
+// --- 2. GAME LOGICA ---
 function initSimon() {
     const board = document.getElementById('game-board');
     const themes = getThemes();
@@ -105,9 +104,7 @@ function initSimon() {
     
     let buttons = '';
     for(let i=0; i<4; i++) {
-        // We pakken plaatje 1, 2, 3 en 4 van het gekozen thema
         const imgSrc = `${t.path}${i+1}.${t.extension}`;
-        
         buttons += `
             <button class="simon-btn" id="sb-${i}" onclick="handleClick(${i})">
                 <div style="position:absolute; top:10%; left:10%; width:80%; height:80%; 
@@ -141,9 +138,7 @@ function nextRound() {
     document.getElementById('s-score').innerText = simonState.level;
     document.getElementById('s-msg').innerText = "Kijk goed...";
     
-    // Voeg nieuwe stap toe
     simonState.sequence.push(Math.floor(Math.random()*4));
-    
     playSequence();
 }
 
@@ -157,14 +152,14 @@ function playSequence() {
             simonState.isActive = true;
             document.getElementById('s-msg').innerText = "Jij!";
         }
-    }, 800); // Snelheid tussen piepjes
+    }, 800);
 }
 
 function activateButton(index) {
     const btn = document.getElementById(`sb-${index}`);
     if(btn) {
         btn.classList.add('lit');
-        playSimonTone(index); // SPEEL SPECIFIEK GELUID
+        playSimonTone(index);
         setTimeout(() => btn.classList.remove('lit'), 400);
     }
 }
@@ -175,15 +170,15 @@ function handleClick(index) {
     activateButton(index);
     simonState.playerSequence.push(index);
     
-    // Check direct
     const currentStep = simonState.playerSequence.length - 1;
     
+    // FOUT
     if (simonState.playerSequence[currentStep] !== simonState.sequence[currentStep]) {
         gameOver();
         return;
     }
     
-    // Ronde klaar?
+    // RONDE KLAAR
     if (simonState.playerSequence.length === simonState.sequence.length) {
         simonState.isActive = false;
         document.getElementById('s-msg').innerText = "Goed zo!";
@@ -195,14 +190,13 @@ function gameOver() {
     simonState.isActive = false;
     document.getElementById('s-msg').innerText = "Fout!";
     
-    // Fout geluid
+    // Foutgeluid
     if (typeof audioCtx !== 'undefined') {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain); gain.connect(audioCtx.destination);
         osc.type = 'sawtooth'; 
-        osc.frequency.setValueAtTime(150, audioCtx.currentTime); // Lage bromtoon
-        osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.3);
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
         gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
         gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
         osc.start(); osc.stop(audioCtx.currentTime + 0.3);
@@ -210,7 +204,9 @@ function gameOver() {
 
     const finalScore = Math.max(0, simonState.level - 1);
     
+    // OPSLAAN (Als saveSoloScore bestaat in main.js)
     if(typeof saveSoloScore === 'function') {
+        // We gebruiken 'clicks' veld om het Level op te slaan
         saveSoloScore('simon', simonState.currentPlayer, 'normal', null, finalScore);
     }
     
@@ -225,12 +221,10 @@ function gameOver() {
     }, 1000);
 }
 
-// --- NIEUW: SPECIFIEKE TONEN GENERATOR ---
 function playSimonTone(index) {
-    // We gebruiken de audioCtx uit main.js als die bestaat
     if (typeof audioCtx === 'undefined' || audioCtx.state === 'suspended') {
         if(typeof audioCtx !== 'undefined') audioCtx.resume();
-        return; // Veiligheid
+        return;
     }
 
     const osc = audioCtx.createOscillator();
@@ -239,13 +233,11 @@ function playSimonTone(index) {
     osc.connect(gainNode);
     gainNode.connect(audioCtx.destination);
     
-    // Kies frequentie op basis van knop index (0-3)
     const freq = simonState.frequencies[index] || 440;
     
     osc.type = 'sine';
     osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
     
-    // Mooi zacht in- en uitfaden (tegen klikjes)
     gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
     gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.05);
     gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
