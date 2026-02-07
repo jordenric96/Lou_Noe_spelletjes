@@ -1,6 +1,6 @@
-// MAIN.JS - FIREBASE EDITIE (Full Version)
+// MAIN.JS - FIREBASE EDITIE (Final Version)
 // - Wachtwoord: 0204
-// - Nieuw Design (Battle Cards)
+// - Nieuw Design (Battle Cards & Solo Neon Cards)
 // - Gender Styles (Boys/Girls)
 
 // -------------------------------------------------------------
@@ -18,7 +18,7 @@ const firebaseConfig = {
 // Initialiseren
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-window.db = db; // Maak db beschikbaar voor andere scripts
+window.db = db; // Maak db beschikbaar
 
 console.log("🔥 Firebase Verbonden!");
 
@@ -197,7 +197,7 @@ function resetLeaderboard() {
 }
 
 // -------------------------------------------------------------
-// 6. RENDER FUNCTIES (Het Uiterlijk)
+// 6. RENDER FUNCTIES (Battle Cards & Neon Solo Lists)
 // -------------------------------------------------------------
 
 function renderLeaderboard() {
@@ -229,18 +229,18 @@ function renderLeaderboard() {
             const d = duels[duelId];
             if (match.winner === d.p1Name) d.wins1++; else if (match.winner === d.p2Name) d.wins2++;
             
-            // Streak berekenen
+            // Streak
             if (match.winner !== 'draw') {
                 if (d.currentStreakOwner === match.winner) d.currentStreakCount++; else { d.currentStreakOwner = match.winner; d.currentStreakCount = 1; }
                 if (match.winner === d.p1Name && d.currentStreakCount > d.longestStreakP1) d.longestStreakP1 = d.currentStreakCount;
                 if (match.winner === d.p2Name && d.currentStreakCount > d.longestStreakP2) d.longestStreakP2 = d.currentStreakCount;
             }
-            // Memory stats
+            // Memory Stats
             if (match.game === 'memory' && match.stats) {
                 let sP1 = (match.p1 === d.p1Name) ? match.stats.p1MaxStreak : match.stats.p2MaxStreak; let sP2 = (match.p1 === d.p1Name) ? match.stats.p2MaxStreak : match.stats.p1MaxStreak;
                 if (sP1 > d.maxMemPairsP1) d.maxMemPairsP1 = sP1 || 0; if (sP2 > d.maxMemPairsP2) d.maxMemPairsP2 = sP2 || 0;
             }
-            // Score telling
+            // Score History
             let finalS1 = (match.p1 === d.p1Name) ? match.s1 : match.s2; let finalS2 = (match.p1 === d.p1Name) ? match.s2 : match.s1;
             if (finalS1 > 0 || finalS2 > 0) { const scoreKey = `${finalS1}-${finalS2}`; if(!d.scoreCounts[scoreKey]) d.scoreCounts[scoreKey] = 0; d.scoreCounts[scoreKey]++; }
         });
@@ -258,8 +258,8 @@ function renderLeaderboard() {
             const classP2 = getPlayerStyleClass(d.p2Name);
 
             // 2. BEPAAL BALK KLEUR (Paars of Roze)
-            let barGradient = 'linear-gradient(90deg, #651FFF, #7C4DFF)'; // Default Boy
-            if (classP1 === 'style-girl') barGradient = 'linear-gradient(90deg, #D500F9, #FF4081)'; // Girl
+            let barGradient = 'linear-gradient(90deg, #651FFF, #7C4DFF)'; // Boy Default
+            if (classP1 === 'style-girl') barGradient = 'linear-gradient(90deg, #D500F9, #FF4081)'; // Girl Style
 
             // 3. STATISTIEKEN BLOK
             let statsHTML = '';
@@ -287,7 +287,7 @@ function renderLeaderboard() {
 
             const gameIcon = currentLbFilter === 'all' ? (d.gameType==='memory' ? '🧠' : '🔴') : '';
 
-            // 4. DUEL CARD HTML (Nieuw Battle Design)
+            // 4. DUEL CARD HTML (Battle Style)
             html += `
             <div class="duel-card">
                 <div style="text-align:center; font-size:0.8rem; margin-bottom:10px; opacity:0.6;">${gameIcon}</div>
@@ -328,80 +328,101 @@ function renderLeaderboard() {
 
 function renderVangLeaderboard(listContainer, history) {
     const vangGames = history.filter(h => h.game === 'vang' && h.type === 'solo');
-    if (vangGames.length === 0) { listContainer.innerHTML = '<div style="text-align:center; padding:20px;">Nog geen mollen gevangen!</div>'; return; }
+    
+    if (vangGames.length === 0) {
+        listContainer.innerHTML = '<div style="text-align:center; padding:30px; opacity:0.6;">Nog geen mollen gevangen!<br>🔨</div>';
+        return;
+    }
 
     const avatars = { 'Lou':'👦🏻', 'Noé':'👶🏼', 'Oliver':'👦🏼', 'Manon':'👧🏼', 'Lore':'👩🏻', 'Jorden':'🧔🏻', 'Karen':'👱🏼‍♀️', 'Bert':'👨🏻', 'Vince':'👩🏽‍🦱', 'Fran':'👩🏻' };
     const difficulties = ['easy', 'medium', 'hard'];
     const diffLabels = { 'easy': 'Makkelijk', 'medium': 'Normaal', 'hard': 'Moeilijk' };
+    const headerClasses = { 'easy': 'header-easy', 'medium': 'header-medium', 'hard': 'header-hard' };
 
-    let html = '<div class="vang-lb-container">';
+    let html = '';
 
     difficulties.forEach(diff => {
         const gamesInDiff = vangGames.filter(g => g.difficulty === diff);
-        if(gamesInDiff.length === 0) return;
+        if(gamesInDiff.length === 0) return; 
 
+        // Top 5 Snelste Tijd & Minste Kliks
         const topTime = [...gamesInDiff].sort((a,b) => a.time - b.time).slice(0, 5);
         const topClicks = [...gamesInDiff].sort((a,b) => a.clicks - b.clicks).slice(0, 5);
 
-        html += `<div class="vang-diff-block">
-            <div class="vang-diff-header ${diff}">${diffLabels[diff]}</div>
-            <div class="vang-stats-grid">
-                <div class="vang-col">
-                    <div class="vang-col-title">⚡ Snelste Tijd</div>
-                    ${topTime.map((g, i) => `
-                        <div class="vang-row top-${i+1}">
+        html += `
+        <div class="solo-card">
+            <div class="solo-header ${headerClasses[diff]}">${diffLabels[diff]}</div>
+            
+            <div class="solo-grid">
+                <div class="solo-col">
+                    <div class="col-title">⚡ Snelste</div>
+                    ${topTime.map((g, i) => {
+                        const styleClass = getPlayerTextClass(g.player);
+                        return `
+                        <div class="solo-row rank-${i+1}">
                             <div style="display:flex; align-items:center;">
-                                <div class="rank-badge">${i+1}</div>
-                                <span class="p-name ${getPlayerTextClass(g.player)}">${avatars[g.player]||''} ${g.player}</span>
+                                <div class="rank-num">${i+1}</div>
+                                <div class="mini-badge ${styleClass}">${avatars[g.player]||''} ${g.player}</div>
                             </div>
-                            <span class="p-score">${g.time}s</span>
-                        </div>
-                    `).join('')}
+                            <div class="solo-score">${g.time}s</div>
+                        </div>`;
+                    }).join('')}
                 </div>
-                <div class="vang-col green">
-                    <div class="vang-col-title">🎯 Minste Kliks</div>
-                    ${topClicks.map((g, i) => `
-                        <div class="vang-row top-${i+1}">
+                
+                <div class="solo-col">
+                    <div class="col-title">🎯 Precisie</div>
+                    ${topClicks.map((g, i) => {
+                        const styleClass = getPlayerTextClass(g.player);
+                        return `
+                        <div class="solo-row rank-${i+1}">
                             <div style="display:flex; align-items:center;">
-                                <div class="rank-badge">${i+1}</div>
-                                <span class="p-name ${getPlayerTextClass(g.player)}">${avatars[g.player]||''} ${g.player}</span>
+                                <div class="rank-num">${i+1}</div>
+                                <div class="mini-badge ${styleClass}">${avatars[g.player]||''} ${g.player}</div>
                             </div>
-                            <span class="p-score">${g.clicks}</span>
-                        </div>
-                    `).join('')}
+                            <div class="solo-score green-score">${g.clicks}</div>
+                        </div>`;
+                    }).join('')}
                 </div>
             </div>
         </div>`;
     });
-    html += '</div>';
+
     listContainer.innerHTML = html;
 }
 
 function renderSimonLeaderboard(listContainer, history) {
     const simonGames = history.filter(h => h.game === 'simon');
-    if (simonGames.length === 0) { listContainer.innerHTML = '<div style="text-align:center; padding:20px;">Nog geen Simon gespeeld!</div>'; return; }
+    
+    if (simonGames.length === 0) {
+        listContainer.innerHTML = '<div style="text-align:center; padding:30px; opacity:0.6;">Nog geen Simon gespeeld!<br>💡</div>';
+        return;
+    }
     
     const avatars = { 'Lou':'👦🏻', 'Noé':'👶🏼', 'Oliver':'👦🏼', 'Manon':'👧🏼', 'Lore':'👩🏻', 'Jorden':'🧔🏻', 'Karen':'👱🏼‍♀️', 'Bert':'👨🏻', 'Vince':'👩🏽‍🦱', 'Fran':'👩🏻' };
+    
     const topScores = simonGames.sort((a,b) => b.clicks - a.clicks).slice(0, 10); 
 
-    let html = `<div class="vang-lb-container">
-        <div class="vang-diff-block">
-            <div class="vang-diff-header simon">💡 Slimste Koppies</div>
-            <div class="vang-stats-grid" style="display:block;">
-                <div class="vang-col" style="border:none;">
-                    <div class="vang-col-title">Hoogste Level</div>
-                    ${topScores.map((g, i) => `
-                        <div class="vang-row top-${i+1}">
-                            <div style="display:flex; align-items:center;">
-                                <div class="rank-badge">${i+1}</div>
-                                <span class="p-name ${getPlayerTextClass(g.player)}">${avatars[g.player]||''} ${g.player}</span>
-                            </div>
-                            <span class="p-score">Level ${g.clicks}</span>
+    let html = `
+    <div class="solo-card">
+        <div class="solo-header header-simon">💡 Slimste Koppies</div>
+        
+        <div class="solo-grid" style="display:block; padding:10px;">
+            <div class="col-title">Hoogste Level Bereikt</div>
+            ${topScores.map((g, i) => {
+                const styleClass = getPlayerStyleClass(g.player);
+                return `
+                <div class="solo-row rank-${i+1}" style="padding: 10px;">
+                    <div style="display:flex; align-items:center;">
+                        <div class="rank-num" style="width:30px; height:30px; font-size:1rem;">${i+1}</div>
+                        <div class="mini-badge ${styleClass}" style="font-size:1rem; padding:5px 10px; border-radius:15px; width:auto; text-align:left;">
+                            ${avatars[g.player]||''} ${g.player}
                         </div>
-                    `).join('')}
-                </div>
-            </div>
+                    </div>
+                    <div class="solo-score" style="font-size:1.2rem;">Level ${g.clicks}</div>
+                </div>`;
+            }).join('')}
         </div>
     </div>`;
+
     listContainer.innerHTML = html;
 }
