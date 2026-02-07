@@ -51,15 +51,17 @@ function startSimonGame() {
         <div class="simon-setup">
             <div class="setup-group">
                 <h3>1. Wie gaat er spelen?</h3>
-                <div class="name-row">
-                    <button class="player-btn" onclick="simonSelectPlayer('Lou', this)">👦🏻 Lou</button>
-                    <button class="player-btn" onclick="simonSelectPlayer('Noé', this)">👶🏼 Noé</button>
-                    <button class="player-btn" onclick="simonSelectPlayer('Oliver', this)">👦🏼 Oliver</button>
-                    <button class="player-btn" onclick="simonSelectPlayer('Manon', this)">👧🏼 Manon</button>
-                    <button class="player-btn" onclick="simonSelectPlayer('Lore', this)">👩🏻 Lore</button>
-                    <button class="player-btn" onclick="simonSelectPlayer('Jorden', this)">🧔🏻 Jorden</button>
-                    <button class="player-btn" onclick="simonSelectPlayer('Bert', this)">👨🏻 Bert</button>
-                    <button class="player-btn" onclick="simonSelectPlayer('Karen', this)">👩🏼 Karen</button>
+                <div class="preset-row">
+                    <button class="preset-btn ${currPlayer.name==='Lou'?'active':''}" onclick="c4SetName('Lou')">👦🏻<br>Lou</button>
+                    <button class="preset-btn ${currPlayer.name==='Noé'?'active':''}" onclick="c4SetName('Noé')">👶🏼<br>Noé</button>
+                    <button class="preset-btn ${currPlayer.name==='Oliver'?'active':''}" onclick="c4SetName('Oliver')">👦🏼<br>Oliver</button>
+                    <button class="preset-btn ${currPlayer.name==='Manon'?'active':''}" onclick="c4SetName('Manon')">👧🏼<br>Manon</button>
+                    <button class="preset-btn ${currPlayer.name==='Lore'?'active':''}" onclick="c4SetName('Lore')">👩🏻<br>Lore</button>
+                    <button class="preset-btn ${currPlayer.name==='Jorden'?'active':''}" onclick="c4SetName('Jorden')">🧔🏻<br>Jorden</button>
+                    <button class="preset-btn ${currPlayer.name==='Karen'?'active':''}" onclick="c4SetName('Karen')">👱🏼‍♀️<br>Karen</button>
+                    <button class="preset-btn ${currPlayer.name==='Bert'?'active':''}" onclick="c4SetName('Bert')">👨🏻<br>Bert</button>
+                    <button class="preset-btn ${currPlayer.name==='Vince'?'active':''}" onclick="c4SetName('Vince')">👩🏽‍🦱<br>Vince</button>
+                    <button class="preset-btn ${currPlayer.name==='Fran'?'active':''}" onclick="c4SetName('Fran')">👩🏻<br>Fran</button>
                 </div>
             </div>
 
