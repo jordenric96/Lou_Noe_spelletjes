@@ -1,4 +1,4 @@
-// MAIN.JS - FIREBASE EDITIE (Met Slimme Scorebord & Ranglijsten)
+// MAIN.JS - FIREBASE EDITIE (Met Vang ze! & Simon)
 
 // -------------------------------------------------------------
 // 1. FIREBASE CONFIGURATIE
@@ -15,7 +15,6 @@ const firebaseConfig = {
 // Initialiseren
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-window.db = db; // Maak db globaal beschikbaar voor andere scripts
 
 console.log("🔥 Firebase Verbonden: Klaar voor actie!");
 
@@ -62,15 +61,16 @@ function loadGame(gameType) {
     else if(gameType === 'schaduw' && typeof startShadowGame === 'function') startShadowGame();
     else if(gameType === 'vang' && typeof startWhackGame === 'function') startWhackGame();
     else if(gameType === 'vieropeenrij' && typeof startConnect4 === 'function') startConnect4();
+    else if(gameType === 'simon' && typeof startSimonGame === 'function') startSimonGame();
 }
 
-// --- WINNAAR MODAL (AANGEPAST) ---
+// --- WINNAAR MODAL ---
 function showWinnerModal(title, details = null) {
     playSound('victory'); if(typeof memFireConfetti === 'function') memFireConfetti();
 
     let contentHTML = '';
 
-    // A. Als details een Array is -> Het is een Leaderboard (Memory/4-op-rij)
+    // A. Leaderboard Array (Memory / 4-op-rij)
     if (Array.isArray(details) && details.length > 1) {
         details.sort((a, b) => b.score - a.score);
         contentHTML = '<div class="leaderboard-list">';
@@ -80,15 +80,17 @@ function showWinnerModal(title, details = null) {
         });
         contentHTML += '</div>';
     } 
-    // B. Als details een Object is -> Het is Vang Ze (Solo Stats)
-    else if (details && typeof details === 'object' && details.time) {
-        contentHTML = `
-            <div class="leaderboard-list" style="text-align:center;">
-                <div style="font-size: 1.2rem; margin-bottom: 5px;">⏱️ Tijd: <b>${details.time}s</b></div>
-                <div style="font-size: 1.1rem; margin-bottom: 10px; color:#555;">🎯 Kliks: <b>${details.clicks}</b></div>
-                ${details.rank ? `<div style="background:#FFEB3B; color:#333; padding:5px 10px; border-radius:10px; display:inline-block; font-weight:bold; box-shadow:0 2px 0 rgba(0,0,0,0.1);">🏆 ${details.rank}e Plaats!</div>` : ''}
-            </div>
-        `;
+    // B. Solo Stats (Vang ze! / Simon)
+    else if (details && typeof details === 'object') {
+        contentHTML = `<div class="leaderboard-list" style="text-align:center;">`;
+        
+        if(details.time) contentHTML += `<div style="font-size: 1.2rem; margin-bottom: 5px;">${details.time}</div>`;
+        if(details.clicks) contentHTML += `<div style="font-size: 1.1rem; margin-bottom: 10px; color:#555;">${details.clicks}</div>`;
+        
+        if(details.rank) {
+            contentHTML += `<div style="background:#FFEB3B; color:#333; padding:5px 10px; border-radius:10px; display:inline-block; font-weight:bold; box-shadow:0 2px 0 rgba(0,0,0,0.1);">🏆 ${details.rank}e Plaats!</div>`;
+        }
+        contentHTML += `</div>`;
     }
 
     const modalHTML = `
@@ -126,7 +128,7 @@ function saveDuelResult(gameType, player1, player2, winner, score1, score2, extr
     }).catch((error) => console.error("Fout bij opslaan:", error));
 }
 
-// 2. SOLO SCORE OPSLAAN + CHECK RANK (Vang ze!)
+// 2. SOLO SCORE OPSLAAN + CHECK RANK (Vang ze! & Simon)
 async function saveSoloScore(gameType, player, difficulty, time, clicks) {
     if (!player) return;
 
@@ -145,41 +147,32 @@ async function saveSoloScore(gameType, player, difficulty, time, clicks) {
         console.log(`✅ Score opgeslagen.`);
 
         // B. Check Ranglijst (Live berekenen)
-        const snapshot = await db.collection("game_history")
-            .where("game", "==", gameType)
-            .where("type", "==", "solo")
-            .where("difficulty", "==", difficulty)
-            .orderBy("time", "asc")
-            .get();
-
-        let rank = 0;
-        let found = false;
+        // Voor Vang ze! is laagste tijd beter (asc), voor Simon is hoogste score beter (desc)
+        // Omdat dit complex is in één functie, skippen we de live rank berekening voor Simon even hier.
+        // We doen een simpele check alleen als 'time' bestaat (Vang ze).
         
-        // We lopen door de lijst heen om te kijken waar de huidige tijd staat
-        // (Dit is een simpele client-side benadering, prima voor deze schaal)
-        const scores = [];
-        snapshot.forEach(doc => scores.push(doc.data()));
-        
-        // Sorteer voor zekerheid
-        scores.sort((a,b) => a.time - b.time);
+        if (time !== null) {
+            const snapshot = await db.collection("game_history")
+                .where("game", "==", gameType)
+                .where("type", "==", "solo")
+                .where("difficulty", "==", difficulty)
+                .orderBy("time", "asc")
+                .get();
 
-        // Vind index
-        for(let i=0; i<scores.length; i++) {
-            // Checken op tijd en speler en timestamp (ongeveer) om 'deze' score te vinden is lastig zonder ID.
-            // We checken gewoon: Hoeveel mensen waren sneller?
-            if (scores[i].time < time) {
-                // sneller
-            } else if (scores[i].time === time && scores[i].player === player) {
-                // Dit zijn wij (of iemand met zelfde tijd). 
-                // Als we de eerste keer deze tijd tegenkomen is dat onze rank.
-                rank = i + 1;
-                found = true;
-                break;
+            let rank = 0;
+            const scores = [];
+            snapshot.forEach(doc => scores.push(doc.data()));
+            scores.sort((a,b) => a.time - b.time);
+
+            for(let i=0; i<scores.length; i++) {
+                if (scores[i].time === time && scores[i].player === player) {
+                    rank = i + 1;
+                    break;
+                }
             }
+            return rank;
         }
-        if(!found) rank = scores.length; // Fallback
-
-        return rank;
+        return null;
 
     } catch (error) {
         console.error("Fout bij opslaan/ranken:", error);
@@ -219,13 +212,19 @@ function renderLeaderboard() {
         const history = [];
         querySnapshot.forEach((doc) => { history.push(doc.data()); });
 
-        // A. SPECIAAL VOOR VANG ZE (SOLO SCORES)
+        // 1. SIMON
+        if (currentLbFilter === 'simon') {
+            renderSimonLeaderboard(list, history);
+            return;
+        }
+
+        // 2. VANG ZE
         if (currentLbFilter === 'vang') {
             renderVangLeaderboard(list, history);
             return;
         }
 
-        // B. DUELS (Filter Vang eruit bij 'all')
+        // 3. DUELS (De rest)
         const filteredHistory = history.filter(h => {
             if (currentLbFilter === 'all') return h.type === 'duel'; // Alleen duels in 'Alles' tab
             return h.game === currentLbFilter;
@@ -342,9 +341,7 @@ function renderVangLeaderboard(listContainer, history) {
         const gamesInDiff = vangGames.filter(g => g.difficulty === diff);
         if(gamesInDiff.length === 0) return;
 
-        // Top 5 Snelste Tijd
         const topTime = [...gamesInDiff].sort((a,b) => a.time - b.time).slice(0, 5);
-        // Top 5 Minste Kliks
         const topClicks = [...gamesInDiff].sort((a,b) => a.clicks - b.clicks).slice(0, 5);
 
         html += `<div class="vang-diff-block">
@@ -352,26 +349,53 @@ function renderVangLeaderboard(listContainer, history) {
             <div class="vang-stats-row">
                 <div class="vang-col">
                     <div class="vang-col-header">⚡ Snelste Tijd</div>
-                    ${topTime.map((g, i) => `
-                        <div class="vang-row">
-                            <span>${i+1}. ${avatars[g.player]||''} ${g.player}</span>
-                            <strong>${g.time}s</strong>
-                        </div>
-                    `).join('')}
+                    ${topTime.map((g, i) => `<div class="vang-row"><span>${i+1}. ${avatars[g.player]||''} ${g.player}</span><strong>${g.time}s</strong></div>`).join('')}
                 </div>
                 <div class="vang-col">
                     <div class="vang-col-header">🎯 Minste Kliks</div>
-                    ${topClicks.map((g, i) => `
-                        <div class="vang-row">
-                            <span>${i+1}. ${avatars[g.player]||''} ${g.player}</span>
-                            <strong>${g.clicks}</strong>
-                        </div>
-                    `).join('')}
+                    ${topClicks.map((g, i) => `<div class="vang-row"><span>${i+1}. ${avatars[g.player]||''} ${g.player}</span><strong>${g.clicks}</strong></div>`).join('')}
                 </div>
             </div>
         </div>`;
     });
 
     html += '</div>';
+    listContainer.innerHTML = html;
+}
+
+// --- SIMON LEADERBOARD FUNCTIE ---
+function renderSimonLeaderboard(listContainer, history) {
+    // Filter Simon games
+    // In simon.js hebben we saveSoloScore aangeroepen met:
+    // clicks = score (Level)
+    // time = null
+    const simonGames = history.filter(h => h.game === 'simon');
+    
+    if (simonGames.length === 0) {
+        listContainer.innerHTML = '<div style="text-align:center; padding:20px;">Nog geen Simon gespeeld!</div>';
+        return;
+    }
+
+    const avatars = { 'Lou':'👦🏻', 'Noé':'👶🏼', 'Oliver':'👦🏼', 'Manon':'👧🏼', 'Lore':'👩🏻', 'Jorden':'🧔🏻', 'Karen':'👱🏼‍♀️', 'Bert':'👨🏻' };
+
+    // Sorteer op Level (clicks veld) aflopend -> Hoogste level bovenaan
+    const topScores = simonGames.sort((a,b) => b.clicks - a.clicks).slice(0, 20);
+
+    let html = `
+        <div class="vang-diff-block">
+            <h3 class="vang-diff-title">💡 Slimste Koppies</h3>
+            <div class="vang-stats-row">
+                <div class="vang-col" style="border:none;">
+                    <div class="vang-col-header">Hoogste Level</div>
+                    ${topScores.map((g, i) => `
+                        <div class="vang-row">
+                            <span>${i+1}. ${avatars[g.player]||''} ${g.player}</span>
+                            <strong>Level ${g.clicks}</strong>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>`;
+
     listContainer.innerHTML = html;
 }
