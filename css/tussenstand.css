@@ -133,3 +133,75 @@
 /* HISTORY DOTS */
 .history-row { display: flex; justify-content: center; gap: 5px; margin-top: 12px; }
 .hist-pill { font-size: 0.7rem; font-weight: bold; background: #F5F5F5; color: #999; padding: 2px 8px; border-radius: 10px; }
+
+/* --- SOLO GAMES STYLING (Vang ze & Simon) --- */
+
+.solo-card {
+    background: #FFF; border-radius: 20px;
+    margin-bottom: 25px; overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    border: 3px solid #FFF;
+}
+
+/* HEADER VAN DE KAART (Het Niveau) */
+.solo-header {
+    padding: 12px; text-align: center;
+    font-size: 1.2rem; font-weight: 900; color: white;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    margin-bottom: 10px; border-radius: 15px 15px 0 0;
+}
+
+/* Kleuren per niveau */
+.header-easy { background: linear-gradient(135deg, #43A047, #66BB6A); border-bottom: 4px solid #2E7D32; }
+.header-medium { background: linear-gradient(135deg, #FB8C00, #FFA726); border-bottom: 4px solid #EF6C00; }
+.header-hard { background: linear-gradient(135deg, #E53935, #EF5350); border-bottom: 4px solid #C62828; }
+.header-simon { background: linear-gradient(135deg, #311B92, #6200EA); border-bottom: 4px solid #000; box-shadow: 0 0 15px #6200EA; }
+
+/* GRID INDELING (2 Kolommen) */
+.solo-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0; position: relative;
+}
+.solo-col { padding: 5px 10px 15px 10px; }
+.solo-col:first-child { border-right: 2px dashed #EEE; }
+
+/* KOLOM TITEL (Tijd / Kliks) */
+.col-title {
+    text-align: center; font-size: 0.75rem; color: #90A4AE;
+    font-weight: 900; text-transform: uppercase; margin-bottom: 10px;
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+}
+
+/* RIJ STIJL */
+.solo-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 6px 8px; margin-bottom: 6px;
+    background: #FAFAFA; border-radius: 12px; border: 1px solid #F0F0F0;
+}
+
+/* RANG NUMMER (1, 2, 3) */
+.rank-num {
+    width: 24px; height: 24px; border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 0.8rem; font-weight: bold; margin-right: 8px;
+    color: #555; background: #EEE;
+    flex-shrink: 0;
+}
+/* Medaille Kleuren */
+.rank-1 .rank-num { background: #FFD700; color: #5D4037; box-shadow: 0 2px 5px rgba(255, 215, 0, 0.4); transform: scale(1.1); border: 1px solid #FFF; }
+.rank-2 .rank-num { background: #E0E0E0; color: #616161; }
+.rank-3 .rank-num { background: #CD7F32; color: #FFF; }
+
+/* NAAM BADGE (Kleiner dan bij duel) */
+.mini-badge {
+    padding: 3px 8px; border-radius: 8px;
+    font-size: 0.75rem; font-weight: 800; color: white;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;
+}
+
+/* SCORE */
+.solo-score {
+    font-weight: 900; font-size: 0.9rem; color: #37474F;
+}
+.green-score { color: #2E7D32; } /* Voor 'weinig kliks' is groen goed */
