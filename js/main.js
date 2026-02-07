@@ -1,6 +1,11 @@
-// MAIN.JS - FIREBASE EDITIE (Met Flashy Gender Styles in Leaderboard)
+// MAIN.JS - FIREBASE EDITIE (Full Version)
+// - Wachtwoord: 0204
+// - Nieuw Design (Match Cards)
+// - Gender Styles (Boys/Girls)
 
+// -------------------------------------------------------------
 // 1. FIREBASE CONFIGURATIE
+// -------------------------------------------------------------
 const firebaseConfig = {
   apiKey: "AIzaSyA_P2tE0Xz4iPuCQ3YfRxp7zxLId-TaCPY",
   authDomain: "kidsgames-d250e.firebaseapp.com",
@@ -10,31 +15,39 @@ const firebaseConfig = {
   appId: "1:242669911777:web:8a648af368ec6e409f01a0"
 };
 
+// Initialiseren
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 window.db = db; 
 
 console.log("🔥 Firebase Verbonden!");
 
-// --- GESLACHT CONFIGURATIE (Alleen voor Tussenstand) ---
+// -------------------------------------------------------------
+// 2. GESLACHT STIJLEN (Voor Tussenstand)
+// -------------------------------------------------------------
 const genderStyles = {
     boys: ['Jorden', 'Vince', 'Bert', 'Noé', 'Lou', 'Oliver'],
     girls: ['Manon', 'Karen', 'Lore', 'Fran']
 };
 
-// Hulpfunctie om te checken welke stijl iemand krijgt
+// Geeft de juiste CSS class terug voor de badge achtergrond
 function getPlayerStyleClass(name) {
     if (genderStyles.boys.includes(name)) return 'style-boy';
     if (genderStyles.girls.includes(name)) return 'style-girl';
-    return ''; // Geen speciale stijl voor onbekenden
+    return ''; 
 }
+
+// Geeft de juiste CSS class terug voor gekleurde tekst
 function getPlayerTextClass(name) {
     if (genderStyles.boys.includes(name)) return 'style-boy-text';
     if (genderStyles.girls.includes(name)) return 'style-girl-text';
     return ''; 
 }
 
-// STANDAARD CODE
+// -------------------------------------------------------------
+// 3. STANDAARD GAME CODE (Audio, Navigatie, Modal)
+// -------------------------------------------------------------
+
 const mainMenu = document.getElementById('main-menu');
 const gameContainer = document.getElementById('game-board');
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -79,6 +92,7 @@ function showWinnerModal(title, details = null) {
     playSound('victory'); if(typeof memFireConfetti === 'function') memFireConfetti();
     let contentHTML = '';
 
+    // A. Duel (Lijst)
     if (Array.isArray(details) && details.length > 1) {
         details.sort((a, b) => b.score - a.score);
         contentHTML = '<div class="leaderboard-list">';
@@ -87,11 +101,15 @@ function showWinnerModal(title, details = null) {
             contentHTML += `<div class="leaderboard-item"><span>${medal} ${player.name}</span><span>${player.score} pnt</span></div>`;
         });
         contentHTML += '</div>';
-    } else if (details && typeof details === 'object') {
+    } 
+    // B. Solo (Enkel resultaat)
+    else if (details && typeof details === 'object') {
         contentHTML = `<div class="leaderboard-list" style="text-align:center;">`;
         if(details.time) contentHTML += `<div style="font-size: 1.2rem; margin-bottom: 5px;">${details.time}</div>`;
         if(details.clicks) contentHTML += `<div style="font-size: 1.1rem; margin-bottom: 10px; color:#555;">${details.clicks}</div>`;
-        if(details.rank) contentHTML += `<div style="background:#FFEB3B; color:#333; padding:5px 10px; border-radius:10px; display:inline-block; font-weight:bold; box-shadow:0 2px 0 rgba(0,0,0,0.1);">🏆 ${details.rank}e Plaats!</div>`;
+        if(details.rank) {
+            contentHTML += `<div style="background:#FFEB3B; color:#333; padding:5px 10px; border-radius:10px; display:inline-block; font-weight:bold; box-shadow:0 2px 0 rgba(0,0,0,0.1);">🏆 ${details.rank}e Plaats!</div>`;
+        }
         contentHTML += `</div>`;
     }
 
@@ -108,7 +126,10 @@ function showWinnerModal(title, details = null) {
     document.body.insertAdjacentHTML('beforeend', modalHTML);
 }
 
-// OPSLAAN
+// -------------------------------------------------------------
+// 4. OPSLAAN LOGICA (Duel & Solo)
+// -------------------------------------------------------------
+
 function saveDuelResult(gameType, player1, player2, winner, score1, score2, extraStats = {}) {
     if (!player1 || !player2 || player1 === player2) return;
     db.collection("game_history").add({
@@ -124,8 +145,15 @@ async function saveSoloScore(gameType, player, difficulty, time, clicks) {
             game: gameType, type: 'solo', player: player, difficulty: difficulty, time: time, clicks: clicks,         
             date: new Date().toISOString(), timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
+        
+        // Rank berekenen (alleen als er een tijd is, dus Vang Ze)
         if (time !== null) {
-            const snapshot = await db.collection("game_history").where("game", "==", gameType).where("type", "==", "solo").where("difficulty", "==", difficulty).orderBy("time", "asc").get();
+            const snapshot = await db.collection("game_history")
+                .where("game", "==", gameType)
+                .where("type", "==", "solo")
+                .where("difficulty", "==", difficulty)
+                .orderBy("time", "asc")
+                .get();
             let rank = 0; const scores = [];
             snapshot.forEach(doc => scores.push(doc.data()));
             scores.sort((a,b) => a.time - b.time);
@@ -136,7 +164,10 @@ async function saveSoloScore(gameType, player, difficulty, time, clicks) {
     } catch (error) { console.error("Fout:", error); return null; }
 }
 
-// LEADERBOARD
+// -------------------------------------------------------------
+// 5. LEADERBOARD NAVIGATIE
+// -------------------------------------------------------------
+
 let currentLbFilter = 'all';
 
 function openLeaderboard() { 
@@ -149,13 +180,14 @@ function openLeaderboard() {
 function closeLeaderboard() { playSound('click'); document.getElementById('leaderboard-modal').classList.add('hidden'); }
 function switchLbTab(filter, btn) { playSound('click'); currentLbFilter = filter; document.querySelectorAll('.lb-tab').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderLeaderboard(); }
 
+// RESET MET WACHTWOORD 0204
 function resetLeaderboard() { 
     const password = prompt("🔒 Voer de pincode in om alles te wissen:");
     if (password === "0204") {
-        if(confirm("⚠️ Weet je het 100% zeker?")) { 
+        if(confirm("⚠️ Weet je het 100% zeker? Dit wist ALLE historie.")) { 
             db.collection("game_history").limit(50).get().then(snapshot => {
                 snapshot.forEach(doc => doc.ref.delete());
-                alert("🗑️ Recente geschiedenis is gewist.");
+                alert("🗑️ Geschiedenis is gewist.");
                 renderLeaderboard();
             });
         }
@@ -164,7 +196,9 @@ function resetLeaderboard() {
     }
 }
 
-// --- RENDER FUNCTIES (AANGEPAST MET KLEUREN) ---
+// -------------------------------------------------------------
+// 6. RENDER FUNCTIES (Het Uiterlijk)
+// -------------------------------------------------------------
 
 function renderLeaderboard() {
     const list = document.getElementById('lb-list');
@@ -172,9 +206,11 @@ function renderLeaderboard() {
         const history = [];
         querySnapshot.forEach((doc) => { history.push(doc.data()); });
 
+        // Speciale renders voor Solo games
         if (currentLbFilter === 'simon') { renderSimonLeaderboard(list, history); return; }
         if (currentLbFilter === 'vang') { renderVangLeaderboard(list, history); return; }
 
+        // Filter voor Duels (Alles behalve solo)
         const filteredHistory = history.filter(h => {
             if (currentLbFilter === 'all') return h.type === 'duel'; 
             return h.game === currentLbFilter;
@@ -192,51 +228,89 @@ function renderLeaderboard() {
             if (!duels[duelId]) { duels[duelId] = { p1Name: players[0], p2Name: players[1], wins1: 0, wins2: 0, longestStreakP1: 0, longestStreakP2: 0, currentStreakOwner: null, currentStreakCount: 0, maxMemPairsP1: 0, maxMemPairsP2: 0, scoreCounts: {}, gameType: match.game }; }
             const d = duels[duelId];
             if (match.winner === d.p1Name) d.wins1++; else if (match.winner === d.p2Name) d.wins2++;
+            
+            // Streak berekenen
             if (match.winner !== 'draw') {
                 if (d.currentStreakOwner === match.winner) d.currentStreakCount++; else { d.currentStreakOwner = match.winner; d.currentStreakCount = 1; }
                 if (match.winner === d.p1Name && d.currentStreakCount > d.longestStreakP1) d.longestStreakP1 = d.currentStreakCount;
                 if (match.winner === d.p2Name && d.currentStreakCount > d.longestStreakP2) d.longestStreakP2 = d.currentStreakCount;
             }
-            let finalS1 = (match.p1 === d.p1Name) ? match.s1 : match.s2; let finalS2 = (match.p1 === d.p1Name) ? match.s2 : match.s1;
-            if (finalS1 > 0 || finalS2 > 0) { const scoreKey = `${finalS1}-${finalS2}`; if(!d.scoreCounts[scoreKey]) d.scoreCounts[scoreKey] = 0; d.scoreCounts[scoreKey]++; }
+            // Memory stats
             if (match.game === 'memory' && match.stats) {
                 let sP1 = (match.p1 === d.p1Name) ? match.stats.p1MaxStreak : match.stats.p2MaxStreak; let sP2 = (match.p1 === d.p1Name) ? match.stats.p2MaxStreak : match.stats.p1MaxStreak;
                 if (sP1 > d.maxMemPairsP1) d.maxMemPairsP1 = sP1 || 0; if (sP2 > d.maxMemPairsP2) d.maxMemPairsP2 = sP2 || 0;
             }
+            // Score telling
+            let finalS1 = (match.p1 === d.p1Name) ? match.s1 : match.s2; let finalS2 = (match.p1 === d.p1Name) ? match.s2 : match.s1;
+            if (finalS1 > 0 || finalS2 > 0) { const scoreKey = `${finalS1}-${finalS2}`; if(!d.scoreCounts[scoreKey]) d.scoreCounts[scoreKey] = 0; d.scoreCounts[scoreKey]++; }
         });
 
         const sortedDuels = Object.values(duels).sort((a,b) => (b.wins1+b.wins2) - (a.wins1+a.wins2));
         let html = '';
+        
         sortedDuels.forEach(d => {
-            const totalGames = d.wins1 + d.wins2; const pct1 = totalGames > 0 ? Math.round((d.wins1 / totalGames) * 100) : 50;
+            const totalGames = d.wins1 + d.wins2; 
+            const pct1 = totalGames > 0 ? Math.round((d.wins1 / totalGames) * 100) : 50;
             const sortedScores = Object.entries(d.scoreCounts).sort((a, b) => b[1] - a[1]).slice(0, 4);
-            let scorePills = sortedScores.map(([s, c]) => `<div class="score-pill">${s} <span class="score-count">${c}</span></div>`).join('');
             
-            // KLEURTJE BEPALEN
+            // 1. BEPAAL STIJL (Boy/Girl)
             const classP1 = getPlayerStyleClass(d.p1Name);
             const classP2 = getPlayerStyleClass(d.p2Name);
 
-            let extraStatsHTML = `<div class="stats-row"><div class="stat-col left"><span class="stat-label">Beste Reeks</span><span class="stat-val">🔥 ${d.longestStreakP1}x</span></div><div class="stat-col right"><span class="stat-label">Beste Reeks</span><span class="stat-val">${d.longestStreakP2}x 🔥</span></div></div>`;
+            // 2. BEPAAL BALK KLEUR (Volgt P1 stijl)
+            let barColor = 'linear-gradient(90deg, #651FFF, #7C4DFF)'; // Boy (Default)
+            if (classP1 === 'style-girl') barColor = 'linear-gradient(90deg, #F50057, #FF4081)'; // Girl
+
+            // 3. STATISTIEKEN BLOK
+            let statsHTML = '';
             if (currentLbFilter === 'memory' || (currentLbFilter === 'all' && d.gameType === 'memory')) {
-                extraStatsHTML += `<div class="stats-row" style="margin-top:2px; border-top:0;"><div class="stat-col left"><span class="stat-label">Slimste Beurt</span><span class="stat-val">🧠 ${d.maxMemPairsP1} paren</span></div><div class="stat-col right"><span class="stat-label">Slimste Beurt</span><span class="stat-val">${d.maxMemPairsP2} paren 🧠</span></div></div>`;
+                statsHTML = `
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <span class="stat-label">Beste Reeks</span>
+                        <div class="stat-val">${d.p1Name}: ${d.longestStreakP1}x | ${d.p2Name}: ${d.longestStreakP2}x</div>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">Slimste Beurt</span>
+                        <div class="stat-val">${d.p1Name}: ${d.maxMemPairsP1} | ${d.p2Name}: ${d.maxMemPairsP2}</div>
+                    </div>
+                </div>`;
+            } else {
+                 statsHTML = `
+                <div class="stats-grid">
+                    <div class="stat-box" style="grid-column: span 2;">
+                        <span class="stat-label">Langste Winstreeks</span>
+                        <div class="stat-val">🔥 ${d.longestStreakP1}x (${d.p1Name}) vs ${d.longestStreakP2}x (${d.p2Name})</div>
+                    </div>
+                </div>`;
             }
+
             const gameIcon = currentLbFilter === 'all' ? (d.gameType==='memory' ? '🧠' : '🔴') : '';
-            
-            // HIER PASSEN WE DE STIJLEN TOE OP DE NAMEN/BADGES
+
+            // 4. DUEL CARD HTML (Nieuw Design)
             html += `
             <div class="duel-card">
+                <div style="text-align:center; font-size:0.8rem; margin-bottom:5px; opacity:0.5;">${gameIcon}</div>
+                
                 <div class="duel-header">
-                    <div class="p-left">
-                        <span class="lb-badge ${classP1}">${avatars[d.p1Name]||''} ${d.p1Name}</span>
+                    <div class="lb-badge ${classP1}">
+                        ${avatars[d.p1Name]||''} ${d.p1Name}
                     </div>
-                    <div class="score-badge">${d.wins1} - ${d.wins2}</div>
-                    <div class="p-right">
-                        <span class="lb-badge ${classP2}">${d.p2Name} ${avatars[d.p2Name]||''}</span>
+                    <div class="score-big">${d.wins1} - ${d.wins2}</div>
+                    <div class="lb-badge ${classP2}">
+                        ${d.p2Name} ${avatars[d.p2Name]||''}
                     </div>
                 </div>
-                <div class="vs-bar-bg"><div class="vs-bar-fill" style="width: ${pct1}%"></div></div>
-                ${extraStatsHTML}
-                <div class="score-history" style="margin-top:5px;">${scorePills}</div>
+
+                <div class="vs-bar-container">
+                    <div class="vs-bar-fill" style="width: ${pct1}%; background: ${barColor};"></div>
+                </div>
+
+                ${statsHTML}
+
+                <div class="history-row">
+                    ${sortedScores.map(([s, c]) => `<div class="hist-pill">${s} (${c})</div>`).join('')}
+                </div>
             </div>`;
         });
         list.innerHTML = html;
