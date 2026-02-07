@@ -48,6 +48,25 @@
 
     <div id="game-board"></div>
 
+    <div id="leaderboard-modal" class="hidden">
+        <div class="lb-content">
+            <button class="lb-close" onclick="closeLeaderboard()">✕</button>
+            <div class="lb-header"><h2>🏆 Tussenstand</h2></div>
+            
+            <div class="lb-tabs">
+                <button class="lb-tab active" onclick="switchLbTab('all', this)">Alles</button>
+                <button class="lb-tab" onclick="switchLbTab('memory', this)">Memory</button>
+                <button class="lb-tab" onclick="switchLbTab('vieropeenrij', this)">4 op 'n Rij</button>
+                <button class="lb-tab" onclick="switchLbTab('vang', this)">🔨 Vang ze</button>
+            </div>
+    
+            <div id="lb-list" class="lb-list">
+                </div>
+            
+            <button class="lb-reset-btn" onclick="resetLeaderboard()">🗑️ Wis Geschiedenis</button>
+        </div>
+    </div>
+
     <script src="js/memory.js"></script>
     <script src="js/stickers.js"></script>
     <script src="js/puzzel.js"></script>
