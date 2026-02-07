@@ -13,7 +13,6 @@ const bombSVG = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" view
 const poopSVG = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💩</text></svg>`;
 
 // --- 1. SLIM FILTER VOOR VIERKANTE PLAATJES ---
-// Checkt nu 4 hoeken én een paar pixels naar binnen
 function isCutout(src) {
     return new Promise((resolve) => {
         const img = new Image(); img.src = src; img.crossOrigin = "Anonymous"; 
@@ -22,20 +21,16 @@ function isCutout(src) {
             canvas.width = img.width; canvas.height = img.height;
             const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0);
             
-            // Hulpfunctie om alpha van een punt te checken
             const isTransparent = (x, y) => {
                 try { return ctx.getImageData(x, y, 1, 1).data[3] < 200; } catch(e) { return true; }
             };
 
             const w = img.width - 1; const h = img.height - 1;
-            // Check exacte hoeken en 5px naar binnen (voor zekerheid)
             const corners = [
                 isTransparent(0,0), isTransparent(w,0), isTransparent(0,h), isTransparent(w,h),
                 isTransparent(5,5), isTransparent(w-5,5), isTransparent(5,h-5), isTransparent(w-5,h-5)
             ];
             
-            // Als ook maar 1 punt transparant is, keuren we hem goed als 'niet-vierkant'
-            // Als ALLES ondoorzichtig is (false), dan is het een blok.
             const hasTransparency = corners.some(res => res === true);
             resolve(hasTransparency);
         };
@@ -49,7 +44,6 @@ async function startWhackGame() {
     if(whackState.timerInterval) clearInterval(whackState.timerInterval);
 
     const board = document.getElementById('game-board');
-    // Toon laadscherm
     board.innerHTML = `<div style="display:flex; height:100%; justify-content:center; align-items:center; flex-direction:column; color:white; font-size:1.5rem;">
         <div>Plaatjes controleren... 🕵️‍♂️</div>
         <div style="font-size:1rem; margin-top:10px;">(Dit duurt heel even)</div>
@@ -58,20 +52,16 @@ async function startWhackGame() {
     whackState.currentPlayer = null;
     whackState.validImages = []; 
 
-    // Filteren van afbeeldingen
     if(typeof memThemes !== 'undefined') {
         let allPool = [];
-        // Verzamel alle plaatjes
         Object.values(memThemes).forEach(t => {
             if(!t.locked && !t.isMix) {
                 for(let i=1; i<=15; i++) allPool.push(`${t.path}${i}.${t.extension}`);
             }
         });
         
-        // Random mixen
         allPool.sort(() => 0.5 - Math.random());
         
-        // Checken tot we er 20 hebben (anders duurt laden te lang)
         let count = 0;
         for(let src of allPool) {
             if(count >= 20) break;
@@ -83,7 +73,6 @@ async function startWhackGame() {
         }
     }
     
-    // Fallback
     if(whackState.validImages.length === 0) whackState.validImages = ['assets/images/icon.png'];
 
     renderWhackSetup(board);
@@ -94,7 +83,8 @@ function renderWhackSetup(board) {
         <div class="memory-setup">
             <div class="setup-group">
                 <h3>1. Wie gaat er meppen?</h3>
-                <div class="name-row"> <button class="player-btn ${whackState.currentPlayer==='Lou'?'selected-pending':''}" onclick="vangSelectPlayer('Lou', this)">👦🏻<br>Lou</button>
+                <div class="name-row">
+                    <button class="player-btn ${whackState.currentPlayer==='Lou'?'selected-pending':''}" onclick="vangSelectPlayer('Lou', this)">👦🏻<br>Lou</button>
                     <button class="player-btn ${whackState.currentPlayer==='Noé'?'selected-pending':''}" onclick="vangSelectPlayer('Noé', this)">👶🏼<br>Noé</button>
                     <button class="player-btn ${whackState.currentPlayer==='Oliver'?'selected-pending':''}" onclick="vangSelectPlayer('Oliver', this)">👦🏼<br>Oliver</button>
                     <button class="player-btn ${whackState.currentPlayer==='Manon'?'selected-pending':''}" onclick="vangSelectPlayer('Manon', this)">👧🏼<br>Manon</button>
@@ -104,12 +94,8 @@ function renderWhackSetup(board) {
                     <button class="player-btn ${whackState.currentPlayer==='Bert'?'selected-pending':''}" onclick="vangSelectPlayer('Bert', this)">👨🏻<br>Bert</button>
                     <button class="player-btn ${whackState.currentPlayer==='Vince'?'selected-pending':''}" onclick="vangSelectPlayer('Vince', this)">👩🏽‍🦱<br>Vince</button>
                     <button class="player-btn ${whackState.currentPlayer==='Fran'?'selected-pending':''}" onclick="vangSelectPlayer('Fran', this)">👩🏻<br>Fran</button>
-
                 </div>
             </div>
-            
-            ```
-
 
             <div class="setup-group">
                 <h3>2. Kies Niveau</h3>
@@ -221,7 +207,6 @@ function randomHole(holes) {
     return hole;
 }
 
-// --- PEEP MET PRELOAD (ANTI-FLIKKER) ---
 function peep() {
     if(whackState.timeUp) return;
     if(whackState.score >= whackState.scoreGoal) return; 
@@ -245,18 +230,13 @@ function peep() {
         nextSrc = randomImg; type = "good";
     }
 
-    // --- FIX: EERST LADEN, DAN OMHOOG ---
-    // Dit voorkomt dat je het vorige plaatje ziet of een lege flits
+    // PRELOAD FIX
     const tempImg = new Image();
     tempImg.onload = () => {
-        // Pas als hij geladen is, zetten we hem in de echte DOM
-        if(whackState.timeUp) return; // Check of game al voorbij is
-        
+        if(whackState.timeUp) return;
         imgEl.src = nextSrc;
         imgEl.dataset.type = type;
-        
         hole.classList.add('up');
-        
         let time = whackState.speed * (0.8 + Math.random() * 0.4); 
         whackState.peepTimer = setTimeout(() => {
             hole.classList.remove('up');
@@ -303,13 +283,10 @@ async function endWhackGame() {
     const finalTime = parseFloat(((Date.now() - whackState.startTime) / 1000).toFixed(2));
     
     let rank = null;
-    
-    // Opslaan en rang ophalen
     if(typeof saveSoloScore === 'function') {
         rank = await saveSoloScore('vang', whackState.currentPlayer, whackState.difficulty, finalTime, whackState.totalClicks);
     }
 
-    // Modal tonen met details
     setTimeout(() => { 
         if(typeof showWinnerModal === 'function') {
             showWinnerModal(whackState.currentPlayer + " wint!", { 
