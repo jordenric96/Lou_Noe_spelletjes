@@ -1,4 +1,4 @@
-// MAIN.JS - FIREBASE EDITIE (Met Duel & Solo Highscores)
+// MAIN.JS - FIREBASE EDITIE (Met Slimme Scorebord & Ranglijsten)
 
 // -------------------------------------------------------------
 // 1. FIREBASE CONFIGURATIE
@@ -15,6 +15,7 @@ const firebaseConfig = {
 // Initialiseren
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+window.db = db; // Maak db globaal beschikbaar voor andere scripts
 
 console.log("🔥 Firebase Verbonden: Klaar voor actie!");
 
@@ -63,28 +64,31 @@ function loadGame(gameType) {
     else if(gameType === 'vieropeenrij' && typeof startConnect4 === 'function') startConnect4();
 }
 
-// --- WINNAAR MODAL ---
-function showWinnerModal(winnerName, allScores = []) {
+// --- WINNAAR MODAL (AANGEPAST) ---
+function showWinnerModal(title, details = null) {
     playSound('victory'); if(typeof memFireConfetti === 'function') memFireConfetti();
 
-    let leaderboardHTML = '';
-    // Alleen tonen als het een Array is (Memory), niet bij solo games
-    if (Array.isArray(allScores) && allScores.length > 1) {
-        allScores.sort((a, b) => b.score - a.score);
-        leaderboardHTML = '<div class="leaderboard-list">';
-        allScores.forEach((player, index) => {
-            let medal = index === 0 ? '🥇' : (index === 1 ? '🥈' : '🥉');
-            leaderboardHTML += `<div class="leaderboard-item"><span>${medal} ${player.name}</span><span>${player.score} pnt</span></div>`;
-        });
-        leaderboardHTML += '</div>';
-    }
+    let contentHTML = '';
 
-    // Stickers
-    let stickerHTML = '';
-    if (typeof unlockRandomSticker === 'function') {
-        // Omdat stickers async is, doen we hier een eenvoudige check
-        // De echte sticker logica zit in stickers.js, hier tonen we evt placeholder
-        // In een latere versie koppelen we dit strakker.
+    // A. Als details een Array is -> Het is een Leaderboard (Memory/4-op-rij)
+    if (Array.isArray(details) && details.length > 1) {
+        details.sort((a, b) => b.score - a.score);
+        contentHTML = '<div class="leaderboard-list">';
+        details.forEach((player, index) => {
+            let medal = index === 0 ? '🥇' : (index === 1 ? '🥈' : '🥉');
+            contentHTML += `<div class="leaderboard-item"><span>${medal} ${player.name}</span><span>${player.score} pnt</span></div>`;
+        });
+        contentHTML += '</div>';
+    } 
+    // B. Als details een Object is -> Het is Vang Ze (Solo Stats)
+    else if (details && typeof details === 'object' && details.time) {
+        contentHTML = `
+            <div class="leaderboard-list" style="text-align:center;">
+                <div style="font-size: 1.2rem; margin-bottom: 5px;">⏱️ Tijd: <b>${details.time}s</b></div>
+                <div style="font-size: 1.1rem; margin-bottom: 10px; color:#555;">🎯 Kliks: <b>${details.clicks}</b></div>
+                ${details.rank ? `<div style="background:#FFEB3B; color:#333; padding:5px 10px; border-radius:10px; display:inline-block; font-weight:bold; box-shadow:0 2px 0 rgba(0,0,0,0.1);">🏆 ${details.rank}e Plaats!</div>` : ''}
+            </div>
+        `;
     }
 
     const modalHTML = `
@@ -92,8 +96,8 @@ function showWinnerModal(winnerName, allScores = []) {
             <div class="winner-modal-content">
                 <span class="trophy-icon">🏆</span>
                 <h2 class="winner-title">Goed gedaan!</h2>
-                <div class="winner-name">${winnerName} wint!</div>
-                ${leaderboardHTML}
+                <div class="winner-name">${title}</div>
+                ${contentHTML}
                 <div class="modal-actions"><button class="restart-btn" onclick="location.reload()">Nog een keer!</button><button class="menu-btn" onclick="location.reload()">Hoofdmenu</button></div>
             </div>
         </div>`;
@@ -122,22 +126,65 @@ function saveDuelResult(gameType, player1, player2, winner, score1, score2, extr
     }).catch((error) => console.error("Fout bij opslaan:", error));
 }
 
-// 2. SOLO SCORE OPSLAAN (Vang ze!)
-function saveSoloScore(gameType, player, difficulty, time, clicks) {
+// 2. SOLO SCORE OPSLAAN + CHECK RANK (Vang ze!)
+async function saveSoloScore(gameType, player, difficulty, time, clicks) {
     if (!player) return;
 
-    db.collection("game_history").add({
-        game: gameType,
-        type: 'solo',
-        player: player,
-        difficulty: difficulty, 
-        time: time,             
-        clicks: clicks,         
-        date: new Date().toISOString(),
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    })
-    .then(() => console.log(`✅ Solo score opgeslagen: ${player} (${time}s)`))
-    .catch((error) => console.error("Fout bij opslaan:", error));
+    try {
+        // A. Opslaan
+        await db.collection("game_history").add({
+            game: gameType,
+            type: 'solo',
+            player: player,
+            difficulty: difficulty, 
+            time: time,             
+            clicks: clicks,         
+            date: new Date().toISOString(),
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        console.log(`✅ Score opgeslagen.`);
+
+        // B. Check Ranglijst (Live berekenen)
+        const snapshot = await db.collection("game_history")
+            .where("game", "==", gameType)
+            .where("type", "==", "solo")
+            .where("difficulty", "==", difficulty)
+            .orderBy("time", "asc")
+            .get();
+
+        let rank = 0;
+        let found = false;
+        
+        // We lopen door de lijst heen om te kijken waar de huidige tijd staat
+        // (Dit is een simpele client-side benadering, prima voor deze schaal)
+        const scores = [];
+        snapshot.forEach(doc => scores.push(doc.data()));
+        
+        // Sorteer voor zekerheid
+        scores.sort((a,b) => a.time - b.time);
+
+        // Vind index
+        for(let i=0; i<scores.length; i++) {
+            // Checken op tijd en speler en timestamp (ongeveer) om 'deze' score te vinden is lastig zonder ID.
+            // We checken gewoon: Hoeveel mensen waren sneller?
+            if (scores[i].time < time) {
+                // sneller
+            } else if (scores[i].time === time && scores[i].player === player) {
+                // Dit zijn wij (of iemand met zelfde tijd). 
+                // Als we de eerste keer deze tijd tegenkomen is dat onze rank.
+                rank = i + 1;
+                found = true;
+                break;
+            }
+        }
+        if(!found) rank = scores.length; // Fallback
+
+        return rank;
+
+    } catch (error) {
+        console.error("Fout bij opslaan/ranken:", error);
+        return null;
+    }
 }
 
 // --- LEADERBOARD NAVIGATIE ---
@@ -167,7 +214,7 @@ function resetLeaderboard() {
 function renderLeaderboard() {
     const list = document.getElementById('lb-list');
     
-    // Haal laatste 200 op
+    // Haal data op (Limit 200)
     db.collection("game_history").orderBy("timestamp", "desc").limit(200).get().then((querySnapshot) => {
         const history = [];
         querySnapshot.forEach((doc) => { history.push(doc.data()); });
@@ -178,10 +225,9 @@ function renderLeaderboard() {
             return;
         }
 
-        // B. DE REST (DUELS)
-        // Filter 'vang' eruit als we op 'all' staan, want dat zijn solo scores
+        // B. DUELS (Filter Vang eruit bij 'all')
         const filteredHistory = history.filter(h => {
-            if (currentLbFilter === 'all') return h.type === 'duel' || (h.game !== 'vang' && !h.type);
+            if (currentLbFilter === 'all') return h.type === 'duel'; // Alleen duels in 'Alles' tab
             return h.game === currentLbFilter;
         });
 
@@ -192,9 +238,7 @@ function renderLeaderboard() {
         const getAv = (n) => avatars[n] || '';
 
         filteredHistory.forEach(match => {
-            // Alleen duels verwerken
             if (!match.p1 || !match.p2) return;
-
             const players = [match.p1, match.p2].sort(); 
             const duelId = players.join('|'); 
             
@@ -210,10 +254,8 @@ function renderLeaderboard() {
             }
             const d = duels[duelId];
 
-            // Winnaar
             if (match.winner === d.p1Name) d.wins1++; else if (match.winner === d.p2Name) d.wins2++;
 
-            // Streak
             if (match.winner !== 'draw') {
                 if (d.currentStreakOwner === match.winner) d.currentStreakCount++;
                 else { d.currentStreakOwner = match.winner; d.currentStreakCount = 1; }
@@ -221,7 +263,6 @@ function renderLeaderboard() {
                 if (match.winner === d.p2Name && d.currentStreakCount > d.longestStreakP2) d.longestStreakP2 = d.currentStreakCount;
             }
 
-            // Scores
             let finalS1 = (match.p1 === d.p1Name) ? match.s1 : match.s2;
             let finalS2 = (match.p1 === d.p1Name) ? match.s2 : match.s1;
             if (finalS1 > 0 || finalS2 > 0) {
@@ -230,7 +271,6 @@ function renderLeaderboard() {
                 d.scoreCounts[scoreKey]++;
             }
 
-            // Memory Stats
             if (match.game === 'memory' && match.stats) {
                 let sP1 = (match.p1 === d.p1Name) ? match.stats.p1MaxStreak : match.stats.p2MaxStreak;
                 let sP2 = (match.p1 === d.p1Name) ? match.stats.p2MaxStreak : match.stats.p1MaxStreak;
@@ -239,7 +279,6 @@ function renderLeaderboard() {
             }
         });
 
-        // HTML Bouwen Duels
         const sortedDuels = Object.values(duels).sort((a,b) => (b.wins1+b.wins2) - (a.wins1+a.wins2));
         let html = '';
         sortedDuels.forEach(d => {
@@ -266,7 +305,6 @@ function renderLeaderboard() {
 
             html += `
             <div class="duel-card">
-                <div style="font-size:0.8rem; text-align:center; color:#ccc; margin-bottom:-5px;">${gameIcon}</div>
                 <div class="duel-header">
                     <div class="p-left">${getAv(d.p1Name)} ${d.p1Name}</div>
                     <div class="score-badge">${d.wins1} - ${d.wins2}</div>
@@ -287,7 +325,6 @@ function renderLeaderboard() {
 
 // --- VANG LEADERBOARD FUNCTIE ---
 function renderVangLeaderboard(listContainer, history) {
-    // Alleen solo Vang games
     const vangGames = history.filter(h => h.game === 'vang' && h.type === 'solo');
     
     if (vangGames.length === 0) {
@@ -305,10 +342,10 @@ function renderVangLeaderboard(listContainer, history) {
         const gamesInDiff = vangGames.filter(g => g.difficulty === diff);
         if(gamesInDiff.length === 0) return;
 
-        // Top 10 Snelste Tijd
-        const topTime = [...gamesInDiff].sort((a,b) => a.time - b.time).slice(0, 10);
-        // Top 10 Minste Kliks
-        const topClicks = [...gamesInDiff].sort((a,b) => a.clicks - b.clicks).slice(0, 10);
+        // Top 5 Snelste Tijd
+        const topTime = [...gamesInDiff].sort((a,b) => a.time - b.time).slice(0, 5);
+        // Top 5 Minste Kliks
+        const topClicks = [...gamesInDiff].sort((a,b) => a.clicks - b.clicks).slice(0, 5);
 
         html += `<div class="vang-diff-block">
             <h3 class="vang-diff-title">${diffLabels[diff]}</h3>
