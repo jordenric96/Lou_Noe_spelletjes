@@ -1,25 +1,51 @@
-// SIMON.JS - Met Spelers & Highscores
-console.log("Simon.js geladen (Full Version)...");
+// SIMON.JS - Met Unieke Geluiden & Alle Memory Thema's
+console.log("Simon.js geladen (Pro Audio & Themes)...");
 
 let simonState = {
     sequence: [],
     playerSequence: [],
     level: 0,
-    isActive: false, // Mag de speler klikken?
-    theme: 'mario',
+    isActive: false, 
+    theme: 'mario', // Standaard
     currentPlayer: null,
-    btnSounds: [300, 400, 500, 600] // Frequenties voor piepjes
+    // Specifieke frequenties voor Simon (Groen, Rood, Geel, Blauw)
+    // E4 (329.6), A3 (220), C#4 (277.2), E3 (164.8) - Klassieke Simon tonen
+    frequencies: [329.63, 261.63, 220.00, 164.81] 
 };
 
-const simonThemes = {
-    'mario': { path: 'assets/images/memory/mario/', ext: 'png' },
-    'pokemon': { path: 'assets/images/memory/pokemon/', ext: 'png' }
+// We gebruiken memThemes uit memory.js. 
+// Als die nog niet geladen is, gebruiken we een fallback.
+const getThemes = () => (typeof memThemes !== 'undefined') ? memThemes : {
+    'mario': { path: 'assets/images/memory/mario/', ext: 'png', locked: false },
+    'pokemon': { path: 'assets/images/memory/pokemon/', ext: 'png', locked: false }
 };
 
 // --- 1. SETUP ---
 function startSimonGame() {
     const board = document.getElementById('game-board');
     simonState.currentPlayer = null;
+
+    // Genereer Thema Knoppen op basis van Memory Thema's
+    const themes = getThemes();
+    let themeButtonsHTML = '';
+    
+    Object.keys(themes).forEach(key => {
+        const t = themes[key];
+        // We slaan de 'mix' over en gelockte thema's
+        if (!t.isMix && !t.locked) {
+            const isSelected = simonState.theme === key ? 'selected' : '';
+            // Probeer cover.png, anders plaatje 1
+            const imgIcon = `${t.path}cover.png`; 
+            const fallbackIcon = `${t.path}1.${t.extension}`;
+            
+            themeButtonsHTML += `
+                <button class="option-btn ${isSelected}" onclick="setSimonTheme('${key}', this)">
+                    <img src="${imgIcon}" onerror="this.src='${fallbackIcon}'">
+                    <span class="btn-label" style="font-size:0.7rem; text-transform:capitalize;">${key}</span>
+                </button>
+            `;
+        }
+    });
 
     board.innerHTML = `
         <div class="simon-setup">
@@ -40,8 +66,7 @@ function startSimonGame() {
             <div class="setup-group">
                 <h3>2. Kies Thema</h3>
                 <div class="option-grid">
-                    <button class="option-btn selected" onclick="setSimonTheme('mario', this)"><span>🍄</span><span class="btn-label">Mario</span></button>
-                    <button class="option-btn" onclick="setSimonTheme('pokemon', this)"><span>⚡</span><span class="btn-label">Pokémon</span></button>
+                    ${themeButtonsHTML}
                 </div>
             </div>
 
@@ -51,7 +76,6 @@ function startSimonGame() {
             </div>
         </div>
     `;
-    simonState.theme = 'mario';
 }
 
 function simonSelectPlayer(name, btn) {
@@ -74,17 +98,18 @@ function setSimonTheme(t, btn) {
 // --- 2. GAME ---
 function initSimon() {
     const board = document.getElementById('game-board');
-    const t = simonThemes[simonState.theme];
+    const themes = getThemes();
+    const t = themes[simonState.theme];
     
     let buttons = '';
     for(let i=0; i<4; i++) {
-        // We zetten de afbeelding als background-image op de ::after via inline style of class is lastig,
-        // dus we doen het direct op de button met een inner div of style.
-        // Makkelijkste: Style injectie of gewoon img tag erin.
+        // We pakken plaatje 1, 2, 3 en 4 van het gekozen thema
+        const imgSrc = `${t.path}${i+1}.${t.extension}`;
+        
         buttons += `
             <button class="simon-btn" id="sb-${i}" onclick="handleClick(${i})">
                 <div style="position:absolute; top:10%; left:10%; width:80%; height:80%; 
-                            background-image:url('${t.path}${i+1}.${t.ext}'); 
+                            background-image:url('${imgSrc}'); 
                             background-size:contain; background-repeat:no-repeat; background-position:center; 
                             opacity:0.8;"></div>
             </button>`;
@@ -130,14 +155,14 @@ function playSequence() {
             simonState.isActive = true;
             document.getElementById('s-msg').innerText = "Jij!";
         }
-    }, 800); // Snelheid
+    }, 800); // Snelheid tussen piepjes
 }
 
 function activateButton(index) {
     const btn = document.getElementById(`sb-${index}`);
     if(btn) {
         btn.classList.add('lit');
-        playTone(index);
+        playSimonTone(index); // SPEEL SPECIFIEK GELUID
         setTimeout(() => btn.classList.remove('lit'), 400);
     }
 }
@@ -148,7 +173,7 @@ function handleClick(index) {
     activateButton(index);
     simonState.playerSequence.push(index);
     
-    // Check of het goed is
+    // Check direct
     const currentStep = simonState.playerSequence.length - 1;
     
     if (simonState.playerSequence[currentStep] !== simonState.sequence[currentStep]) {
@@ -156,11 +181,10 @@ function handleClick(index) {
         return;
     }
     
-    // Check of ronde klaar is
+    // Ronde klaar?
     if (simonState.playerSequence.length === simonState.sequence.length) {
         simonState.isActive = false;
         document.getElementById('s-msg').innerText = "Goed zo!";
-        if(typeof playSound === 'function') playSound('win');
         setTimeout(nextRound, 1000);
     }
 }
@@ -168,9 +192,20 @@ function handleClick(index) {
 function gameOver() {
     simonState.isActive = false;
     document.getElementById('s-msg').innerText = "Fout!";
-    if(typeof playSound === 'function') playSound('error');
     
-    // OPSLAAN (Level - 1 want huidige level is gefaald)
+    // Fout geluid
+    if (typeof audioCtx !== 'undefined') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.type = 'sawtooth'; 
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime); // Lage bromtoon
+        osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+    }
+
     const finalScore = Math.max(0, simonState.level - 1);
     
     if(typeof saveSoloScore === 'function') {
@@ -180,7 +215,7 @@ function gameOver() {
     setTimeout(() => {
         if(typeof showWinnerModal === 'function') {
             showWinnerModal(simonState.currentPlayer, {
-                rank: null, // Wordt niet berekend voor Simon nog
+                rank: null,
                 time: "Level " + finalScore,
                 clicks: "Memory"
             });
@@ -188,9 +223,33 @@ function gameOver() {
     }, 1000);
 }
 
-// Simpele toon generator voor Simon
-function playTone(idx) {
-    if(typeof playSound === 'function') playSound('pop');
+// --- NIEUW: SPECIFIEKE TONEN GENERATOR ---
+function playSimonTone(index) {
+    // We gebruiken de audioCtx uit main.js als die bestaat
+    if (typeof audioCtx === 'undefined' || audioCtx.state === 'suspended') {
+        if(typeof audioCtx !== 'undefined') audioCtx.resume();
+        return; // Veiligheid
+    }
+
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    // Kies frequentie op basis van knop index (0-3)
+    const freq = simonState.frequencies[index] || 440;
+    
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    
+    // Mooi zacht in- en uitfaden (tegen klikjes)
+    gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.05);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+    
+    osc.start(audioCtx.currentTime);
+    osc.stop(audioCtx.currentTime + 0.4);
 }
 
 function stopSimonGame() { simonState.isActive = false; }
