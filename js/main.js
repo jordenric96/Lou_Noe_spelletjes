@@ -1,4 +1,4 @@
-// MAIN.JS - FIREBASE EDITIE (Met Wachtwoord & Mooi Design)
+// MAIN.JS - FIREBASE EDITIE (Met Flashy Gender Styles in Leaderboard)
 
 // 1. FIREBASE CONFIGURATIE
 const firebaseConfig = {
@@ -12,9 +12,29 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+window.db = db; 
+
 console.log("🔥 Firebase Verbonden!");
 
-// STANDAARD CODE (Audio, Nav, etc.)
+// --- GESLACHT CONFIGURATIE (Alleen voor Tussenstand) ---
+const genderStyles = {
+    boys: ['Jorden', 'Vince', 'Bert', 'Noé', 'Lou', 'Oliver'],
+    girls: ['Manon', 'Karen', 'Lore', 'Fran']
+};
+
+// Hulpfunctie om te checken welke stijl iemand krijgt
+function getPlayerStyleClass(name) {
+    if (genderStyles.boys.includes(name)) return 'style-boy';
+    if (genderStyles.girls.includes(name)) return 'style-girl';
+    return ''; // Geen speciale stijl voor onbekenden
+}
+function getPlayerTextClass(name) {
+    if (genderStyles.boys.includes(name)) return 'style-boy-text';
+    if (genderStyles.girls.includes(name)) return 'style-girl-text';
+    return ''; 
+}
+
+// STANDAARD CODE
 const mainMenu = document.getElementById('main-menu');
 const gameContainer = document.getElementById('game-board');
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -58,6 +78,7 @@ function loadGame(gameType) {
 function showWinnerModal(title, details = null) {
     playSound('victory'); if(typeof memFireConfetti === 'function') memFireConfetti();
     let contentHTML = '';
+
     if (Array.isArray(details) && details.length > 1) {
         details.sort((a, b) => b.score - a.score);
         contentHTML = '<div class="leaderboard-list">';
@@ -73,11 +94,21 @@ function showWinnerModal(title, details = null) {
         if(details.rank) contentHTML += `<div style="background:#FFEB3B; color:#333; padding:5px 10px; border-radius:10px; display:inline-block; font-weight:bold; box-shadow:0 2px 0 rgba(0,0,0,0.1);">🏆 ${details.rank}e Plaats!</div>`;
         contentHTML += `</div>`;
     }
-    const modalHTML = `<div class="winner-modal-overlay"><div class="winner-modal-content"><span class="trophy-icon">🏆</span><h2 class="winner-title">Goed gedaan!</h2><div class="winner-name">${title}</div>${contentHTML}<div class="modal-actions"><button class="restart-btn" onclick="location.reload()">Nog een keer!</button><button class="menu-btn" onclick="location.reload()">Hoofdmenu</button></div></div></div>`;
+
+    const modalHTML = `
+        <div class="winner-modal-overlay">
+            <div class="winner-modal-content">
+                <span class="trophy-icon">🏆</span>
+                <h2 class="winner-title">Goed gedaan!</h2>
+                <div class="winner-name">${title}</div>
+                ${contentHTML}
+                <div class="modal-actions"><button class="restart-btn" onclick="location.reload()">Nog een keer!</button><button class="menu-btn" onclick="location.reload()">Hoofdmenu</button></div>
+            </div>
+        </div>`;
     document.body.insertAdjacentHTML('beforeend', modalHTML);
 }
 
-// --- OPSLAAN LOGICA ---
+// OPSLAAN
 function saveDuelResult(gameType, player1, player2, winner, score1, score2, extraStats = {}) {
     if (!player1 || !player2 || player1 === player2) return;
     db.collection("game_history").add({
@@ -101,24 +132,27 @@ async function saveSoloScore(gameType, player, difficulty, time, clicks) {
             for(let i=0; i<scores.length; i++) { if (scores[i].time === time && scores[i].player === player) { rank = i + 1; break; } }
             return rank;
         }
-        return null;
+        return null; 
     } catch (error) { console.error("Fout:", error); return null; }
 }
 
-// --- LEADERBOARD ---
+// LEADERBOARD
 let currentLbFilter = 'all';
-function openLeaderboard() { playSound('click'); document.getElementById('leaderboard-modal').classList.remove('hidden'); document.getElementById('lb-list').innerHTML = '<div style="text-align:center; padding:20px;">Laden... ☁️</div>'; renderLeaderboard(); }
+
+function openLeaderboard() { 
+    playSound('click'); 
+    document.getElementById('leaderboard-modal').classList.remove('hidden'); 
+    document.getElementById('lb-list').innerHTML = '<div style="text-align:center; padding:20px;">Laden... ☁️</div>';
+    renderLeaderboard(); 
+}
+
 function closeLeaderboard() { playSound('click'); document.getElementById('leaderboard-modal').classList.add('hidden'); }
 function switchLbTab(filter, btn) { playSound('click'); currentLbFilter = filter; document.querySelectorAll('.lb-tab').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderLeaderboard(); }
 
-// --- WACHTWOORD BEVEILIGING VOOR RESET ---
 function resetLeaderboard() { 
     const password = prompt("🔒 Voer de pincode in om alles te wissen:");
-    
-    // HET WACHTWOORD IS 1234
     if (password === "0204") {
-        if(confirm("⚠️ Weet je het 100% zeker? Dit kan niet ongedaan gemaakt worden!")) { 
-            // Wis laatste 50 items (Batch delete is veiliger)
+        if(confirm("⚠️ Weet je het 100% zeker?")) { 
             db.collection("game_history").limit(50).get().then(snapshot => {
                 snapshot.forEach(doc => doc.ref.delete());
                 alert("🗑️ Recente geschiedenis is gewist.");
@@ -130,7 +164,8 @@ function resetLeaderboard() {
     }
 }
 
-// --- RENDER FUNCTIE ---
+// --- RENDER FUNCTIES (AANGEPAST MET KLEUREN) ---
+
 function renderLeaderboard() {
     const list = document.getElementById('lb-list');
     db.collection("game_history").orderBy("timestamp", "desc").limit(200).get().then((querySnapshot) => {
@@ -148,9 +183,8 @@ function renderLeaderboard() {
         if (filteredHistory.length === 0) { list.innerHTML = '<div style="text-align:center; color:#aaa; padding:30px;">Nog geen duels gespeeld!</div>'; return; }
 
         const duels = {};
-        const avatars = { 'Lou':'👦🏻', 'Noé':'👶🏼', 'Oliver':'👦🏼', 'Manon':'👧🏼', 'Lore':'👩🏻', 'Jorden':'🧔🏻', 'Karen':'👱🏼‍♀️', 'Bert':'👨🏻' };
-        const getAv = (n) => avatars[n] || '';
-
+        const avatars = { 'Lou':'👦🏻', 'Noé':'👶🏼', 'Oliver':'👦🏼', 'Manon':'👧🏼', 'Lore':'👩🏻', 'Jorden':'🧔🏻', 'Karen':'👱🏼‍♀️', 'Bert':'👨🏻', 'Vince':'👩🏽‍🦱', 'Fran':'👩🏻' };
+        
         filteredHistory.forEach(match => {
             if (!match.p1 || !match.p2) return;
             const players = [match.p1, match.p2].sort(); 
@@ -177,23 +211,43 @@ function renderLeaderboard() {
             const totalGames = d.wins1 + d.wins2; const pct1 = totalGames > 0 ? Math.round((d.wins1 / totalGames) * 100) : 50;
             const sortedScores = Object.entries(d.scoreCounts).sort((a, b) => b[1] - a[1]).slice(0, 4);
             let scorePills = sortedScores.map(([s, c]) => `<div class="score-pill">${s} <span class="score-count">${c}</span></div>`).join('');
+            
+            // KLEURTJE BEPALEN
+            const classP1 = getPlayerStyleClass(d.p1Name);
+            const classP2 = getPlayerStyleClass(d.p2Name);
+
             let extraStatsHTML = `<div class="stats-row"><div class="stat-col left"><span class="stat-label">Beste Reeks</span><span class="stat-val">🔥 ${d.longestStreakP1}x</span></div><div class="stat-col right"><span class="stat-label">Beste Reeks</span><span class="stat-val">${d.longestStreakP2}x 🔥</span></div></div>`;
             if (currentLbFilter === 'memory' || (currentLbFilter === 'all' && d.gameType === 'memory')) {
                 extraStatsHTML += `<div class="stats-row" style="margin-top:2px; border-top:0;"><div class="stat-col left"><span class="stat-label">Slimste Beurt</span><span class="stat-val">🧠 ${d.maxMemPairsP1} paren</span></div><div class="stat-col right"><span class="stat-label">Slimste Beurt</span><span class="stat-val">${d.maxMemPairsP2} paren 🧠</span></div></div>`;
             }
             const gameIcon = currentLbFilter === 'all' ? (d.gameType==='memory' ? '🧠' : '🔴') : '';
-            html += `<div class="duel-card"><div style="font-size:0.8rem; text-align:center; color:#ccc; margin-bottom:-5px;">${gameIcon}</div><div class="duel-header"><div class="p-left">${getAv(d.p1Name)} ${d.p1Name}</div><div class="score-badge">${d.wins1} - ${d.wins2}</div><div class="p-right">${d.p2Name} ${getAv(d.p2Name)}</div></div><div class="vs-bar-bg"><div class="vs-bar-fill" style="width: ${pct1}%"></div></div>${extraStatsHTML}<div class="score-history" style="margin-top:5px;">${scorePills}</div></div>`;
+            
+            // HIER PASSEN WE DE STIJLEN TOE OP DE NAMEN/BADGES
+            html += `
+            <div class="duel-card">
+                <div class="duel-header">
+                    <div class="p-left">
+                        <span class="lb-badge ${classP1}">${avatars[d.p1Name]||''} ${d.p1Name}</span>
+                    </div>
+                    <div class="score-badge">${d.wins1} - ${d.wins2}</div>
+                    <div class="p-right">
+                        <span class="lb-badge ${classP2}">${d.p2Name} ${avatars[d.p2Name]||''}</span>
+                    </div>
+                </div>
+                <div class="vs-bar-bg"><div class="vs-bar-fill" style="width: ${pct1}%"></div></div>
+                ${extraStatsHTML}
+                <div class="score-history" style="margin-top:5px;">${scorePills}</div>
+            </div>`;
         });
         list.innerHTML = html;
     }).catch((error) => { console.error("Error:", error); list.innerHTML = '<div style="text-align:center; color:red;">Fout bij laden.</div>'; });
 }
 
-// --- MOOIE VANG ZE LEADERBOARD FUNCTIE ---
 function renderVangLeaderboard(listContainer, history) {
     const vangGames = history.filter(h => h.game === 'vang' && h.type === 'solo');
     if (vangGames.length === 0) { listContainer.innerHTML = '<div style="text-align:center; padding:20px;">Nog geen mollen gevangen!</div>'; return; }
 
-    const avatars = { 'Lou':'👦🏻', 'Noé':'👶🏼', 'Oliver':'👦🏼', 'Manon':'👧🏼', 'Lore':'👩🏻', 'Jorden':'🧔🏻', 'Karen':'👱🏼‍♀️', 'Bert':'👨🏻' };
+    const avatars = { 'Lou':'👦🏻', 'Noé':'👶🏼', 'Oliver':'👦🏼', 'Manon':'👧🏼', 'Lore':'👩🏻', 'Jorden':'🧔🏻', 'Karen':'👱🏼‍♀️', 'Bert':'👨🏻', 'Vince':'👩🏽‍🦱', 'Fran':'👩🏻' };
     const difficulties = ['easy', 'medium', 'hard'];
     const diffLabels = { 'easy': 'Makkelijk', 'medium': 'Normaal', 'hard': 'Moeilijk' };
 
@@ -206,10 +260,8 @@ function renderVangLeaderboard(listContainer, history) {
         const topTime = [...gamesInDiff].sort((a,b) => a.time - b.time).slice(0, 5);
         const topClicks = [...gamesInDiff].sort((a,b) => a.clicks - b.clicks).slice(0, 5);
 
-        // Header met kleur
         html += `<div class="vang-diff-block">
             <div class="vang-diff-header ${diff}">${diffLabels[diff]}</div>
-            
             <div class="vang-stats-grid">
                 <div class="vang-col">
                     <div class="vang-col-title">⚡ Snelste Tijd</div>
@@ -217,20 +269,19 @@ function renderVangLeaderboard(listContainer, history) {
                         <div class="vang-row top-${i+1}">
                             <div style="display:flex; align-items:center;">
                                 <div class="rank-badge">${i+1}</div>
-                                <span class="p-name">${avatars[g.player]||''} ${g.player}</span>
+                                <span class="p-name ${getPlayerTextClass(g.player)}">${avatars[g.player]||''} ${g.player}</span>
                             </div>
                             <span class="p-score">${g.time}s</span>
                         </div>
                     `).join('')}
                 </div>
-                
                 <div class="vang-col green">
                     <div class="vang-col-title">🎯 Minste Kliks</div>
                     ${topClicks.map((g, i) => `
                         <div class="vang-row top-${i+1}">
                             <div style="display:flex; align-items:center;">
                                 <div class="rank-badge">${i+1}</div>
-                                <span class="p-name">${avatars[g.player]||''} ${g.player}</span>
+                                <span class="p-name ${getPlayerTextClass(g.player)}">${avatars[g.player]||''} ${g.player}</span>
                             </div>
                             <span class="p-score">${g.clicks}</span>
                         </div>
@@ -239,18 +290,16 @@ function renderVangLeaderboard(listContainer, history) {
             </div>
         </div>`;
     });
-
     html += '</div>';
     listContainer.innerHTML = html;
 }
 
-// --- SIMON LEADERBOARD ---
 function renderSimonLeaderboard(listContainer, history) {
     const simonGames = history.filter(h => h.game === 'simon');
     if (simonGames.length === 0) { listContainer.innerHTML = '<div style="text-align:center; padding:20px;">Nog geen Simon gespeeld!</div>'; return; }
     
-    const avatars = { 'Lou':'👦🏻', 'Noé':'👶🏼', 'Oliver':'👦🏼', 'Manon':'👧🏼', 'Lore':'👩🏻', 'Jorden':'🧔🏻', 'Karen':'👱🏼‍♀️', 'Bert':'👨🏻' };
-    const topScores = simonGames.sort((a,b) => b.clicks - a.clicks).slice(0, 10); // clicks = level bij simon
+    const avatars = { 'Lou':'👦🏻', 'Noé':'👶🏼', 'Oliver':'👦🏼', 'Manon':'👧🏼', 'Lore':'👩🏻', 'Jorden':'🧔🏻', 'Karen':'👱🏼‍♀️', 'Bert':'👨🏻', 'Vince':'👩🏽‍🦱', 'Fran':'👩🏻' };
+    const topScores = simonGames.sort((a,b) => b.clicks - a.clicks).slice(0, 10); 
 
     let html = `<div class="vang-lb-container">
         <div class="vang-diff-block">
@@ -262,7 +311,7 @@ function renderSimonLeaderboard(listContainer, history) {
                         <div class="vang-row top-${i+1}">
                             <div style="display:flex; align-items:center;">
                                 <div class="rank-badge">${i+1}</div>
-                                <span class="p-name">${avatars[g.player]||''} ${g.player}</span>
+                                <span class="p-name ${getPlayerTextClass(g.player)}">${avatars[g.player]||''} ${g.player}</span>
                             </div>
                             <span class="p-score">Level ${g.clicks}</span>
                         </div>
