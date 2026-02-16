@@ -31,6 +31,7 @@ const memThemes = {
     'sonic':     { locked: false, extension: 'png', path: 'assets/images/memory/natuur/' }, // Let op mapnaam
     'cars':      { locked: false, extension: 'png', path: 'assets/images/memory/beroepen/' }, // Let op mapnaam
     'toystory':  { locked: false, extension: 'png', path: 'assets/images/memory/toystory/' },
+    'wildedieren': { locked: false, extension: 'png', path: 'assets/images/memory/wildedieren/' },
     'mix':       { locked: false, extension: 'png', path: '', isMix: true }
 };
 
