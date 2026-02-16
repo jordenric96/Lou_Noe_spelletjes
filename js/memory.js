@@ -33,6 +33,7 @@ const memThemes = {
     'toystory':  { locked: false, extension: 'png', path: 'assets/images/memory/toystory/' },
     'wildedieren': { locked: false, extension: 'png', path: 'assets/images/memory/wildedieren/' },
         'ijsjes': { locked: false, extension: 'png', path: 'assets/images/memory/ijsjes/' },
+    'hotwheels': { locked: false, extension: 'png', path: 'assets/images/memory/hotwheels/' },
 
     'mix':       { locked: false, extension: 'png', path: '', isMix: true }
 };
